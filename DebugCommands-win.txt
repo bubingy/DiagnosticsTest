@@ -1,0 +1,12 @@
+sxe ld coreclr
+.load C:\Users\v-bibu\.dotnet\sos\sos.dll
+!clrstack
+!clrthreads
+!eestack
+!eeheap
+!eeversion
+!dumpstack
+!dumpheap
+!dso
+.detach
+q

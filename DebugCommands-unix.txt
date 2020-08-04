@@ -1,0 +1,10 @@
+clrstack
+clrthreads
+eestack
+eeheap
+eeversion
+dumpstack
+dumpheap
+dso
+exit
+y

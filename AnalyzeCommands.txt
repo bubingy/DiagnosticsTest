@@ -1,0 +1,8 @@
+clrstack
+clrthreads
+clrmodules
+eeheap
+eeversion
+dumpheap
+dso
+exit
