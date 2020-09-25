@@ -355,9 +355,13 @@ function TestTrace { param([string]$ProcessID)
     $Process = Start-Process dotnet-trace -ArgumentList "collect", "-p", $ProcessID -NoNewWindow -PassThru -RedirectStandardOutput "tmp-trace.txt"
     Start-Sleep -Seconds 10
     Stop-Process -Id $Process.Id
-
-    "dotnet-trace convert --format speedscope trace.nettrace" | Out-File $LogPath -Append
-    dotnet-trace convert --format speedscope trace.nettrace | Out-File $LogPath -Append
+    Remove-Item "tmp-trace.txt"
+    
+    New-Item -Path $TestBed -Name "tmp-trace.txt"
+    $Process = Start-Process dotnet-trace -ArgumentList "collect", "-p", $ProcessID, "--format", "speedscope" -NoNewWindow -PassThru -RedirectStandardOutput "tmp-trace.txt"
+    Start-Sleep -Seconds 10
+    Stop-Process -Id $Process.Id
+    Remove-Item "tmp-trace.txt"
 }
 
 function MainProcess {
