@@ -56,7 +56,7 @@ function InstallDiagnostics {
     $ToolNames = "dotnet-counters", "dotnet-dump", "dotnet-gcdump", "dotnet-sos", "dotnet-trace"
     if ($ToolVersion -ne ""){
         foreach ($ToolName in $ToolNames) {
-            dotnet tool install -g $ToolName --version $ToolVersion --add-source https://dnceng.pkgs.visualstudio.com/public/_packaging/dotnet5/nuget/v3/index.json
+            dotnet tool install -g $ToolName --version $ToolVersion --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
         }
     } else {
         foreach ($ToolName in $ToolNames) {
