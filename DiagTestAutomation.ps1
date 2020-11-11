@@ -67,10 +67,17 @@ function InstallDiagnostics {
 }
 
 ########################################
+######  create GCDumpPlayground2  ######
+########################################
+function CreateGCDumpPlayground {
+    Copy-Item -Recurse $WorkDir/GCDumpPlayground2 -Destination $TestBed 
+}
+
+########################################
 ######    run GCDumpPlayground2   ######
 ########################################
 function RunGCDumpPlayground {
-    $ProjectDir = Join-Path $WorkDir "GCDumpPlayground2"
+    $ProjectDir = Join-Path $TestBed "GCDumpPlayground2"
     Set-Location $ProjectDir
 
     if (Test-Path (Join-Path $ProjectDir "flag")) { Remove-Item $ProjectDir/"flag" }
@@ -155,6 +162,20 @@ function RunWebapp {
 }
 
 ########################################
+######     create consoleapp      ######
+########################################
+function CreateBuildConsoleapp {
+    Set-Location $TestBed
+    if ([System.IO.File]::Exists("consoleapp")) {
+        Remove-Item "consoleapp" -Recurse
+    }
+    dotnet new consoleapp -o consoleapp
+    Copy-Item ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
+    Set-Location $TestBed/consoleapp
+    dotnet publish -r $RID
+}
+
+########################################
 ######       run benchmarks       ######
 ########################################
 function RunBenchmark {
@@ -200,6 +221,8 @@ function TestCounters { param([string]$ProcessID)
     Set-Location $TestBed
     New-Item -Path $TestResult -Name "log_dotnet-counters.txt"
     $LogPath = Join-Path $TestResult "log_dotnet-counters.txt"
+    
+    $WebappProcess = RunWebapp
 
     "dotnet-counters --help" | Out-File $LogPath -Append
     dotnet-counters --help | Out-File $LogPath -Append
@@ -217,6 +240,15 @@ function TestCounters { param([string]$ProcessID)
     $Process = Start-Process dotnet-counters -ArgumentList "monitor", "-p", $ProcessID -NoNewWindow -PassThru
     Start-Sleep -Seconds 10
     Stop-Process -Id $Process.Id
+
+    Stop-Process -Id $WebappProcess.Id 
+
+    if ($RID.Contains("linux") -or $RID.Contains("osx")) {
+        dotnet-counters monitor -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp >> $TestResult/log_dotnet-monitor.txt
+    }
+    if ($RID.Contains("win")) {
+        dotnet-counters monitor -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp.exe >> $TestResult/log_dotnet-monitor.txt
+    }
 }
 
 ########################################
@@ -231,6 +263,8 @@ function TestDump { param([string]$ProcessID)
     Set-Location $TestBed
     New-Item -Path $TestResult -Name "log_dotnet-dump.txt"
     $LogPath = Join-Path $TestResult "log_dotnet-dump.txt"
+
+    $WebappProcess = RunWebapp
 
     "dotnet-dump --help" | Out-File $LogPath -Append
     dotnet-dump --help | Out-File $LogPath -Append
@@ -255,6 +289,7 @@ function TestDump { param([string]$ProcessID)
     $Process = Start-Process -FilePath dotnet-dump -ArgumentList "analyze", $DumpPath -NoNewWindow -PassThru -RedirectStandardOutput $AnalyzeOutput -RedirectStandardInput $AnalyzeCommands -Wait
 
     $Process.Close()
+    Stop-Process -Id $WebappProcess.Id 
 }
 
 ########################################
@@ -265,6 +300,8 @@ function TestGCDump { param([string]$ProcessID)
     New-Item -Path $TestResult -Name "log_dotnet-gcdump.txt"
     $LogPath = Join-Path $TestResult "log_dotnet-gcdump.txt"
 
+    $process = RunGCDumpPlayground
+
     "dotnet-gcdump --help" | Out-File $LogPath -Append
     dotnet-gcdump --help | Out-File $LogPath -Append
     "dotnet-gcdump --version" | Out-File $LogPath -Append
@@ -273,6 +310,8 @@ function TestGCDump { param([string]$ProcessID)
     dotnet-gcdump ps | Out-File $LogPath -Append
     "dotnet-gcdump collect -p $ProcessID -v" | Out-File $LogPath -Append
     dotnet-gcdump collect -p $ProcessID -v | Out-File $LogPath -Append
+
+    Stop-Process -Id $process.Id
 }
 
 ########################################
@@ -283,7 +322,8 @@ function TestSOS { param([string]$ProcessID)
         Write-Output "dotnet-sos not support this platform"
         return
     }
-
+    
+    $WebappProcess = RunWebapp
     Set-Location $TestBed
     New-Item -Path $TestResult -Name "log_dotnet-sos.txt"
     $LogPath = Join-Path $TestResult "log_dotnet-sos.txt"
@@ -332,6 +372,7 @@ function TestSOS { param([string]$ProcessID)
         Start-Process -FilePath $Debugger -ArgumentList "-p", $ProcessID -NoNewWindow -RedirectStandardOutput $DebugProcessOutput -RedirectStandardInput $DebugCommands -Wait
         Remove-Item $DebugDumpOutput
     }
+    Stop-Process -Id $WebappProcess.Id
 }
 
 ########################################
@@ -341,6 +382,8 @@ function TestTrace { param([string]$ProcessID)
     Set-Location $TestBed
     New-Item -Path $TestResult -Name "log_dotnet-trace.txt"
     $LogPath = Join-Path $TestResult "log_dotnet-trace.txt"
+
+    $WebappProcess = RunWebapp
 
     "dotnet-trace --help" | Out-File $LogPath -Append
     dotnet-trace --help | Out-File $LogPath -Append
@@ -362,6 +405,16 @@ function TestTrace { param([string]$ProcessID)
     Start-Sleep -Seconds 10
     Stop-Process -Id $Process.Id
     Remove-Item "tmp-trace.txt"
+
+    Stop-Process -Id $WebappProcess.Id
+
+    Set-Location $TestResult
+    if ($RID.Contains("linux") -or $RID.Contains("osx")) {
+        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp 
+    }
+    if ($RID.Contains("win")) {
+        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp.exe
+    }
 }
 
 function MainProcess {
@@ -370,17 +423,15 @@ function MainProcess {
 
     RunBenchmark
 
-    $Process = RunGCDumpPlayground
-    TestGCDump($Process.Id)
-    Stop-Process -Id $Process.Id
-
     CreateWebapp
-    $Process = RunWebapp
+    CreateBuildConsoleapp
+    CreateGCDumpPlayground
+
     TestCounters($Process.Id)
     TestDump($Process.Id)
+    TestGCDump($Process.Id)
     TestSOS($Process.Id)
     TestTrace($Process.Id)
-    Stop-Process -Id $Process.Id 
 }
 
 MainProcess
