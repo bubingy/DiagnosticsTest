@@ -1,8 +1,8 @@
 ########################################
 ######        Configuration       ######
 ########################################
-$Script:RID="linux-x64"   
-$Script:Debugger="lldb-10" 
+$Script:RID="win-x64"   
+$Script:Debugger="cdb" 
 $Script:SdkVersion="5.0.100-rtm.20515.8"
 $Script:ToolVersion="5.0.0-preview.20559.1" 
 $Script:CommitID="93278f1e5b30162ea8afbd66fb20e6e7bd3bbdef"
