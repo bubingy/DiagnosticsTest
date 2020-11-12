@@ -1,11 +1,11 @@
 ########################################
 ######        Configuration       ######
 ########################################
-$Script:RID="osx-x64"   
-$Script:Debugger="lldb" 
-$Script:SdkVersion="5.0.100-preview.7.20319.6"
-$Script:ToolVersion="5.0.0-preview.20319.1" 
-$Script:CommitID="2f9f4baebdedbf74a57c886708760b652b3e6c96"
+$Script:RID="linux-x64"   
+$Script:Debugger="lldb-10" 
+$Script:SdkVersion="5.0.100-rtm.20515.8"
+$Script:ToolVersion="5.0.0-preview.20559.1" 
+$Script:CommitID="93278f1e5b30162ea8afbd66fb20e6e7bd3bbdef"
 $Script:Benchmarks="False" 
 $Script:TestBed=[io.path]::combine(
     $Env:HOME, "DiagnosticsTestBed" 
@@ -70,7 +70,16 @@ function InstallDiagnostics {
 ######  create GCDumpPlayground2  ######
 ########################################
 function CreateGCDumpPlayground {
-    Copy-Item -Recurse $WorkDir/GCDumpPlayground2 -Destination $TestBed 
+    Copy-Item -Recurse $WorkDir/GCDumpPlayground2 -Destination $TestBed
+    $ProjectDir = Join-Path $TestBed "GCDumpPlayground2"
+    Set-Location $ProjectDir
+
+    if (Test-Path (Join-Path $ProjectDir "flag")) { Remove-Item $ProjectDir/"flag" }
+
+    $ProjectFile = Join-Path $ProjectDir "GCDumpPlayground2.csproj"
+    $ProjContent = [xml](Get-Content $ProjectFile)
+    $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
+    $ProjContent.Save($ProjectFile)
 }
 
 ########################################
@@ -81,11 +90,6 @@ function RunGCDumpPlayground {
     Set-Location $ProjectDir
 
     if (Test-Path (Join-Path $ProjectDir "flag")) { Remove-Item $ProjectDir/"flag" }
-
-    $ProjectFile = Join-Path $ProjectDir "GCDumpPlayground2.csproj"
-    $ProjContent = [xml](Get-Content $ProjectFile)
-    $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
-    $ProjContent.Save($ProjectFile)
 
     dotnet build
     $Process = ""
@@ -169,10 +173,10 @@ function CreateBuildConsoleapp {
     if ([System.IO.File]::Exists("consoleapp")) {
         Remove-Item "consoleapp" -Recurse
     }
-    dotnet new consoleapp -o consoleapp
-    Copy-Item ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
+    dotnet new console -o consoleapp
+    Copy-Item $WorkDir/ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
     Set-Location $TestBed/consoleapp
-    dotnet publish -r $RID
+    dotnet publish -r $RID -o out
 }
 
 ########################################
@@ -244,10 +248,10 @@ function TestCounters { param([string]$ProcessID)
     Stop-Process -Id $WebappProcess.Id 
 
     if ($RID.Contains("linux") -or $RID.Contains("osx")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp >> $TestResult/log_dotnet-monitor.txt
+        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp >> $TestResult/log_dotnet-monitor.txt
     }
     if ($RID.Contains("win")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp.exe >> $TestResult/log_dotnet-monitor.txt
+        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp.exe >> $TestResult/log_dotnet-monitor.txt
     }
 }
 
@@ -410,10 +414,10 @@ function TestTrace { param([string]$ProcessID)
 
     Set-Location $TestResult
     if ($RID.Contains("linux") -or $RID.Contains("osx")) {
-        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp 
+        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/out/consoleapp 
     }
     if ($RID.Contains("win")) {
-        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/bin/Debug/net*/$RID/consoleapp.exe
+        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/out/consoleapp.exe
     }
 }
 
@@ -427,11 +431,11 @@ function MainProcess {
     CreateBuildConsoleapp
     CreateGCDumpPlayground
 
-    TestCounters($Process.Id)
-    TestDump($Process.Id)
-    TestGCDump($Process.Id)
-    TestSOS($Process.Id)
-    TestTrace($Process.Id)
+    # TestCounters($Process.Id)
+    # TestDump($Process.Id)
+    # TestGCDump($Process.Id)
+    # TestSOS($Process.Id)
+    # TestTrace($Process.Id)
 }
 
 MainProcess
