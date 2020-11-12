@@ -1,8 +1,8 @@
 ########################################
 ######        Configuration       ######
 ########################################
-$Script:RID="win-x64"   
-$Script:Debugger="cdb" 
+$Script:RID="linux-x64"   
+$Script:Debugger="lldb" 
 $Script:SdkVersion="5.0.100-rtm.20515.8"
 $Script:ToolVersion="5.0.0-preview.20559.1" 
 $Script:CommitID="93278f1e5b30162ea8afbd66fb20e6e7bd3bbdef"
@@ -54,9 +54,10 @@ function InstallSDK {
 ########################################
 function InstallDiagnostics {
     $ToolNames = "dotnet-counters", "dotnet-dump", "dotnet-gcdump", "dotnet-sos", "dotnet-trace"
+    $feed = "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json"
     if ($ToolVersion -ne ""){
         foreach ($ToolName in $ToolNames) {
-            dotnet tool install -g $ToolName --version $ToolVersion --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
+            dotnet tool install -g $ToolName --version $ToolVersion --add-source $feed
         }
     } else {
         foreach ($ToolName in $ToolNames) {
@@ -70,7 +71,7 @@ function InstallDiagnostics {
 ######  create GCDumpPlayground2  ######
 ########################################
 function CreateGCDumpPlayground {
-    Copy-Item -Recurse $WorkDir/GCDumpPlayground2 -Destination $TestBed
+    Copy-Item -Recurse $WorkDir/Projects/GCDumpPlayground2 -Destination $TestBed
     $ProjectDir = Join-Path $TestBed "GCDumpPlayground2"
     Set-Location $ProjectDir
 
@@ -78,7 +79,12 @@ function CreateGCDumpPlayground {
 
     $ProjectFile = Join-Path $ProjectDir "GCDumpPlayground2.csproj"
     $ProjContent = [xml](Get-Content $ProjectFile)
-    $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
+    if ($SdkVersion.Substring(0, 1) -eq 3) {
+        $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
+    } else {
+        $ProjContent.Project.PropertyGroup.TargetFramework = "net" + $SdkVersion.Substring(0, 3)
+    }
+    
     $ProjContent.Save($ProjectFile)
 }
 
@@ -174,7 +180,7 @@ function CreateBuildConsoleapp {
         Remove-Item "consoleapp" -Recurse
     }
     dotnet new console -o consoleapp
-    Copy-Item $WorkDir/ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
+    Copy-Item $WorkDir/Projects/ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
     Set-Location $TestBed/consoleapp
     dotnet publish -r $RID -o out
 }
@@ -248,10 +254,10 @@ function TestCounters { param([string]$ProcessID)
     Stop-Process -Id $WebappProcess.Id 
 
     if ($RID.Contains("linux") -or $RID.Contains("osx")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp >> $TestResult/log_dotnet-monitor.txt
+        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp >> $TestResult/log_dotnet_monitor_console.txt
     }
     if ($RID.Contains("win")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp.exe >> $TestResult/log_dotnet-monitor.txt
+        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp.exe >> $TestResult/log_dotnet_monitor_console.txt
     }
 }
 
