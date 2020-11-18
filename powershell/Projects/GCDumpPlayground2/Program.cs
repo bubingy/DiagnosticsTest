@@ -109,7 +109,6 @@ namespace GCDumpPlayground2
             );
 
             Console.WriteLine("Pause for gcdumps.  Press <enter> to exit.");
-            System.IO.File.WriteAllText(@"flag", "True");
             Console.ReadLine();
         }
     }

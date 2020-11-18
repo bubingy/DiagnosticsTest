@@ -1,0 +1,81 @@
+# coding=utf-8
+
+import os
+import glob
+import time
+
+from config import configuration
+from utils import run_command_async, run_command_sync, PIPE
+from project import projects
+
+log_path = os.path.join(configuration.test_result, 'dotnet_dump.log')
+
+
+def sync_check(output_path):
+    """ check whether the output of previous command has been wirtten to file
+
+    params
+        output_path: the path of output file
+    """
+    content = ''
+    with open(output_path, 'r') as f:
+        content = f.read()
+
+    flag = False
+
+    if '<END_COMMAND_OUTPUT>' in content[-24:]:
+        flag = True
+    
+    if 'exit' in content[-10:]:
+        flag = True
+
+    return flag
+
+
+def test_dump():
+    '''Run sample apps and perform tests.
+    
+    '''
+    if 'osx' in configuration.rid:
+        print('dotnet-dump doesn\'t support on osx.')
+        return
+    webapp_dir = os.path.join(
+        configuration.test_bed,
+        'webapp'
+    )
+    webapp = projects.run_webapp(webapp_dir)
+    sync_commands_list = [
+        'dotnet-dump --help',
+        'dotnet-dump ps',
+        f'dotnet-dump collect -p {webapp.pid}'
+    ]
+    for command in sync_commands_list:
+        run_command_sync(command, log_path, cwd=configuration.test_bed)
+    webapp.terminate()
+
+    if 'win' in configuration.rid:
+        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
+    else:
+        dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
+   
+    analyze_commands = [
+        b'clrstack\n',
+        b'clrthreads\n',
+        b'clrmodules\n',
+        b'eeheap\n',
+        b'dumpheap\n',
+        b'dso\n',
+        b'eeversion\n',
+        b'exit\n'
+    ]
+    analyze_output_path = os.path.join(configuration.test_result, 'dotnet-analyze.log')
+    with open(analyze_output_path, 'w+') as f:
+        p = run_command_async(
+            f'dotnet-dump analyze {dump_path}', 
+            cwd=configuration.test_result,
+            stdin=PIPE,
+            stdout=f
+        )
+        for command in analyze_commands:
+            p.stdin.write(command)
+        p.communicate()

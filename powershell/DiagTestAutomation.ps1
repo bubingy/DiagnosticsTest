@@ -1,14 +1,14 @@
 ########################################
 ######        Configuration       ######
 ########################################
-$Script:RID="linux-x64"   
-$Script:Debugger="lldb" 
+$Script:RID="win-x64"   
+$Script:Debugger="cdb" 
 $Script:SdkVersion="5.0.100-rtm.20515.8"
 $Script:ToolVersion="5.0.0-preview.20559.1" 
 $Script:CommitID="93278f1e5b30162ea8afbd66fb20e6e7bd3bbdef"
 $Script:Benchmarks="False" 
 $Script:TestBed=[io.path]::combine(
-    $Env:HOME, "DiagnosticsTestBed" 
+    "F:\Workspace\.NET-Diagnostics\", "DiagnosticsTestBed" 
 )
 <# Here is an example on OSX:
 $Script:RID="osx-x64"   
@@ -29,15 +29,19 @@ $Script:WorkDir=Split-Path -Parent $MyInvocation.MyCommand.Definition
 if(Test-Path -Path $TestBed) { Write-Output "the work folder $WorkDir already exsists" }
 else { mkdir $TestBed }
 
-$Script:TestResult=Join-Path $TestBed "TestResult"
+$Script:TestResult=[io.path]::combine($TestBed, "TestResult")
 if(Test-Path -Path $TestResult){ Write-Output "the output folder $TestResult already exsists" } 
 else { mkdir $TestResult }
 
+$Script:BinExtend=""
+if ($RID.Contains("win")) {
+    $BinExtend=".exe"
+}
 ########################################
 ######      Install .Net SDK      ######
 ########################################
 function InstallSDK { 
-    Set-Location $TestBed
+    Push-Location $TestBed
     if($RID.Contains("win")) {
         Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'
         ./dotnet-install.ps1 -i $env:DOTNET_ROOT -v $SdkVersion
@@ -47,6 +51,7 @@ function InstallSDK {
         chmod +x dotnet-install.sh
         ./dotnet-install.sh -i $env:DOTNET_ROOT -v $SdkVersion
     }
+    Pop-Location
 }
 
 ########################################
@@ -64,61 +69,50 @@ function InstallDiagnostics {
             dotnet tool install -g $ToolName
         }
     }
-    
 }
 
 ########################################
 ######  create GCDumpPlayground2  ######
 ########################################
 function CreateGCDumpPlayground {
-    Copy-Item -Recurse $WorkDir/Projects/GCDumpPlayground2 -Destination $TestBed
-    $ProjectDir = Join-Path $TestBed "GCDumpPlayground2"
-    Set-Location $ProjectDir
+    $ProjectDir = [io.path]::combine($TestBed, "GCDumpPlayground2")
+    if ([System.IO.File]::Exists($ProjectDir)) {
+        Remove-Item $ProjectDir -Recurse
+    }
+    $TmpProjectDir = [io.path]::combine($TestBed, "Projects", "GCDumpPlayground2") 
+    Copy-Item -Recurse $TmpProjectDir -Destination $TestBed
 
-    if (Test-Path (Join-Path $ProjectDir "flag")) { Remove-Item $ProjectDir/"flag" }
-
-    $ProjectFile = Join-Path $ProjectDir "GCDumpPlayground2.csproj"
+    $ProjectFile = [io.path]::Combine($ProjectDir, "GCDumpPlayground2.csproj")
     $ProjContent = [xml](Get-Content $ProjectFile)
-    if ($SdkVersion.Substring(0, 1) -eq 3) {
+    if ($SdkVersion.Substring(0, 1) -eq "3") {
         $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
     } else {
         $ProjContent.Project.PropertyGroup.TargetFramework = "net" + $SdkVersion.Substring(0, 3)
     }
-    
     $ProjContent.Save($ProjectFile)
+    Push-Location $ProjectDir
+    dotnet publish -r $RID -o $ProjectDir/out
+    Pop-Location
 }
 
 ########################################
 ######    run GCDumpPlayground2   ######
 ########################################
 function RunGCDumpPlayground {
-    $ProjectDir = Join-Path $TestBed "GCDumpPlayground2"
-    Set-Location $ProjectDir
+    $ProjectDir = [io.path]::Combine($TestBed, "GCDumpPlayground2")
+    $FlagPath = [io.path]::Combine($ProjectDir, "tmp.txt")
+    if (Test-Path $FlagPath) { Remove-Item $FlagPath }
 
-    if (Test-Path (Join-Path $ProjectDir "flag")) { Remove-Item $ProjectDir/"flag" }
-
-    dotnet build
-    $Process = ""
-    if ($RID.Contains("win")) {
-        $BinPath = Get-Item $ProjectDir/bin/Debug/net*/GCDumpPlayground2.exe
-        $Process = Start-Process -FilePath $BinPath -ArgumentList "0.1" -NoNewWindow -PassThru
-    } 
-    if ($RID.Contains("linux")) {
-        $BinPath = Get-Item $ProjectDir/bin/Debug/net*/GCDumpPlayground2
-        chmod +x $BinPath
-        $Process = Start-Process -FilePath $BinPath -ArgumentList "0.1" -NoNewWindow -PassThru
-    }
-    if ($RID.Contains("osx")) {
-        $DllPath = Get-Item $ProjectDir/bin/Debug/net*/GCDumpPlayground2.dll
-        $Process = Start-Process -FilePath dotnet -ArgumentList $DllPath, "0.1" -NoNewWindow -PassThru
-    }
+    $BinPath = Get-Item $ProjectDir/out/GCDumpPlayground2$BinExtend
+    $Process = Start-Process -FilePath $BinPath -ArgumentList "0.1" -NoNewWindow -PassThru -RedirectStandardOutput $FlagPath
     
     while (1) {
-        if (Test-Path (Join-Path $ProjectDir "flag")) { break }
-        Start-Sleep -s 1
+        $Content = Get-Content -Path $FlagPath -Raw
+        if ($null -ne $Content) {
+            if ($Content.Contains("Pause for gcdumps.")) { break }
+        }
+        Start-Sleep -s 2
     }
-    Remove-Item -Path (Join-Path $ProjectDir "flag")
-
     return $Process
 }
 
@@ -126,45 +120,33 @@ function RunGCDumpPlayground {
 ######         create webapp      ######
 ########################################
 function CreateWebapp {
-    Set-Location $TestBed
-    if ([System.IO.File]::Exists("webapp")) {
-        Remove-Item "webapp" -Recurse
+    $ProjectDir = [io.path]::Combine($TestBed, "webapp")
+    if ([System.IO.File]::Exists($ProjectDir)) {
+        Remove-Item $ProjectDir -Recurse
     }
-    dotnet new webapp -o webapp
+    Push-Location $TestBed
+    dotnet new webapp -o $ProjectDir
+    Pop-Location
+    Push-Location $ProjectDir
+    dotnet build -r $RID -o out
+    Pop-Location
 }
 
 ########################################
 ######         run webapp         ######
 ########################################
 function RunWebapp {
-    Set-Location $TestBed
-    $ProjectDir = Join-Path $TestBed "webapp"
-    Set-Location $ProjectDir
-    if (Test-Path (Join-Path $ProjectDir "output.txt")) { Remove-Item $ProjectDir/"output.txt" }
+    $ProjectDir = [io.path]::Combine($TestBed, "webapp")
+    $FlagPath = [io.path]::Combine($ProjectDir, "tmp.txt")
+    if (Test-Path -Path $FlagPath) { Remove-Item -Path $FlagPath }
     
-    New-Item -Path $ProjectDir -Name "output.txt"
-    $OutputFile = Join-Path $ProjectDir "output.txt"
-
-    dotnet build
-    $Process = ""
-    if ($RID.Contains('win')) {
-        $BinPath = Get-Item $ProjectDir/bin/Debug/net*/webapp.exe
-        $Process = Start-Process -FilePath $BinPath -NoNewWindow -RedirectStandardOutput $OutputFile -PassThru
-    }
-    if ($RID.Contains("linux")) {
-        $BinPath = Get-Item $ProjectDir/bin/Debug/net*/webapp
-        chmod +x $BinPath
-        $Process = Start-Process -FilePath $BinPath -NoNewWindow -RedirectStandardOutput $OutputFile -PassThru
-    }
-    if ($RID.Contains("osx")) {
-        $DllPath = Get-Item $ProjectDir/bin/Debug/net*/webapp.dll
-        $Process = Start-Process -FilePath dotnet -ArgumentList $DllPath -NoNewWindow -RedirectStandardOutput $OutputFile -PassThru
-    }
+    $BinPath = Get-Item $ProjectDir/out/webapp$BinExtend
+    $Process = Start-Process -FilePath $BinPath -NoNewWindow -RedirectStandardOutput $FlagPath -PassThru
     
     while (1) {
-        $Output = Get-Content $OutputFile | Out-String
-        if ($Output.Contains("Application started")) { 
-            break 
+        $Content = Get-Content -Path $FlagPath -Raw
+        if ($null -ne $Content) {
+            if ($Content.Contains("Application started")) { break }
         }
         Start-Sleep -s 2
     }
@@ -175,49 +157,54 @@ function RunWebapp {
 ######     create consoleapp      ######
 ########################################
 function CreateBuildConsoleapp {
-    Set-Location $TestBed
-    if ([System.IO.File]::Exists("consoleapp")) {
-        Remove-Item "consoleapp" -Recurse
+    $ProjectDir = [io.path]::Combine($TestBed, "consoleapp")
+    if ([System.IO.File]::Exists($ProjectDir)) {
+        Remove-Item $ProjectDir -Recurse
     }
+
+    Push-Location $TestBed
     dotnet new console -o consoleapp
-    Copy-Item $WorkDir/Projects/ConsoleAppTemp -Destination $TestBed/consoleapp/Program.cs
-    Set-Location $TestBed/consoleapp
-    dotnet publish -r $RID -o out
+    Pop-Location
+    Copy-Item $WorkDir/Projects/ConsoleAppTemp -Destination $ProjectDir/Program.cs
+    Push-Location $ProjectDir
+    dotnet build -r $RID -o out
+    Pop-Location
 }
 
 ########################################
 ######       run benchmarks       ######
 ########################################
 function RunBenchmark {
-
     if ($Benchmarks -eq "False") {
         Write-Output "ignore benchmark tests"
         return
     }
     
-    $ProjectRoot = Join-Path $TestBed "diagnostics"
+    $ProjectRoot = [io.path]::combine($TestBed, "diagnostics")
     if ([System.IO.File]::Exists($ProjectRoot)) {
         Remove-Item $ProjectRoot -Recurse
     }
 
-    Set-Location $TestBed
+    Push-Location $TestBed
     git clone "https://github.com/dotnet/diagnostics.git"
-    Set-Location $ProjectRoot
+    Pop-Location
+    Push-Location $ProjectRoot
     git reset --hard $CommitID
+    Pop-Location
 
     $ProjectDir = [io.path]::combine(
         $ProjectRoot, "src", "tests", "benchmarks"
     )
 
-    Set-Location $ProjectDir
     $ProjectFile = [io.path]::combine(
         $ProjectDir, "benchmarks.csproj"
     )
-    
     $ProjContent = [xml](Get-Content $ProjectFile)
     $ProjContent.Project.PropertyGroup.TargetFramework = "netcoreapp" + $SdkVersion.Substring(0, 3)
     $ProjContent.Save($ProjectFile)
+    Push-Location $ProjectDir
     dotnet run -c release
+    Pop-Location
     $ArtifactsDir = [io.path]::combine(
         $ProjectDir, "BenchmarkDotNet.Artifacts"
     )
@@ -227,13 +214,14 @@ function RunBenchmark {
 ########################################
 ######     test dotnet-counters   ######
 ########################################
-function TestCounters { param([string]$ProcessID)
-    Set-Location $TestBed
-    New-Item -Path $TestResult -Name "log_dotnet-counters.txt"
-    $LogPath = Join-Path $TestResult "log_dotnet-counters.txt"
+function TestCounters {
+    $LogPath = [io.path]::Combine($TestResult, "dotnet-counters.log")
+    if (Test-Path -Path $LogPath) { Remove-Item -Path $LogPath }
+    New-Item -Path $TestResult -Name "dotnet-counters.log"
     
     $WebappProcess = RunWebapp
 
+    Push-Location $TestResult
     "dotnet-counters --help" | Out-File $LogPath -Append
     dotnet-counters --help | Out-File $LogPath -Append
     "dotnet-counters --version" | Out-File $LogPath -Append
@@ -243,22 +231,25 @@ function TestCounters { param([string]$ProcessID)
     "dotnet-counters ps" | Out-File $LogPath -Append
     dotnet-counters ps | Out-File $LogPath -Append
 
-    $Process = Start-Process dotnet-counters -ArgumentList "collect", "-p", $ProcessID -NoNewWindow -PassThru
+    $Process = Start-Process dotnet-counters -ArgumentList "collect", "-p", $WebappProcess.Id -NoNewWindow -PassThru
     Start-Sleep -Seconds 10
     Stop-Process -Id $Process.Id
 
-    $Process = Start-Process dotnet-counters -ArgumentList "monitor", "-p", $ProcessID -NoNewWindow -PassThru
+    $Process = Start-Process dotnet-counters -ArgumentList "monitor", "-p", $WebappProcess.Id -PassThru -NoNewWindow
     Start-Sleep -Seconds 10
     Stop-Process -Id $Process.Id
 
     Stop-Process -Id $WebappProcess.Id 
 
-    if ($RID.Contains("linux") -or $RID.Contains("osx")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp >> $TestResult/log_dotnet_monitor_console.txt
+    if ($SdkVersion.Substring(0, 1) -eq "3") {
+        write-host ".net core 3.1 doesn't support new feature of dotnet-counters"
+        Pop-Location
+        return
     }
-    if ($RID.Contains("win")) {
-        dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp.exe >> $TestResult/log_dotnet_monitor_console.txt
-    }
+    $BinPath = [io.path]::Combine($TestBed, "consoleapp", "out", "consoleapp$BinExtend")
+    "dotnet-counters monitor -- $TestBed/consoleapp/out/consoleapp$BinExtend"
+    dotnet-counters monitor -- $BinPath
+    Pop-Location
 }
 
 ########################################
@@ -269,10 +260,9 @@ function TestDump { param([string]$ProcessID)
         Write-Output "dotnet-dump not support this platform"
         return
     }
-    
-    Set-Location $TestBed
-    New-Item -Path $TestResult -Name "log_dotnet-dump.txt"
-    $LogPath = Join-Path $TestResult "log_dotnet-dump.txt"
+    $LogPath = [io.path]::Combine($TestResult, "dotnet-dump.log")
+    if (Test-Path -Path $LogPath) { Remove-Item -Path $LogPath }
+    New-Item -Path $TestResult -Name "dotnet-dump.log"
 
     $WebappProcess = RunWebapp
 
@@ -286,16 +276,17 @@ function TestDump { param([string]$ProcessID)
     dotnet-dump collect -p $ProcessID | Out-File $LogPath -Append
     $DumpPath = ""
     if($RID.Contains("win")) {
-        Set-Location $TestBed
         $DumpPath = Get-Item $TestBed\dump*.dmp
     } 
     if ($RID.Contains("linux")) {
-        Set-Location $TestBed
         $DumpPath = Get-Item $TestBed/core_*
     }
-    New-Item -Path $TestResult -Name "log_dotnet-analyze.txt"
-    $AnalyzeOutput = Join-Path $TestResult "log_dotnet-analyze.txt"
-    $AnalyzeCommands = Join-Path $WorkDir "AnalyzeCommands.txt"
+    
+    $AnalyzeOutput = [io.path]::Combine($TestResult, "dotnet-analyze.log")
+    if (Test-Path -Path $AnalyzeOutput) { Remove-Item -Path $AnalyzeOutput }
+    New-Item -Path $TestResult -Name "dotnet-analyze.log"
+    
+    $AnalyzeCommands = [io.path]::Combine($WorkDir, "AnalyzeCommands.txt")
     $Process = Start-Process -FilePath dotnet-dump -ArgumentList "analyze", $DumpPath -NoNewWindow -PassThru -RedirectStandardOutput $AnalyzeOutput -RedirectStandardInput $AnalyzeCommands -Wait
 
     $Process.Close()
@@ -305,13 +296,14 @@ function TestDump { param([string]$ProcessID)
 ########################################
 ######     test dotnet-gcdump     ######
 ########################################
-function TestGCDump { param([string]$ProcessID)
-    Set-Location $TestResult
-    New-Item -Path $TestResult -Name "log_dotnet-gcdump.txt"
-    $LogPath = Join-Path $TestResult "log_dotnet-gcdump.txt"
+function TestGCDump {
+    $LogPath = [io.path]::Combine($TestResult, "dotnet-gcdump.log")
+    if (Test-Path -Path $LogPath) { Remove-Item -Path $LogPath }
+    New-Item -Path $TestResult -Name "dotnet-gcdump.log"
 
-    $process = RunGCDumpPlayground
-
+    $Process = RunGCDumpPlayground
+    $ProcessID = $Process.Id
+    
     "dotnet-gcdump --help" | Out-File $LogPath -Append
     dotnet-gcdump --help | Out-File $LogPath -Append
     "dotnet-gcdump --version" | Out-File $LogPath -Append
@@ -321,22 +313,21 @@ function TestGCDump { param([string]$ProcessID)
     "dotnet-gcdump collect -p $ProcessID -v" | Out-File $LogPath -Append
     dotnet-gcdump collect -p $ProcessID -v | Out-File $LogPath -Append
 
-    Stop-Process -Id $process.Id
+    Stop-Process -Id $ProcessID
 }
 
 ########################################
 ######      test dotnet-sos       ######
 ########################################
-function TestSOS { param([string]$ProcessID)
+function TestSOS {
     if ($Script:RID.Contains("musl")) {
-        Write-Output "dotnet-sos not support this platform"
+        Write-Output "dotnet-sos isn't supported on Alpine."
         return
     }
-    
-    $WebappProcess = RunWebapp
-    Set-Location $TestBed
-    New-Item -Path $TestResult -Name "log_dotnet-sos.txt"
-    $LogPath = Join-Path $TestResult "log_dotnet-sos.txt"
+
+    $LogPath = [io.path]::Combine($TestResult, "dotnet-sos.log")
+    if (Test-Path -Path $LogPath) { Remove-Item -Path $LogPath }
+    New-Item -Path $TestResult -Name "dotnet-gcdump.log"
 
     "dotnet-sos --help" | Out-File $LogPath -Append
     dotnet-sos --help | Out-File $LogPath -Append
@@ -356,10 +347,14 @@ function TestSOS { param([string]$ProcessID)
         $DumpPath = Get-Item $TestBed/core_*
     }
     
-    New-Item -Path $TestResult -Name "log_debug-dump.txt"
-    $DebugDumpOutput = Join-Path $TestResult "log_debug-dump.txt"
-    New-Item -Path $TestResult -Name "log_debug-process.txt"
-    $DebugProcessOutput = Join-Path $TestResult "log_debug-process.txt"
+    $DebugDumpOutput = [io.path]::Combine($TestResult, "debug-dump.log")
+    if (Test-Path -Path $DebugDumpOutput) { Remove-Item -Path $DebugDumpOutput }
+    New-Item -Path $TestResult -Name "debug-dump.log"
+    $DebugProcessOutput = [io.path]::Combine($TestResult, "debug-process.log")
+    if (Test-Path -Path $DebugProcessOutput) { Remove-Item -Path $DebugProcessOutput }
+    New-Item -Path $TestResult -Name "debug-process.log"
+    
+    $WebappProcess = RunWebapp
 
     $DebugCommands = ""
 
@@ -388,10 +383,10 @@ function TestSOS { param([string]$ProcessID)
 ########################################
 ######      test dotnet-trace     ######
 ########################################
-function TestTrace { param([string]$ProcessID)
-    Set-Location $TestBed
-    New-Item -Path $TestResult -Name "log_dotnet-trace.txt"
-    $LogPath = Join-Path $TestResult "log_dotnet-trace.txt"
+function TestTrace {
+    $LogPath = [io.path]::Combine($TestResult, "dotnet-trace.log")
+    if (Test-Path -Path $LogPath) { Remove-Item -Path $LogPath }
+    New-Item -Path $TestResult -Name "dotnet-trace.log"
 
     $WebappProcess = RunWebapp
 
@@ -404,27 +399,24 @@ function TestTrace { param([string]$ProcessID)
     "dotnet-trace ps" | Out-File $LogPath -Append
     dotnet-trace ps | Out-File $LogPath -Append
     
-    New-Item -Path $TestBed -Name "tmp-trace.txt"
-    $Process = Start-Process dotnet-trace -ArgumentList "collect", "-p", $ProcessID -NoNewWindow -PassThru -RedirectStandardOutput "tmp-trace.txt"
-    Start-Sleep -Seconds 10
+    Push-Location $TestBed
+    $Process = Start-Process dotnet-trace -ArgumentList "collect", "-p", $ProcessID, "-o", "webapp.nettrace" -NoNewWindow -PassThru
+    Start-Sleep -Seconds 20
     Stop-Process -Id $Process.Id
     Remove-Item "tmp-trace.txt"
     
-    New-Item -Path $TestBed -Name "tmp-trace.txt"
-    $Process = Start-Process dotnet-trace -ArgumentList "collect", "-p", $ProcessID, "--format", "speedscope" -NoNewWindow -PassThru -RedirectStandardOutput "tmp-trace.txt"
-    Start-Sleep -Seconds 10
-    Stop-Process -Id $Process.Id
-    Remove-Item "tmp-trace.txt"
-
+    "dotnet-trace convert --format speedscope webapp.nettrace" | Out-File $LogPath -Append
+    dotnet-trace convert --format speedscope webapp.nettrace | Out-File $LogPath -Append
+    Pop-Location
     Stop-Process -Id $WebappProcess.Id
 
-    Set-Location $TestResult
-    if ($RID.Contains("linux") -or $RID.Contains("osx")) {
-        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/out/consoleapp 
+    if ($SdkVersion.Substring(0, 1) -eq "3") {
+        write-host ".net core 3.1 doesn't support new feature of dotnet-trace"
+        return
     }
-    if ($RID.Contains("win")) {
-        dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/out/consoleapp.exe
-    }
+    dotnet-trace collect --providers Microsoft-Windows-DotNETRuntime -- $TestBed/consoleapp/out/consoleapp$BinExtend
+   
+    
 }
 
 function MainProcess {
@@ -437,11 +429,11 @@ function MainProcess {
     CreateBuildConsoleapp
     CreateGCDumpPlayground
 
-    # TestCounters($Process.Id)
-    # TestDump($Process.Id)
-    # TestGCDump($Process.Id)
-    # TestSOS($Process.Id)
-    # TestTrace($Process.Id)
+    TestCounters
+    # TestDump
+    # TestGCDump
+    # TestSOS
+    # TestTrace
 }
 
 MainProcess
