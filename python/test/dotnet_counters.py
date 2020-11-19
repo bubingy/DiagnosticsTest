@@ -25,16 +25,23 @@ def test_counters():
     ]
     for command in sync_commands_list:
         run_command_sync(command, log_path)
-
+        
     async_commands_list = [
         f'dotnet-counters collect -p {webapp.pid}',
         f'dotnet-counters monitor -p {webapp.pid}'
     ]
     for command in async_commands_list:
-        p = run_command_async(command, cwd=configuration.test_result)
-        time.sleep(10)
-        p.terminate()
-    
+        try:
+            p = run_command_async(command, cwd=configuration.test_result)
+            time.sleep(10)
+            p.terminate()
+            with open(log_path, 'a+') as f:
+                f.write(f'successfully run command {command}')
+        except Exception as e:
+            with open(log_path, 'a+') as f:
+                f.write(f'fail to run command: {e}')
+            continue
+
     webapp.terminate()
 
     if configuration.sdk_version[0] == '3':
@@ -47,7 +54,14 @@ def test_counters():
     extend_name = ''
     if 'win' in configuration.rid:
         extend_name = '.exe'
-    p = run_command_async(
-        f'dotnet-counters monitor -- {consoleapp_dir}/out/consoleapp{extend_name}'
-    )
-    p.communicate()
+    try:
+        p = run_command_async(
+            f'dotnet-counters monitor -- {consoleapp_dir}/out/consoleapp{extend_name}'
+        )
+        p.communicate()
+        with open(log_path, 'a+') as f:
+            f.write(f'successfully run command {command}')
+    except Exception as e:
+        with open(log_path, 'a+') as f:
+            f.write(f'fail to run command: {e}')
+    

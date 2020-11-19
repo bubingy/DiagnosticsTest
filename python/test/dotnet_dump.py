@@ -11,27 +11,6 @@ from project import projects
 log_path = os.path.join(configuration.test_result, 'dotnet_dump.log')
 
 
-def sync_check(output_path):
-    """ check whether the output of previous command has been wirtten to file
-
-    params
-        output_path: the path of output file
-    """
-    content = ''
-    with open(output_path, 'r') as f:
-        content = f.read()
-
-    flag = False
-
-    if '<END_COMMAND_OUTPUT>' in content[-24:]:
-        flag = True
-    
-    if 'exit' in content[-10:]:
-        flag = True
-
-    return flag
-
-
 def test_dump():
     '''Run sample apps and perform tests.
     
@@ -74,8 +53,13 @@ def test_dump():
             f'dotnet-dump analyze {dump_path}', 
             cwd=configuration.test_result,
             stdin=PIPE,
-            stdout=f
+            stdout=f,
+            stderr=f
         )
         for command in analyze_commands:
-            p.stdin.write(command)
+            try:
+                p.stdin.write(command)
+            except Exception as e:
+                p.stdin.write(str(e).encode('utf-8'))
+                continue
         p.communicate()

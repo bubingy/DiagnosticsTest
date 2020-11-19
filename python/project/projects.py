@@ -10,6 +10,7 @@ from config import configuration
 from utils import run_command_async, Popen, \
     run_command_sync, Result, PIPE
 
+
 def create_publish_webapp()->Result:
     '''Create and publish a dotnet webapp
 

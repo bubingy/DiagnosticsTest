@@ -55,16 +55,20 @@ def run_benchmark()->Result:
         configuration.test_bed, 'diagnostics', 
         'src', 'tests', 'benchmarks'
     )
-    rt_code = run_command_sync(
-        'dotnet run -c release',
-        log_path=log_path,
-        cwd=project_dir
-    )
-    shutil.copytree(
-        os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
-        os.path.join(configuration.test_result, 'BenchmarkDotNet.Artifacts')
-    )
-    if rt_code == 0:
-        return Result(0, 'successfully run benchmark', None)
-    else:
-        return Result(rt_code, 'fail to run benchmark', None)
+    try:
+        rt_code = run_command_sync(
+            'dotnet run -c release',
+            log_path=log_path,
+            cwd=project_dir
+        )
+        shutil.copytree(
+            os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
+            os.path.join(configuration.test_result, 'BenchmarkDotNet.Artifacts')
+        )
+        if rt_code == 0:
+            return Result(0, 'successfully run benchmark', None)
+        else:
+            return Result(rt_code, 'fail to run benchmark', None)
+    except Exception as e:
+        return Result(-1, 'fail to run benchmark', e)
+    

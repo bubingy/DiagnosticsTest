@@ -58,7 +58,8 @@ def test_sos():
                 f'{configuration.debugger} -z {dump_path}', 
                 cwd=configuration.test_result,
                 stdin=PIPE,
-                stdout=f
+                stdout=f,
+                stderr=f
             )
             for command in analyze_commands:
                 p.stdin.write(command)
@@ -83,7 +84,8 @@ def test_sos():
                 f'{configuration.debugger} -c {dump_path}', 
                 cwd=configuration.test_result,
                 stdin=PIPE,
-                stdout=f
+                stdout=f,
+                stderr=f
             )
             for command in analyze_commands:
                 p.stdin.write(command)
@@ -129,7 +131,8 @@ def test_sos():
             f'{configuration.debugger} -p {webapp.pid}', 
             cwd=configuration.test_result,
             stdin=PIPE,
-            stdout=f
+            stdout=f,
+            stderr=f
         )
         for command in analyze_commands:
             p.stdin.write(command)
