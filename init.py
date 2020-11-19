@@ -20,17 +20,22 @@ def install_sdk():
         req = request.urlopen('https://dot.net/v1/dotnet-install.ps1')
         with open(f'{configuration.test_bed}/dotnet-install.ps1', 'w+') as f:
             f.write(req.read().decode())
-        os.chmod(f'{configuration.test_bed}/dotnet-install.ps1', stat.S_IRWXO)
         rt_code = run_command_sync(
-            f'powershell.exe {configuration.test_bed}/dotnet-install.ps1 ' + \
-                f'-i {sdk_dir} -v {configuration.sdk_version}',
+            ' '.join(
+                [
+                    f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
+                    f'-i {sdk_dir} -v {configuration.sdk_version}'
+                ]
+            ),
             log_path=log_path
         )
     else:
-        req = request.urlopen('https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh')
+        req = request.urlopen(
+            'https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh'
+        )
         with open(f'{configuration.test_bed}/dotnet-install.sh', 'w+') as f:
             f.write(req.read().decode())
-        os.chmod(f'{configuration.test_bed}/dotnet-install.sh', stat.S_IRWXO)
+        run_command_sync(f'chmod +x {configuration.test_bed}/dotnet-install.sh')
         rt_code = run_command_sync(
             ' '.join(
                 [

@@ -60,6 +60,6 @@ def test_dump():
             try:
                 p.stdin.write(command)
             except Exception as e:
-                p.stdin.write(str(e).encode('utf-8'))
+                f.write(f'{e}\n'.encode('utf-8'))
                 continue
         p.communicate()

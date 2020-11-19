@@ -62,7 +62,11 @@ def test_sos():
                 stderr=f
             )
             for command in analyze_commands:
-                p.stdin.write(command)
+                try:
+                    p.stdin.write(command)
+                except Exception as e:
+                    f.write(f'{e}\n'.encode('utf-8'))
+                    continue
             p.communicate()
 
     if 'linux' in configuration.rid:
@@ -88,7 +92,11 @@ def test_sos():
                 stderr=f
             )
             for command in analyze_commands:
-                p.stdin.write(command)
+                try:
+                    p.stdin.write(command)
+                except Exception as e:
+                    f.write(f'{e}\n'.encode('utf-8'))
+                    continue
             p.communicate()
 
     # attach process for debugging
@@ -135,6 +143,10 @@ def test_sos():
             stderr=f
         )
         for command in analyze_commands:
-            p.stdin.write(command)
+            try:
+                p.stdin.write(command)
+            except Exception as e:
+                f.write(f'{e}\n'.encode('utf-8'))
+                continue
         p.communicate()
     webapp.terminate()
