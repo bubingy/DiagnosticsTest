@@ -11,6 +11,8 @@ from utils import run_command_async, Popen, \
     run_command_sync, Result, PIPE
 
 
+log_path = os.path.join(configuration.test_result, 'projects.log') 
+
 def create_publish_webapp()->Result:
     '''Create and publish a dotnet webapp
 
@@ -23,11 +25,13 @@ def create_publish_webapp()->Result:
     )
     rt_code_create = run_command_sync(
         f'dotnet new webapp -o {webapp_dir}',
-        cwd=configuration.test_bed
+        cwd=configuration.test_bed,
+        log_path=log_path
     )
     rt_code_publish = run_command_sync(
         f'dotnet publish -o out',
-        cwd=webapp_dir
+        cwd=webapp_dir,
+        log_path=log_path
     )
     if rt_code_publish == 0 and rt_code_create == 0:
         return Result(0, 'successfully create webapp', webapp_dir)
@@ -51,6 +55,8 @@ def run_webapp(project_dir: str)->Popen:
         webapp process instance
     '''
     tmp_path = os.path.join(project_dir, 'tmp')
+    if os.path.exists(tmp_path):
+        os.remove(tmp_path)
     tmp_write = open(tmp_path, 'w+')
     tmp_read = open(tmp_path, 'r')
     if 'win' in configuration.rid:
@@ -90,7 +96,8 @@ def create_publish_consoleapp()->Result:
     )
     rt_code_create = run_command_sync(
         f'dotnet new console -o {consoleapp_dir}',
-        cwd=configuration.test_bed
+        cwd=configuration.test_bed,
+        log_path=log_path
     )
     shutil.copy(
         os.path.join(configuration.tool_root, 'project', 'consoleapp_tmp'), 
@@ -98,7 +105,8 @@ def create_publish_consoleapp()->Result:
     )
     rt_code_publish = run_command_sync(
         f'dotnet publish -o out',
-        cwd=consoleapp_dir
+        cwd=consoleapp_dir,
+        log_path=log_path
     )
 
     if rt_code_publish == 0 and rt_code_create == 0:
@@ -144,7 +152,8 @@ def create_publish_GCDumpPlayground()->Result:
         return Result(-1, 'fail to copy GCDumpPlayground to testbed', e)
     rt_code_publish = run_command_sync(
         f'dotnet publish -o out',
-        cwd=project_dir
+        cwd=project_dir,
+        log_path=log_path
     )
     if rt_code_publish == 0:
         return Result(0, 'successfully publish GCDumpPlayground', project_dir)

@@ -13,6 +13,9 @@ log_path = os.path.join(configuration.test_result, 'benchmark.log')
 def download_diagnostics()->Result:
     '''Clone diagnostics from github
     '''
+    if configuration.run_benchmarks is False:
+        print('ignore benchmarks, so the repo won\'t be downloaded')
+        return
     rt_code = run_command_sync(
         'git clone https://github.com/dotnet/diagnostics.git',
         log_path=log_path,
@@ -51,6 +54,9 @@ def run_benchmark()->Result:
     '''Run benchmark
 
     '''
+    if configuration.run_benchmarks is False:
+        print('ignore benchmarks')
+        return
     project_dir = os.path.join(
         configuration.test_bed, 'diagnostics', 
         'src', 'tests', 'benchmarks'

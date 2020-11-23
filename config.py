@@ -22,7 +22,10 @@ class GlobalConfig:
         self.tool_commit = self.config['Tool']['Commit']
         self.tool_feed = self.config['Tool']['Feed']
         self.test_bed = self.config['Test']['TestBed']
-        self.run_benchmarks = self.config.getboolean('Test', 'RunBenchmarks')
+        if self.config['Test']['RunBenchmarks'] == 'true':
+            self.run_benchmarks = True
+        else:
+            self.run_benchmarks = False
             
         self.test_result = os.path.join(self.test_bed, 'TestResult')
         self.tool_root = os.path.dirname(os.path.abspath(__file__))

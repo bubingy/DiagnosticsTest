@@ -36,10 +36,10 @@ def test_counters():
             time.sleep(10)
             p.terminate()
             with open(log_path, 'a+') as f:
-                f.write(f'successfully run command {command}')
+                f.write(f'successfully run command {command}\n')
         except Exception as e:
             with open(log_path, 'a+') as f:
-                f.write(f'fail to run command: {e}')
+                f.write(f'fail to run command: {e}\n')
             continue
 
     webapp.terminate()
@@ -60,8 +60,8 @@ def test_counters():
         )
         p.communicate()
         with open(log_path, 'a+') as f:
-            f.write(f'successfully run command {command}')
+            f.write(f'successfully run command {command}\n')
     except Exception as e:
         with open(log_path, 'a+') as f:
-            f.write(f'fail to run command: {e}')
+            f.write(f'fail to run command: {e}\n')
     
