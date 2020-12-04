@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import glob
 import time
 
 from config import configuration
@@ -26,3 +27,9 @@ def test_gcdump():
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=configuration.test_result)
     gcdumpplayground.terminate()
+
+    gcdump = glob.glob(f'{configuration.test_result}/*.gcdump')
+    if len(gcdump) == 0 or gcdump is None:
+        print('fail to generate gcdump.')
+        with open(log_path, 'a+') as log:
+            log.write('fail to generate gcdump\n')

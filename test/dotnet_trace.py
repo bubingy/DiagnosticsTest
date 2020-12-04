@@ -31,14 +31,13 @@ def test_trace():
         cwd=configuration.test_bed
     )
     time.sleep(20)
-    p.terminate()
+    webapp.terminate()
+    p.communicate()
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace', 
         log_path,
         cwd=configuration.test_bed
     )
-
-    webapp.terminate()
 
     if configuration.sdk_version[0] == '3':
         print('dotnet-trace new feature isn\'t supported by .net core 3.x')
