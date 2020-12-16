@@ -2,7 +2,6 @@
 
 import os
 import glob
-import time
 
 from config import configuration
 from utils import run_command_async, run_command_sync, PIPE
@@ -13,7 +12,7 @@ log_path = os.path.join(configuration.test_result, 'dotnet_sos.log')
 
 def test_sos():
     '''Run sample apps and perform tests.
-    
+
     '''
     if 'musl' in configuration.rid:
         print('lldb isn\'t available for alpine.')
@@ -55,7 +54,7 @@ def test_sos():
         ]
         with open(analyze_output_path, 'w+') as f:
             p = run_command_async(
-                f'{configuration.debugger} -z {dump_path}', 
+                f'{configuration.debugger} -z {dump_path}',
                 cwd=configuration.test_result,
                 stdin=PIPE,
                 stdout=f,
@@ -63,9 +62,10 @@ def test_sos():
             )
             for command in analyze_commands:
                 try:
+                    f.write(f'{command.decode()}\n')
                     p.stdin.write(command)
-                except Exception as e:
-                    f.write(f'{e}\n'.encode('utf-8'))
+                except Exception as exception:
+                    f.write(f'{exception}\n'.encode('utf-8'))
                     continue
             p.communicate()
 
@@ -85,7 +85,7 @@ def test_sos():
         ]
         with open(analyze_output_path, 'w+') as f:
             p = run_command_async(
-                f'{configuration.debugger} -c {dump_path}', 
+                f'{configuration.debugger} -c {dump_path}',
                 cwd=configuration.test_result,
                 stdin=PIPE,
                 stdout=f,
@@ -145,8 +145,8 @@ def test_sos():
         for command in analyze_commands:
             try:
                 p.stdin.write(command)
-            except Exception as e:
-                f.write(f'{e}\n'.encode('utf-8'))
+            except Exception as exception:
+                f.write(f'{exception}\n'.encode('utf-8'))
                 continue
         p.communicate()
     webapp.terminate()

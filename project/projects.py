@@ -8,10 +8,10 @@ from xml.etree import ElementTree as ET
 
 from config import configuration
 from utils import run_command_async, Popen, \
-    run_command_sync, Result, PIPE
+    run_command_sync, Result
 
 
-log_path = os.path.join(configuration.test_result, 'projects.log') 
+log_path = os.path.join(configuration.test_result, 'projects.log')
 
 def create_publish_webapp()->Result:
     '''Create and publish a dotnet webapp
@@ -29,7 +29,7 @@ def create_publish_webapp()->Result:
         log_path=log_path
     )
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out',
+        'dotnet publish -o out',
         cwd=webapp_dir,
         log_path=log_path
     )
@@ -37,8 +37,8 @@ def create_publish_webapp()->Result:
         return Result(0, 'successfully create webapp', webapp_dir)
     else:
         return Result(
-            -1, 
-            'fail to create webapp', 
+            -1,
+            'fail to create webapp',
             {
                 'create': rt_code_create,
                 'publish': rt_code_publish
@@ -55,21 +55,26 @@ def run_webapp(project_dir: str)->Popen:
         webapp process instance
     '''
     tmp_path = os.path.join(project_dir, 'tmp')
-    if os.path.exists(tmp_path):
-        os.remove(tmp_path)
     tmp_write = open(tmp_path, 'w+')
     tmp_read = open(tmp_path, 'r')
     if 'win' in configuration.rid:
         proc = run_command_async(
-            f'{project_dir}/out/webapp.exe', 
+            f'{project_dir}/out/webapp.exe',
+            stdout=tmp_write
+        )
+    elif 'osx' in configuration.rid:
+        proc = run_command_async(
+            f'dotnet {project_dir}/out/webapp.dll',
+            stdout=tmp_write
+        )
+    elif 'linux' in configuration.rid:
+        proc = run_command_async(
+            f'{project_dir}/out/webapp',
+            cwd=f'{project_dir}/out',
             stdout=tmp_write
         )
     else:
-        proc = run_command_async(
-            f'{project_dir}/out/webapp', 
-            cwd=f'{project_dir}/out',  
-            stdout=tmp_write
-        )
+        raise Exception("invalid rid!")
     while True:
         if 'Application started' in tmp_read.read():
             print('webapp is running!')
@@ -84,7 +89,7 @@ def run_webapp(project_dir: str)->Popen:
 def create_publish_consoleapp()->Result:
     '''Create and publish a dotnet console app.
 
-    The console app is used to test startup feature of 
+    The console app is used to test startup feature of
         dotnet-counters/dotnet-trace.
 
     Return:
@@ -104,7 +109,7 @@ def create_publish_consoleapp()->Result:
         os.path.join(consoleapp_dir, 'Program.cs')
     )
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out',
+        'dotnet publish -o out',
         cwd=consoleapp_dir,
         log_path=log_path
     )
@@ -113,8 +118,8 @@ def create_publish_consoleapp()->Result:
         return Result(0, 'successfully create console app', consoleapp_dir)
     else:
         return Result(
-            -1, 
-            'fail to create console app', 
+            -1,
+            'fail to create console app',
             {
                 'create': rt_code_create,
                 'publish': rt_code_publish
@@ -134,7 +139,7 @@ def create_publish_GCDumpPlayground()->Result:
         'GCDumpPlayground2'
     )
     project_dir = os.path.join(
-        configuration.test_bed, 
+        configuration.test_bed,
         'GCDumpPlayground2'
     )
     project_file = os.path.join(project_dir, 'GCDumpPlayground2.csproj')
@@ -147,11 +152,11 @@ def create_publish_GCDumpPlayground()->Result:
         else:
             framework = 'net' + configuration.sdk_version[:3]
         root.find('PropertyGroup').find('TargetFramework').text = framework
-        tree.write(project_file) 
-    except Exception as e:
-        return Result(-1, 'fail to copy GCDumpPlayground to testbed', e)
+        tree.write(project_file)
+    except Exception as exception:
+        return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out',
+        'dotnet publish -o out',
         cwd=project_dir,
         log_path=log_path
     )
@@ -159,11 +164,11 @@ def create_publish_GCDumpPlayground()->Result:
         return Result(0, 'successfully publish GCDumpPlayground', project_dir)
     else:
         return Result(
-            rt_code_publish, 
-            'fail to publish GCDumpPlayground', 
+            rt_code_publish,
+            'fail to publish GCDumpPlayground',
             None
         )
-    
+
 
 def run_GCDumpPlayground(project_dir: str)->Popen:
     '''Start GCDumpPlayground and return the process instance.
@@ -173,17 +178,28 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
     Return:
         GCDumpPlayground process instance
     '''
-    extend_name = ''
-    if 'win' in configuration.rid:
-        extend_name = '.exe'
     tmp_path = os.path.join(project_dir, 'tmp.txt')
-    tmp_writer = open(tmp_path, 'w+')
+    tmp_write = open(tmp_path, 'w+')
 
-    proc = run_command_async(
-        f'{project_dir}/out/GCDumpPlayground2{extend_name} 0.1',
-        stdout=tmp_writer
-    )
-        
+    if 'win' in configuration.rid:
+        proc = run_command_async(
+            f'{project_dir}/out/GCDumpPlayground2.exe 0.1',
+            stdout=tmp_write
+        )
+    elif 'osx' in configuration.rid:
+        proc = run_command_async(
+            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
+            stdout=tmp_write
+        )
+    elif 'linux' in configuration.rid:
+        proc = run_command_async(
+            f'{project_dir}/out/GCDumpPlayground2 0.1',
+            cwd=f'{project_dir}/out',
+            stdout=tmp_write
+        )
+    else:
+        raise Exception("invalid rid!")
+
     while True:
         with open(tmp_path, 'r+') as f:
             if 'Pause for gcdumps.' in f.read():
@@ -191,5 +207,5 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
                 break
             else:
                 time.sleep(2)
-    tmp_writer.close()
+    tmp_write.close()
     return proc

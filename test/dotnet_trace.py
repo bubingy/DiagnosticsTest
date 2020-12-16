@@ -30,7 +30,7 @@ def test_trace():
         f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace', 
         cwd=configuration.test_bed
     )
-    time.sleep(20)
+    time.sleep(10)
     webapp.terminate()
     p.communicate()
     run_command_sync(

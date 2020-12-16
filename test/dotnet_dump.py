@@ -47,7 +47,7 @@ def test_dump():
         b'eeversion\n',
         b'exit\n'
     ]
-    analyze_output_path = os.path.join(configuration.test_result, 'dotnet-analyze.log')
+    analyze_output_path = os.path.join(configuration.test_result, 'dotnet_analyze.log')
     with open(analyze_output_path, 'w+') as f:
         p = run_command_async(
             f'dotnet-dump analyze {dump_path}', 
@@ -59,7 +59,7 @@ def test_dump():
         for command in analyze_commands:
             try:
                 p.stdin.write(command)
-            except Exception as e:
-                f.write(f'{e}\n'.encode('utf-8'))
+            except Exception as exception:
+                f.write(f'{exception}\n'.encode('utf-8'))
                 continue
         p.communicate()
