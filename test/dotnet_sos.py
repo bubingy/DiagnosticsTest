@@ -62,7 +62,6 @@ def test_sos():
             )
             for command in analyze_commands:
                 try:
-                    f.write(f'{command.decode()}\n')
                     p.stdin.write(command)
                 except Exception as exception:
                     f.write(f'{exception}\n'.encode('utf-8'))
