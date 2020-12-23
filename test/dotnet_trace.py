@@ -32,6 +32,7 @@ def test_trace():
     )
     time.sleep(10)
     webapp.terminate()
+    webapp.communicate()
     p.communicate()
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace', 

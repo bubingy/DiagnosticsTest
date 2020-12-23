@@ -29,7 +29,7 @@ def create_publish_webapp()->Result:
         log_path=log_path
     )
     rt_code_publish = run_command_sync(
-        'dotnet publish -o out',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=webapp_dir,
         log_path=log_path
     )
@@ -58,23 +58,15 @@ def run_webapp(project_dir: str)->Popen:
     tmp_write = open(tmp_path, 'w+')
     tmp_read = open(tmp_path, 'r')
     if 'win' in configuration.rid:
-        proc = run_command_async(
-            f'{project_dir}/out/webapp.exe',
-            stdout=tmp_write
-        )
-    elif 'osx' in configuration.rid:
-        proc = run_command_async(
-            f'dotnet {project_dir}/out/webapp.dll',
-            stdout=tmp_write
-        )
-    elif 'linux' in configuration.rid:
-        proc = run_command_async(
-            f'{project_dir}/out/webapp',
-            cwd=f'{project_dir}/out',
-            stdout=tmp_write
-        )
+        bin_extension = '.exe'
     else:
-        raise Exception("invalid rid!")
+        bin_extension = ''
+
+    proc = run_command_async(
+        f'{project_dir}/out/webapp{bin_extension}',
+        cwd=f'{project_dir}/out',
+        stdout=tmp_write
+    )
     while True:
         if 'Application started' in tmp_read.read():
             print('webapp is running!')
@@ -109,7 +101,7 @@ def create_publish_consoleapp()->Result:
         os.path.join(consoleapp_dir, 'Program.cs')
     )
     rt_code_publish = run_command_sync(
-        'dotnet publish -o out',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=consoleapp_dir,
         log_path=log_path
     )
@@ -156,7 +148,7 @@ def create_publish_GCDumpPlayground()->Result:
     except Exception as exception:
         return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
     rt_code_publish = run_command_sync(
-        'dotnet publish -o out',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
@@ -182,23 +174,15 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
     tmp_write = open(tmp_path, 'w+')
 
     if 'win' in configuration.rid:
-        proc = run_command_async(
-            f'{project_dir}/out/GCDumpPlayground2.exe 0.1',
-            stdout=tmp_write
-        )
-    elif 'osx' in configuration.rid:
-        proc = run_command_async(
-            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
-            stdout=tmp_write
-        )
-    elif 'linux' in configuration.rid:
-        proc = run_command_async(
-            f'{project_dir}/out/GCDumpPlayground2 0.1',
-            cwd=f'{project_dir}/out',
-            stdout=tmp_write
-        )
+        bin_extension = '.exe'
     else:
-        raise Exception("invalid rid!")
+        bin_extension = ''
+
+    proc = run_command_async(
+        f'{project_dir}/out/GCDumpPlayground2{bin_extension} 0.1',
+        cwd=f'{project_dir}/out',
+        stdout=tmp_write
+    )
 
     while True:
         with open(tmp_path, 'r+') as f:

@@ -31,6 +31,7 @@ def test_dump():
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=configuration.test_bed)
     webapp.terminate()
+    webapp.communicate()
 
     if 'win' in configuration.rid:
         dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]

@@ -149,3 +149,4 @@ def test_sos():
                 continue
         p.communicate()
     webapp.terminate()
+    webapp.communicate()

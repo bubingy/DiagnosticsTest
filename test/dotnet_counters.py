@@ -11,7 +11,7 @@ log_path = os.path.join(configuration.test_result, 'dotnet_counters.log')
 
 def test_counters():
     '''Run sample apps and perform tests.
-    
+
     '''
     webapp_dir = os.path.join(
         configuration.test_bed,
@@ -37,12 +37,13 @@ def test_counters():
             p.terminate()
             with open(log_path, 'a+') as f:
                 f.write(f'successfully run command {command}\n')
-        except Exception as e:
+        except Exception as exception:
             with open(log_path, 'a+') as f:
-                f.write(f'fail to run command: {e}\n')
+                f.write(f'fail to run command: {exception}\n')
             continue
 
     webapp.terminate()
+    webapp.communicate()
 
     if configuration.sdk_version[0] == '3':
         print('dotnet-counters new feature isn\'t supported by .net core 3.x')
@@ -61,7 +62,6 @@ def test_counters():
         p.communicate()
         with open(log_path, 'a+') as f:
             f.write(f'successfully run command {command}\n')
-    except Exception as e:
+    except Exception as exception:
         with open(log_path, 'a+') as f:
-            f.write(f'fail to run command: {e}\n')
-    
+            f.write(f'fail to run command: {exception}\n')
