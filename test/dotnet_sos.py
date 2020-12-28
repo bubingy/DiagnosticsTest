@@ -2,6 +2,7 @@
 
 import os
 import glob
+import time
 
 from config import configuration
 from utils import run_command_async, run_command_sync, PIPE
@@ -53,7 +54,7 @@ def test_sos():
             b'q\n'
         ]
         with open(analyze_output_path, 'w+') as f:
-            p = run_command_async(
+            proc = run_command_async(
                 f'{configuration.debugger} -z {dump_path}',
                 cwd=configuration.test_result,
                 stdin=PIPE,
@@ -62,11 +63,11 @@ def test_sos():
             )
             for command in analyze_commands:
                 try:
-                    p.stdin.write(command)
+                    proc.stdin.write(command)
                 except Exception as exception:
                     f.write(f'{exception}\n'.encode('utf-8'))
                     continue
-            p.communicate()
+            proc.communicate()
 
     if 'linux' in configuration.rid:
         dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
@@ -83,7 +84,7 @@ def test_sos():
             b'y\n'
         ]
         with open(analyze_output_path, 'w+') as f:
-            p = run_command_async(
+            proc = run_command_async(
                 f'{configuration.debugger} -c {dump_path}',
                 cwd=configuration.test_result,
                 stdin=PIPE,
@@ -92,11 +93,11 @@ def test_sos():
             )
             for command in analyze_commands:
                 try:
-                    p.stdin.write(command)
-                except Exception as e:
-                    f.write(f'{e}\n'.encode('utf-8'))
+                    proc.stdin.write(command)
+                except Exception as exception:
+                    f.write(f'{exception}\n'.encode('utf-8'))
                     continue
-            p.communicate()
+            proc.communicate()
 
     # attach process for debugging
     webapp = projects.run_webapp(webapp_dir)
@@ -134,8 +135,8 @@ def test_sos():
             b'y\n'
         ]
     with open(analyze_output_path, 'w+') as f:
-        p = run_command_async(
-            f'{configuration.debugger} -p {webapp.pid}', 
+        proc = run_command_async(
+            f'{configuration.debugger} -p {webapp.pid}',
             cwd=configuration.test_result,
             stdin=PIPE,
             stdout=f,
@@ -143,10 +144,11 @@ def test_sos():
         )
         for command in analyze_commands:
             try:
-                p.stdin.write(command)
+                proc.stdin.write(command)
             except Exception as exception:
                 f.write(f'{exception}\n'.encode('utf-8'))
                 continue
-        p.communicate()
+        proc.communicate()
     webapp.terminate()
-    webapp.communicate()
+    while webapp.poll() is None:
+        time.sleep(1)

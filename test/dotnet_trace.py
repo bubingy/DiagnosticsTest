@@ -11,7 +11,7 @@ log_path = os.path.join(configuration.test_result, 'dotnet_trace.log')
 
 def test_trace():
     '''Run sample apps and perform tests.
-    
+
     '''
     webapp_dir = os.path.join(
         configuration.test_bed,
@@ -26,16 +26,17 @@ def test_trace():
     for command in sync_commands_list:
         run_command_sync(command, log_path)
 
-    p = run_command_async(
-        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace', 
+    proc = run_command_async(
+        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace',
         cwd=configuration.test_bed
     )
     time.sleep(10)
     webapp.terminate()
-    webapp.communicate()
-    p.communicate()
+    while webapp.poll() is None:
+        time.sleep(1)
+    proc.communicate()
     run_command_sync(
-        'dotnet-trace convert --format speedscope webapp.nettrace', 
+        'dotnet-trace convert --format speedscope webapp.nettrace',
         log_path,
         cwd=configuration.test_bed
     )
@@ -50,10 +51,10 @@ def test_trace():
     extend_name = ''
     if 'win' in configuration.rid:
         extend_name = '.exe'
-    p = run_command_async(
+    proc = run_command_async(
         'dotnet-trace collect -o consoleapp.nettrace ' + \
             '--providers Microsoft-Windows-DotNETRuntime ' + \
             f'-- {consoleapp_dir}/out/consoleapp{extend_name}',
         cwd=configuration.test_result
     )
-    p.communicate()
+    proc.communicate()

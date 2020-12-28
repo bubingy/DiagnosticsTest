@@ -12,7 +12,7 @@ log_path = os.path.join(configuration.test_result, 'dotnet_gcdump.log')
 
 def test_gcdump():
     '''Run sample apps and perform tests.
-    
+
     '''
     project_dir = os.path.join(
         configuration.test_bed,
@@ -27,6 +27,8 @@ def test_gcdump():
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=configuration.test_result)
     gcdumpplayground.terminate()
+    while gcdumpplayground.poll() is None:
+        time.sleep(1)
 
     gcdump = glob.glob(f'{configuration.test_result}/*.gcdump')
     if len(gcdump) == 0 or gcdump is None:

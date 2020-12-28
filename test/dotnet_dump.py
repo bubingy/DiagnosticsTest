@@ -13,7 +13,7 @@ log_path = os.path.join(configuration.test_result, 'dotnet_dump.log')
 
 def test_dump():
     '''Run sample apps and perform tests.
-    
+
     '''
     if 'osx' in configuration.rid:
         print('dotnet-dump doesn\'t support on osx.')
@@ -31,13 +31,14 @@ def test_dump():
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=configuration.test_bed)
     webapp.terminate()
-    webapp.communicate()
+    while webapp.poll() is None:
+        time.sleep(1)
 
     if 'win' in configuration.rid:
         dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
     else:
         dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
-   
+
     analyze_commands = [
         b'clrstack\n',
         b'clrthreads\n',
@@ -50,7 +51,7 @@ def test_dump():
     ]
     analyze_output_path = os.path.join(configuration.test_result, 'dotnet_analyze.log')
     with open(analyze_output_path, 'w+') as f:
-        p = run_command_async(
+        proc = run_command_async(
             f'dotnet-dump analyze {dump_path}', 
             cwd=configuration.test_result,
             stdin=PIPE,
@@ -59,8 +60,8 @@ def test_dump():
         )
         for command in analyze_commands:
             try:
-                p.stdin.write(command)
+                proc.stdin.write(command)
             except Exception as exception:
                 f.write(f'{exception}\n'.encode('utf-8'))
                 continue
-        p.communicate()
+        proc.communicate()
