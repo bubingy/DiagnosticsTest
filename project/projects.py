@@ -62,11 +62,18 @@ def run_webapp(project_dir: str)->Popen:
     else:
         bin_extension = ''
 
-    proc = run_command_async(
-        f'{project_dir}/out/webapp{bin_extension}',
-        cwd=f'{project_dir}/out',
-        stdout=tmp_write
-    )
+    if 'osx' in configuration.rid:
+        proc = run_command_async(
+            f'dotnet {project_dir}/out/webapp.dll',
+            cwd=f'{project_dir}/out',
+            stdout=tmp_write
+        )
+    else:
+        proc = run_command_async(
+            f'{project_dir}/out/webapp{bin_extension}',
+            cwd=f'{project_dir}/out',
+            stdout=tmp_write
+        )
     while True:
         if 'Application started' in tmp_read.read():
             print('webapp is running!')
@@ -178,11 +185,18 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
     else:
         bin_extension = ''
 
-    proc = run_command_async(
-        f'{project_dir}/out/GCDumpPlayground2{bin_extension} 0.1',
-        cwd=f'{project_dir}/out',
-        stdout=tmp_write
-    )
+    if 'osx' in configuration.rid:
+        proc = run_command_async(
+            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
+            cwd=f'{project_dir}/out',
+            stdout=tmp_write
+        )
+    else:
+        proc = run_command_async(
+            f'{project_dir}/out/GCDumpPlayground2{bin_extension} 0.1',
+            cwd=f'{project_dir}/out',
+            stdout=tmp_write
+        )
 
     while True:
         with open(tmp_path, 'r+') as f:
