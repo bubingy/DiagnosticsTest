@@ -29,7 +29,7 @@ def create_publish_webapp()->Result:
         log_path=log_path
     )
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'dotnet publish -o out',
         cwd=webapp_dir,
         log_path=log_path
     )
@@ -101,7 +101,7 @@ def create_publish_consoleapp()->Result:
         os.path.join(consoleapp_dir, 'Program.cs')
     )
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'dotnet publish -o out',
         cwd=consoleapp_dir,
         log_path=log_path
     )
@@ -148,7 +148,7 @@ def create_publish_GCDumpPlayground()->Result:
     except Exception as exception:
         return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
     rt_code_publish = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'dotnet publish -o out',
         cwd=project_dir,
         log_path=log_path
     )
