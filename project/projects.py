@@ -107,11 +107,18 @@ def create_publish_consoleapp()->Result:
         os.path.join(configuration.tool_root, 'project', 'consoleapp_tmp'), 
         os.path.join(consoleapp_dir, 'Program.cs')
     )
-    rt_code_publish = run_command_sync(
-        f'dotnet publish -o out',
+    if 'osx' in configuration.rid and int(configuration.sdk_version[0]) > 3:
+        rt_code_publish = run_command_sync(
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=consoleapp_dir,
         log_path=log_path
     )
+    else:
+        rt_code_publish = run_command_sync(
+            f'dotnet publish -o out',
+            cwd=consoleapp_dir,
+            log_path=log_path
+        )
 
     if rt_code_publish == 0 and rt_code_create == 0:
         return Result(0, 'successfully create console app', consoleapp_dir)
