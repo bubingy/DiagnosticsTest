@@ -2,7 +2,7 @@
 '''
 
 import os
-import stat
+import sys
 from urllib import request
 
 from config import configuration
@@ -17,38 +17,35 @@ def install_sdk():
     '''
     sdk_dir = os.environ['DOTNET_ROOT']
     if 'win' in configuration.rid:
-        req = request.urlopen('https://dot.net/v1/dotnet-install.ps1')
-        with open(f'{configuration.test_bed}/dotnet-install.ps1', 'w+') as f:
-            f.write(req.read().decode())
-        rt_code = run_command_sync(
-            ' '.join(
-                [
-                    f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
-                    f'-i {sdk_dir} -v {configuration.sdk_version}'
-                ]
-            ),
-            log_path=log_path
-        )
+        script_url = 'https://dot.net/v1/dotnet-install.ps1'
+        shell_name = 'powershell.exe'
     else:
-        req = request.urlopen(
-            'https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh'
-        )
-        with open(f'{configuration.test_bed}/dotnet-install.sh', 'w+') as f:
+        script_url = 'https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh'
+        shell_name = '/bin/bash'
+
+    try:
+        req = request.urlopen(script_url)
+        with open(f'{configuration.test_bed}/{os.path.basename(script_url)}', 'w+') as f:
             f.write(req.read().decode())
-        run_command_sync(f'chmod +x {configuration.test_bed}/dotnet-install.sh')
-        rt_code = run_command_sync(
-            ' '.join(
-                [
-                    f'/bin/bash {configuration.test_bed}/dotnet-install.sh',
-                    f'-i {sdk_dir} -v {configuration.sdk_version}'
-                ]
-            ),
-            log_path=log_path
-        )
+    except Exception as e:
+        with open(log_path, 'a+') as log:
+            log.write('fail to download install script!\n')
+        sys.exit(-1)
+    rt_code = run_command_sync(
+        ' '.join(
+            [
+                f'{shell_name} {configuration.test_bed}/{os.path.basename(script_url)}',
+                f'-i {sdk_dir} -v {configuration.sdk_version}'
+            ]
+        ),
+        log_path=log_path
+    )
     if rt_code == 0:
         return Result(0, 'successfully install sdk', None)
     else:
-        return Result(rt_code, 'fail to install sdk', None)
+        with open(log_path, 'a+') as log:
+            log.write('fail to install sdk!\n')
+        sys.exit(-1)
 
 
 def install_tools():
@@ -62,7 +59,7 @@ def install_tools():
         'dotnet-trace'
     ]
     for tool in tools:
-        run_command_sync(
+        rt_code = run_command_sync(
             ' '.join(
                 [
                     f'dotnet tool install -g {tool}',
@@ -72,3 +69,7 @@ def install_tools():
             ),
             log_path=log_path
         )
+        if rt_code != 0:
+            with open(log_path, 'a+') as log:
+                log.write(f'fail to install tool: {tool}!\n')
+            sys.exit(-1)

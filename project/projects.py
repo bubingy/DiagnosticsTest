@@ -2,6 +2,7 @@
 '''
 
 import os
+import sys
 import time
 import shutil
 from xml.etree import ElementTree as ET
@@ -13,40 +14,47 @@ from utils import run_command_async, Popen, \
 
 log_path = os.path.join(configuration.test_result, 'projects.log')
 
-def create_publish_webapp()->Result:
+def create_publish_webapp() -> Result:
     '''Create and publish a dotnet webapp
 
     Return:
         return Result class
     '''
-    webapp_dir = os.path.join(
+    project_dir = os.path.join(
         configuration.test_bed,
         'webapp'
     )
-    rt_code_create = run_command_sync(
-        f'dotnet new webapp -o {webapp_dir}',
+    rt_code = run_command_sync(
+        f'dotnet new webapp -o {project_dir}',
         cwd=configuration.test_bed,
         log_path=log_path
     )
-    rt_code_publish = run_command_sync(
-        f'dotnet publish -o out',
-        cwd=webapp_dir,
+    if rt_code != 0:
+        configuration.webappapp_runnable = False
+        return Result(-1, 'fail to create webapp.', None)
+
+    rt_code = run_command_sync(
+        f'dotnet publish -o out -r {configuration.rid}',
+        cwd=project_dir,
         log_path=log_path
     )
-    if rt_code_publish == 0 and rt_code_create == 0:
-        return Result(0, 'successfully create webapp', webapp_dir)
+    if rt_code == 0:
+        return Result(0, 'successfully create and publish webapp.', project_dir)
+    
+    # if given runtime isn't available, try to publish without specifying rid.
+    rt_code = run_command_sync(
+        f'dotnet publish -o out',
+        cwd=project_dir,
+        log_path=log_path
+    )
+    if rt_code != 0:
+        configuration.webappapp_runnable = False
+        return Result(-1, 'fail to publish webapp.', None)
     else:
-        return Result(
-            -1,
-            'fail to create webapp',
-            {
-                'create': rt_code_create,
-                'publish': rt_code_publish
-            }
-        )
+        return Result(0, 'successfully create and publish webapp.', project_dir)
 
 
-def run_webapp(project_dir: str)->Popen:
+def run_webapp(project_dir: str) -> Popen:
     '''Start webapp and return the process instance.
 
     Args:
@@ -62,18 +70,17 @@ def run_webapp(project_dir: str)->Popen:
     else:
         bin_extension = ''
 
-    if 'osx' in configuration.rid:
+    if f'webapp{bin_extension}' in os.listdir(f'{project_dir}/out'):
         proc = run_command_async(
-            f'dotnet {project_dir}/out/webapp.dll',
-            cwd=f'{project_dir}/out',
+            f'{project_dir}/out/webapp{bin_extension}',
             stdout=tmp_write
         )
     else:
         proc = run_command_async(
-            f'{project_dir}/out/webapp{bin_extension}',
-            cwd=f'{project_dir}/out',
+            f'dotnet {project_dir}/out/webapp.dll',
             stdout=tmp_write
         )
+        
     while True:
         if 'Application started' in tmp_read.read():
             print('webapp is running!')
@@ -85,7 +92,7 @@ def run_webapp(project_dir: str)->Popen:
     return proc
 
 
-def create_publish_consoleapp()->Result:
+def create_publish_consoleapp() -> Result:
     '''Create and publish a dotnet console app.
 
     The console app is used to test startup feature of
@@ -94,46 +101,53 @@ def create_publish_consoleapp()->Result:
     Return:
         return Result class
     '''
-    consoleapp_dir = os.path.join(
+    if int(configuration.sdk_version[0]) == 3:
+        with open(log_path, 'a+') as f:
+            f.write(f'won\'t create and publish consoleapp: new feature isn\'t supported by .net core 3.\n')
+        configuration.consoleapp_runnable = False
+        return Result(-1, 'not supported sdk.', None)
+    project_dir = os.path.join(
         configuration.test_bed,
         'consoleapp'
     )
-    rt_code_create = run_command_sync(
-        f'dotnet new console -o {consoleapp_dir}',
+    rt_code = run_command_sync(
+        f'dotnet new console -o {project_dir}',
         cwd=configuration.test_bed,
         log_path=log_path
     )
+    if rt_code != 0:
+        configuration.consoleapp_runnable = False
+        return Result(-1, 'fail to create consoleapp.', None)
     shutil.copy(
         os.path.join(configuration.tool_root, 'project', 'consoleapp_tmp'), 
-        os.path.join(consoleapp_dir, 'Program.cs')
+        os.path.join(project_dir, 'Program.cs')
     )
-    if 'osx' in configuration.rid and int(configuration.sdk_version[0]) > 3:
-        rt_code_publish = run_command_sync(
+
+    rt_code = run_command_sync(
         f'dotnet publish -o out -r {configuration.rid}',
-        cwd=consoleapp_dir,
+        cwd=project_dir,
         log_path=log_path
     )
+    if rt_code == 0:
+        return Result(0, 'successfully create and publish consoleapp.', project_dir)
+    if 'osx' in configuration.rid:
+        configuration.consoleapp_runnable = False
+        return Result(-1, 'fail to publish consoleapp.', None)
+
+    # if given runtime isn't available, try to publish without specifying rid.
+    rt_code = run_command_sync(
+        f'dotnet publish -o out',
+        cwd=project_dir,
+        log_path=log_path
+    )
+    if rt_code != 0:
+        configuration.consoleapp_runnable = False
+        return Result(-1, 'fail to publish consoleapp.', None)
     else:
-        rt_code_publish = run_command_sync(
-            f'dotnet publish -o out',
-            cwd=consoleapp_dir,
-            log_path=log_path
-        )
-
-    if rt_code_publish == 0 and rt_code_create == 0:
-        return Result(0, 'successfully create console app', consoleapp_dir)
-    else:
-        return Result(
-            -1,
-            'fail to create console app',
-            {
-                'create': rt_code_create,
-                'publish': rt_code_publish
-            }
-        )
+        return Result(0, 'successfully create and publish consoleapp', project_dir)
 
 
-def create_publish_GCDumpPlayground()->Result:
+def create_publish_GCDumpPlayground() -> Result:
     '''Copy GCDumpPlayground to testbed then publish.
 
     Return:
@@ -160,20 +174,28 @@ def create_publish_GCDumpPlayground()->Result:
         root.find('PropertyGroup').find('TargetFramework').text = framework
         tree.write(project_file)
     except Exception as exception:
+        configuration.gcplayground_runnable = False
         return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
-    rt_code_publish = run_command_sync(
+
+    rt_code = run_command_sync(
+        f'dotnet publish -o out -r {configuration.rid}',
+        cwd=project_dir,
+        log_path=log_path
+    )
+    if rt_code == 0:
+        return Result(0, 'successfully create and publish GCDumpPlayground.', project_dir)
+    
+    # if given runtime isn't available, try to publish without specifying rid.
+    rt_code = run_command_sync(
         f'dotnet publish -o out',
         cwd=project_dir,
         log_path=log_path
     )
-    if rt_code_publish == 0:
-        return Result(0, 'successfully publish GCDumpPlayground', project_dir)
+    if rt_code != 0:
+        configuration.gcplayground_runnable = False
+        return Result(-1, 'fail to publish gcdumpplayground.', None)
     else:
-        return Result(
-            rt_code_publish,
-            'fail to publish GCDumpPlayground',
-            None
-        )
+        return Result(0, 'successfully create and publish gcdumpplayground.', project_dir)
 
 
 def run_GCDumpPlayground(project_dir: str)->Popen:
@@ -192,16 +214,14 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
     else:
         bin_extension = ''
 
-    if 'osx' in configuration.rid:
+    if f'GCDumpPlayground2{bin_extension}' in os.listdir(f'{project_dir}/out'):
         proc = run_command_async(
-            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
-            cwd=f'{project_dir}/out',
+            f'{project_dir}/out/GCDumpPlayground2{bin_extension}',
             stdout=tmp_write
         )
     else:
         proc = run_command_async(
-            f'{project_dir}/out/GCDumpPlayground2{bin_extension} 0.1',
-            cwd=f'{project_dir}/out',
+            f'dotnet {project_dir}/out/GCDumpPlayground2.dll',
             stdout=tmp_write
         )
 

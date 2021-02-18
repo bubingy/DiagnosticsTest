@@ -13,6 +13,10 @@ def test_trace():
     '''Run sample apps and perform tests.
 
     '''
+    if configuration.webappapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run webapp for dotnet-trace.\n')
+        return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
@@ -43,6 +47,10 @@ def test_trace():
 
     if configuration.sdk_version[0] == '3':
         print('dotnet-trace new feature isn\'t supported by .net core 3.x')
+        return
+    if configuration.consoleapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run consoleapp for dotnet-trace.\n')
         return
     consoleapp_dir = os.path.join(
         configuration.test_bed,

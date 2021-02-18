@@ -13,6 +13,10 @@ def test_counters():
     '''Run sample apps and perform tests.
 
     '''
+    if configuration.webappapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run webapp for dotnet-counters.\n')
+        return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
@@ -48,6 +52,11 @@ def test_counters():
 
     if configuration.sdk_version[0] == '3':
         print('dotnet-counters new feature isn\'t supported by .net core 3.x')
+        return
+    
+    if configuration.consoleapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run consoleapp for dotnet-counters.\n')
         return
     consoleapp_dir = os.path.join(
         configuration.test_bed,

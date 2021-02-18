@@ -18,6 +18,12 @@ def test_sos():
     if 'musl' in configuration.rid:
         print('lldb isn\'t available for alpine.')
         return
+    
+    if configuration.webappapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run webapp for dotnet-sos.\n')
+        return
+
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'

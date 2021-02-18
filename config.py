@@ -30,6 +30,10 @@ class GlobalConfig:
         self.test_result = os.path.join(self.test_bed, 'TestResult')
         self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
+        self.webappapp_runnable = True
+        self.consoleapp_runnable = True
+        self.gcplayground_runnable = True
+
         self.check_init_config()
 
     def check_init_config(self):

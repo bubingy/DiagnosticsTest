@@ -14,6 +14,10 @@ def test_gcdump():
     '''Run sample apps and perform tests.
 
     '''
+    if configuration.gcplayground_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run gcdumpplayground for dotnet-gcdump.\n')
+        return
     project_dir = os.path.join(
         configuration.test_bed,
         'GCDumpPlayground2'

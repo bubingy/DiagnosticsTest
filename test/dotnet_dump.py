@@ -18,6 +18,10 @@ def test_dump():
     if 'osx' in configuration.rid:
         print('dotnet-dump doesn\'t support on osx.')
         return
+    if configuration.webappapp_runnable is False:
+        with open(log_path, 'a+') as f:
+            f.write(f'can\'t run webapp for dotnet-dump.\n')
+        return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
@@ -35,9 +39,14 @@ def test_dump():
         time.sleep(1)
 
     if 'win' in configuration.rid:
-        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
+        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')
     else:
-        dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
+        dump_path = glob.glob(f'{configuration.test_bed}/core_*')
+
+    if len(dump_path) == 0:
+        with open(log_path, 'a+') as f:
+            f.write(f'no dump files available.\n')
+        return
 
     analyze_commands = [
         b'clrstack\n',
