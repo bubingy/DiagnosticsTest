@@ -39,11 +39,11 @@ def test_dump():
         time.sleep(1)
 
     if 'win' in configuration.rid:
-        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')
+        dump_paths = glob.glob(f'{configuration.test_bed}/dump*.dmp')
     else:
-        dump_path = glob.glob(f'{configuration.test_bed}/core_*')
+        dump_paths = glob.glob(f'{configuration.test_bed}/core_*')
 
-    if len(dump_path) == 0:
+    if len(dump_paths) == 0:
         with open(log_path, 'a+') as f:
             f.write(f'no dump files available.\n')
         return
@@ -61,7 +61,7 @@ def test_dump():
     analyze_output_path = os.path.join(configuration.test_result, 'dotnet_analyze.log')
     with open(analyze_output_path, 'w+') as f:
         proc = run_command_async(
-            f'dotnet-dump analyze {dump_path}', 
+            f'dotnet-dump analyze {dump_paths[0]}', 
             cwd=configuration.test_result,
             stdin=PIPE,
             stdout=f,
