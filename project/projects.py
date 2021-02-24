@@ -216,12 +216,12 @@ def run_GCDumpPlayground(project_dir: str)->Popen:
 
     if f'GCDumpPlayground2{bin_extension}' in os.listdir(f'{project_dir}/out'):
         proc = run_command_async(
-            f'{project_dir}/out/GCDumpPlayground2{bin_extension}',
+            f'{project_dir}/out/GCDumpPlayground2{bin_extension} 0.1',
             stdout=tmp_write
         )
     else:
         proc = run_command_async(
-            f'dotnet {project_dir}/out/GCDumpPlayground2.dll',
+            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
             stdout=tmp_write
         )
 
