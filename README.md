@@ -36,3 +36,11 @@ Retrieving version of diagnostics tool requires authority. Once you can't get to
 4. Copy value of `cookie` in `Request Headers`;
 5. Replace value of `cookie` in `tools/getTestParaments/configuration.py` with what you copied in step 4;
 6. Re-run the tool.
+
+### OSRotationGenerator
+Not sure what OSes we will test against this week? Have no idea which sdk version we should choose for specific OS? That is why we develop this tool.
+Run following command on windows:
+```
+cd tools/OSRotationGenerator
+python get_os_rotation.py
+```
