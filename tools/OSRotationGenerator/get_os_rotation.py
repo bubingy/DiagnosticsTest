@@ -1,8 +1,19 @@
 # coding=utf-8
 
+import os
 import json
 import datetime
 import argparse
+from typing import Any
+
+
+def load_json(file_path: os.PathLike) -> Any:
+    import json
+    content = None
+    with open(file_path, 'r') as reader:
+        content = reader.read()
+    content = json.loads(content)
+    return content
 
 
 def calculate_week_increment(date_str: str) -> int:
@@ -12,10 +23,12 @@ def calculate_week_increment(date_str: str) -> int:
         date_str - a string object in format `year-month-day`.
     Return: number of weeks between given day and week in `baseStatus.json`.
     '''
-    base_status = None
-    with open('baseStatus.json', 'r') as reader:
-        base_status = reader.read()
-    base_status = json.loads(base_status)
+    base_status = load_json(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'baseStatus.json'
+        )
+    )
     year, month, day = date_str.split('-')
     date_obj = datetime.datetime(
         year=int(year),
@@ -50,10 +63,13 @@ def get_required_os_status(date_str: str) -> dict:
                             ...
         }
     '''
-    base_status = None
-    with open('baseStatus.json', 'r') as reader:
-        base_status = reader.read()
-    base_status = json.loads(base_status)
+    base_status = load_json(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'baseStatus.json'
+        )
+    )
+
     required_oses = list(base_status['requiredOS'].keys())
     dotnet_major_versions = list()
     for required_os in required_oses:
@@ -87,14 +103,18 @@ def get_alternate_os_status(date_str: str) -> dict:
                         ...
         }
     '''
-    base_status = None
-    with open('baseStatus.json', 'r') as reader:
-        base_status = reader.read()
-    base_status = json.loads(base_status)
-    alternate_oses = None
-    with open('alternateOS.json', 'r') as reader:
-        alternate_oses = reader.read()
-    alternate_oses = json.loads(alternate_oses)
+    base_status = load_json(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'baseStatus.json'
+        )
+    )
+    alternate_oses = load_json(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'alternateOS.json'
+        )
+    )
     
     cycle_length = len(base_status['alternateOS'].keys())
     first_os_index = alternate_oses.index(base_status['alternateOS']['3.1'])
@@ -124,6 +144,7 @@ def get_week_info(date_str: str) -> dict:
             friday = date of friday
         } 
     '''
+    import datetime
     year, month, day = date_str.split('-')
     date_obj = datetime.datetime(
         year=int(year),

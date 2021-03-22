@@ -1,8 +1,7 @@
 # coding=utf-8
 
 from SDKVersion import get_sdk_version
-from ToolVersion import get_latest_acceptable_build, \
-    get_tool_version, get_artifact, get_pr_info
+from ToolInfo import ToolInfo
 
 
 if __name__ == '__main__':
@@ -11,11 +10,10 @@ if __name__ == '__main__':
     for branch in sdk_version.keys():
         print(f'{branch}: {sdk_version[branch]}')
     
-    build = get_latest_acceptable_build()
-    tool_version = get_tool_version(
-        get_artifact(build)
-    )
-    pr_info = get_pr_info(build)
+    tool_info = ToolInfo()
+    build = tool_info.build
+    tool_version = tool_info.tool_version
+    pr_info = tool_info.pr_info
     print('Info of tool')
     print(f'Version: {tool_version}')
     for key in pr_info.keys():

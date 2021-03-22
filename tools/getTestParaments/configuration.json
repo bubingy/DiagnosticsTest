@@ -1,0 +1,20 @@
+{    
+    "branches": {
+        "3.1": "3.1.4xx",
+        "5.0": "5.0.3XX",
+        "6.0": "6.0.1XX-preview2"
+    },
+
+    "RID": "win-x64",
+
+    "results": [
+        "succeeded",
+        "partiallySucceeded"
+    ],
+
+    
+    "headers": {
+        "cookie": "VstsSession={\"PersistentSessionId\":\"ff6c5164-c640-4b9f-ab08-9233b5e38cac\",\"PendingAuthenticationSessionId\":\"00000000-0000-0000-0000-000000000000\",\"CurrentAuthenticationSessionId\":\"f88875ba-3633-4049-b288-4121b8160f24\",\"SignInState\":{}}; X-VSS-UseRequestRouting=True; UserAuthentication=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjRkZWF3MFZZVnlPd05BSFh0YjZWZ3hrYzQ2TSJ9.eyJmYW1pbHlfbmFtZSI6IkJ1IiwiZ2l2ZW5fbmFtZSI6IlZpbmNlbnQiLCJvaWQiOiI0MzYwODNkMC03YmIzLTRmN2ItYTI5OC1mZTE3M2JhMTU3MjYiLCJ0aWQiOiI3MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDciLCJzdWIiOiI3MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDdcXHYtYmlidUBtaWNyb3NvZnQuY29tIiwidW5pcXVlX25hbWUiOiJ2LWJpYnVAbWljcm9zb2Z0LmNvbSIsImVtYWlsIjoidi1iaWJ1QG1pY3Jvc29mdC5jb20iLCJwdWlkIjoiYWFkOjEwMDM3RkZFQUMzREQxRTUiLCJ2ZXIiOiIxLjAiLCJqdGkiOiIyMjIwMWVjNi0wZGVmLTQ3MGYtYjRlYi1hM2IyOTE3N2M5MDEiLCJpc3MiOiJhcHAudnN0b2tlbi52aXN1YWxzdHVkaW8uY29tIiwiYXVkIjoiZTVjODY2NzYtZDA2My00ZGEzLWJiOTYtYzhlMDUwNGJkYmE1IiwibmJmIjoxNjE2Mzc4NjQxLCJleHAiOjE2MTY5ODM0NDF9.CFsApl3RipbOCzLX_tfwZ6m3X3lbLPNDguoZPcJSTXtyxVMQ9XDrrefUIcLpKr3QrjvnkIr1lUTiC56gU-92llbkkadLE0kN7io9O6joyy04XJVQfQMyAgg3zfa8z1UNM6YgsDzTUA0suKlw-XJO4ysTgXWkJ2paCMNYOIblJ7-Lsalsoi9hFdY0LBuJ59gyJZbHCtAKbGCdmnHfF5JjMumUHR5GKqkw_YPIXal_QlPzyS91sYqPxr_pXGCRAGdUBMP0H2L4TJmXMGedNwkalLYQdNW5aep1nzCU9EEVRobAedp3jWQ-_u_kEx_xR_7QHeh_nSpVknsEgB9_APZUTA; __RequestVerificationToken=a9aeTzSkIc5j8NsrAECGJ7bcXPRdJ5Swi9cxaFstRqA7ifKnx0HzyZpp7iBFXtpGwWg7-QruZ6OdoDHdiyatznSxodM1; __RequestVerificationToken2e9c9654b-8963-4f2f-856b-7a9e0c0a25fc=a9aeTzSkIc5j8NsrAECGJ7bcXPRdJ5Swi9cxaFstRqA7ifKnx0HzyZpp7iBFXtpGwWg7-QruZ6OdoDHdiyatznSxodM1",
+        "comment": "# VERY IMPORTANT: IF THE FOLLOWING HEADER DOSE NOT WORK ANY MORE, OPEN FOLLOWING LINK WITH WEB BROWSER(DEBUG MOD REQUIRED), REPLACE VALUE OF `cookie` WITH which IN `Request Header` FIELD. https://dev.azure.com/dnceng/internal/_build?definitionId=528&_a=summary"
+    }
+}
