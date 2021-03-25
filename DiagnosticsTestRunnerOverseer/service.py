@@ -1,11 +1,13 @@
 # coding=utf-8
 
 import os
+import time
 import json
 import shutil
-from subprocess import Popen, PIPE
+from subprocess import Popen
 
 import pika
+import schedule
 
 from utils import DictFromFile
 
@@ -49,6 +51,7 @@ def retrieve_task():
 
     for runner in runner_list:
         queue_name = runner['queue']
+        print(f'retrieving message from {queue_name}...')
         while True:
             try:
                 connection = pika.BlockingConnection(
@@ -106,9 +109,12 @@ def assign_task(message: dict, runner: dict):
         test_config['Test']['RunBenchmarks'] = 'false'
 
     runner_type = runner['type']
+    runner_name = runner['name']
     if runner_type == 'physic':
+        print(f'running task on device {runner_name}...')
         run_task_on_device(test_config, runner)
     elif runner_type == 'container':
+        print(f'running task on container {runner_name}...')
         run_task_on_docker(test_config, runner)
     else:
         raise(f'unknown runner type: {runner_type}')
@@ -125,11 +131,15 @@ def run_task_on_device(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    shutil.copy(automation_scripts_template, runner['testbed'])
+    if os.path.exists(runner['testbed']) is False:
+        os.mkdir(runner['testbed'])
     automation_scripts_dir = os.path.join(
         runner['testbed'],
         'AutomationScripts'
     )
+    if os.path.exists(automation_scripts_dir) is True:
+        os.removedirs(automation_scripts_dir)
+    shutil.copytree(automation_scripts_template, automation_scripts_dir)
     with open(os.path.join(automation_scripts_dir, 'config.json'), 'w') as f:
         json.dump(config, f)
 
@@ -140,8 +150,10 @@ def run_task_on_device(config: dict, runner: dict):
         python_intepreter = 'python3'
     start_script = os.path.join(automation_scripts_dir, 'run_test.py')
     command = f'{python_intepreter} {start_script}'
-    process = Popen(command.split(' '), stdout=PIPE, stderr=PIPE)
+    print(f'exec {command}')
+    process = Popen(command.split(' '))
     process.communicate()
+    print('task completed!')
 
 
 def run_task_on_docker(config: dict, runner: dict):
@@ -170,5 +182,14 @@ def run_task_on_docker(config: dict, runner: dict):
         f'docker exec -ti {docker_name} '
         f'/bin/bash python3 {start_script}'
     ) # TODO
-    process = Popen(command.split(' '), stdout=PIPE, stderr=PIPE)
+    print(f'exec {command}')
+    process = Popen(command.split(' '))
     process.communicate()
+    print('task completed!')
+
+
+if __name__ == "__main__":
+    schedule.every().minute.do(retrieve_task)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

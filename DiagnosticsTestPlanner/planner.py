@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import time
 import datetime
 
 import pika
@@ -88,6 +89,8 @@ def publish_plan():
     )
     
     for plan in plans:
+        if plan['OS'] != 'windows10':
+            continue # remove after testing
         try:
             channel.basic_publish(
                 exchange='',
@@ -100,4 +103,9 @@ def publish_plan():
 
 
 if __name__ == "__main__":
-    schedule.every().wednesday.at("9:00").do(get_plans)
+    # schedule.every().wednesday.at("08:30").do(publish_plan)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+    publish_plan()
+    
