@@ -35,6 +35,7 @@ def test_trace():
         cwd=configuration.test_bed
     )
     time.sleep(10)
+    proc.terminate()
     webapp.terminate()
     while webapp.poll() is None:
         time.sleep(1)
