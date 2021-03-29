@@ -32,6 +32,14 @@ class GlobalConfig:
         self.test_result = os.path.join(self.test_bed, 'TestResult')
         self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
+        dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
+        tool_root = os.path.join(os.environ['HOME'], '.dotnet', 'tools')
+        os.environ['DOTNET_ROOT'] = dotnet_root
+        if 'win' in self.rid:
+            os.environ['PATH'] = f'{dotnet_root};{tool_root};' + os.environ['PATH'] 
+        else:
+            os.environ['PATH'] = f'{dotnet_root}:{tool_root}:' + os.environ['PATH']
+
         self.webappapp_runnable = True
         self.consoleapp_runnable = True
         self.gcplayground_runnable = True

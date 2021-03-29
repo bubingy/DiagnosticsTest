@@ -66,7 +66,7 @@ def retrieve_task():
                     break
                 method, properties, body = channel.basic_get(
                     queue_name,
-                    True
+                    False # turn to True before deploying.
                 )
                 connection.close()
                 assign_task(json.loads(body.decode('utf-8')), runner)
@@ -102,7 +102,10 @@ def assign_task(message: dict, runner: dict):
     test_config['Tool']['Commit'] = message['Tool_Info']['commit']
     test_config['Tool']['Feed'] = 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
     test_config['Test'] = dict()
-    test_config['Test']['TestBed'] = runner['testbed']
+    test_config['Test']['TestBed'] = os.path.join(
+        runner['mount'][1],
+        os.path.basename(runner['testbed'])
+    )
     if message['SDK'][0] == '3':
         test_config['Test']['RunBenchmarks'] = 'true'
     else:
@@ -151,15 +154,7 @@ def run_task_on_device(config: dict, runner: dict):
     start_script = os.path.join(automation_scripts_dir, 'run_test.py')
     command = f'{python_intepreter} {start_script}'
     print(f'exec {command}')
-    test_env = os.environ.copy()
-    dotnet_root = os.path.join(runner['testbed'], '.dotnet-test')
-    tool_root = os.path.join(os.environ['HOME'], '.dotnet', 'tools')
-    test_env['DOTNET_ROOT'] = dotnet_root
-    if 'win' in runner['queue']:
-        test_env['PATH'] = f'{dotnet_root};{tool_root};' + test_env['PATH'] 
-    else:
-        test_env['PATH'] = f'{dotnet_root}:{tool_root}:' + test_env['PATH'] 
-    process = Popen(command.split(' '), env=test_env)
+    process = Popen(command.split(' ')) # env=test_env
     process.communicate()
     print('task completed!')
 
@@ -175,20 +170,23 @@ def run_task_on_docker(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    shutil.copy(automation_scripts_template, runner['testbed'])
+    if os.path.exists(runner['testbed']) is False:
+        os.mkdir(runner['testbed'])  
     automation_scripts_dir = os.path.join(
         runner['testbed'],
         'AutomationScripts'
     )
+    if os.path.exists(automation_scripts_dir) is True:
+        os.removedirs(automation_scripts_dir)
+    shutil.copytree(automation_scripts_template, automation_scripts_dir)
     with open(os.path.join(automation_scripts_dir, 'config.json'), 'w') as f:
         json.dump(config, f)
 
     # run test
-    start_script = os.path.join(automation_scripts_dir, 'run_test.py')
     docker_name = runner['name']
     command = (
         f'docker exec -ti {docker_name} '
-        f'/bin/bash python3 {start_script}'
+        'python3 /root/DiagnosticsTestBed/AutomationScripts/run_test.py'
     ) # TODO
     print(f'exec {command}')
     process = Popen(command.split(' '))
@@ -197,7 +195,8 @@ def run_task_on_docker(config: dict, runner: dict):
 
 
 if __name__ == "__main__":
-    schedule.every().minute.do(retrieve_task)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # schedule.every().minute.do(retrieve_task)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+    retrieve_task()

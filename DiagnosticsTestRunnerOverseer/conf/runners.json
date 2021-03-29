@@ -1,8 +1,12 @@
 [
     {
-        "name": "windows10-x64",
-        "type": "physic",
-        "queue": "win-x64",
-        "testbed": "D:\\Workspace\\DiagnosticsTestBed"
+        "name": "alpine3.13diag",
+        "type": "container",
+        "queue": "linux-musl-x64",
+        "testbed": "/home/devopscti/Workspace/docker-mnt/alpine3.13diag/DiagnosticsTestBed",
+        "mount": [
+            "/home/devopscti/Workspace/docker-mnt/alpine3.13diag/",
+            "/root"
+        ]
     }
 ]
