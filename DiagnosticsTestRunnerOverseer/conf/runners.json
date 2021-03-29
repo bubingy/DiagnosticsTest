@@ -3,6 +3,6 @@
         "name": "windows10-x64",
         "type": "physic",
         "queue": "win-x64",
-        "testbed": "D:\\Workspace\\DiagnositcsTestBed"
+        "testbed": "D:\\Workspace\\DiagnosticsTestBed"
     }
 ]

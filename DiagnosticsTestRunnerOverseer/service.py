@@ -151,7 +151,15 @@ def run_task_on_device(config: dict, runner: dict):
     start_script = os.path.join(automation_scripts_dir, 'run_test.py')
     command = f'{python_intepreter} {start_script}'
     print(f'exec {command}')
-    process = Popen(command.split(' '))
+    test_env = os.environ.copy()
+    dotnet_root = os.path.join(runner['testbed'], '.dotnet-test')
+    tool_root = os.path.join(os.environ['HOME'], '.dotnet', 'tools')
+    test_env['DOTNET_ROOT'] = dotnet_root
+    if 'win' in runner['queue']:
+        test_env['PATH'] = f'{dotnet_root};{tool_root};' + test_env['PATH'] 
+    else:
+        test_env['PATH'] = f'{dotnet_root}:{tool_root}:' + test_env['PATH'] 
+    process = Popen(command.split(' '), env=test_env)
     process.communicate()
     print('task completed!')
 
