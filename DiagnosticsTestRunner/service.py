@@ -87,15 +87,6 @@ def assign_task(message: dict, runner: dict):
     '''
     test_config = dict()
     test_config['Platform'] = dict()
-    test_config['Platform']['RID'] = runner['queue']
-    debugger_map = DictFromFile(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'conf',
-            'DebuggerMap.json'
-        )
-    ).content
-    test_config['Platform']['Debugger'] = debugger_map[message['OS']]
     test_config['SDK'] = dict()
     test_config['SDK']['Version'] = message['SDK']
     test_config['Tool'] = dict()
