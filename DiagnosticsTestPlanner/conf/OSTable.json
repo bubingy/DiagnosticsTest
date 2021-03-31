@@ -1,0 +1,16 @@
+[
+    ["alpine3.9",    "required", "linux-musl-x64"],
+    ["windows10",    "required", "win-x64"],
+    ["osx10.15",     "required", "osx-x64"],
+    ["CentOS8",      "",         "linux-x64"],
+    ["Debian10",     "",         "linux-x64"],
+    ["LinuxCross",   "",         "linux-arm"],
+    ["LinuxCross64", "",         "linux-arm64"],
+    ["Fedora30",     "",         "linux-x64"],
+    ["Ubuntu16.04",  "",         "linux-x64"],
+    ["Fedora31",     "",         "linux-x64"],
+    ["Ubuntu18.04",  "",         "linux-x64"],
+    ["OpenSUSE15.1", "",         "linux-x64"],
+    ["Ubuntu20.04",  "",         "linux-x64"],
+    ["OpenSUSE15.2", "",         "linux-x64"]
+]

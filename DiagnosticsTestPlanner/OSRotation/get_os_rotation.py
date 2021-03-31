@@ -1,5 +1,10 @@
 # coding=utf-8
 
+import os
+import json
+import datetime
+from utils import load_json
+
 def calculate_week_increment(date_str: str) -> int:
     '''Calculate how much weeks between given day and week in `baseStatus.json`.
 
@@ -7,9 +12,6 @@ def calculate_week_increment(date_str: str) -> int:
         date_str - a string object in format `year-month-day`.
     Return: number of weeks between given day and week in `baseStatus.json`.
     '''
-    import os
-    import datetime
-    from utils import load_json
     base_status = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -50,9 +52,6 @@ def get_required_os_status(date_str: str) -> dict:
                             ...
         }
     '''
-    import os
-    import json
-    from utils import load_json
     base_status = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -93,19 +92,23 @@ def get_alternate_os_status(date_str: str) -> dict:
                         ...
         }
     '''
-    import os
-    import json
-    from utils import load_json
     base_status = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'baseStatus.json'
         )
     )
-    alternate_oses = load_json(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'alternateOS.json'
+    alternate_oses = map(
+        lambda x: x[0],
+        filter(
+            lambda x: x[1] != 'required',
+            load_json(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    'conf',
+                    'OSTable.json'
+                )
+            )
         )
     )
     

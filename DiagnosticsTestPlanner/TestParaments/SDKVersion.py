@@ -1,13 +1,14 @@
 # coding=utf-8
 
+import os
 from urllib import request
+
+from utils import load_json
 
 def get_sdk_version():
     '''Print out latest `release` version of .net core 3, .net 5 and .net 6.
 
     '''
-    import os
-    from utils import load_json
     configuration = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),

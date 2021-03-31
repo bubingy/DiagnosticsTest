@@ -63,6 +63,7 @@ def publish_plan():
     connection_info = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
+            'conf',
             'connection.json'
         )
     )
@@ -81,12 +82,17 @@ def publish_plan():
     channel = connection.channel()
     plans = get_plans()
 
-    rid_map_info = load_json(
+    rid_map_info = dict()
+
+    OSTable = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            'RIDMap.json'
+            'conf',
+            'OSTable.json'
         )
     )
+    for os_info in OSTable:
+        rid_map_info[os_info[0]] = os_info[2]
     
     for plan in plans:
         if plan['OS'] != 'windows10':
