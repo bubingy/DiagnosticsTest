@@ -29,7 +29,10 @@ class GlobalConfig:
         else:
             self.run_benchmarks = False
             
-        self.test_result = os.path.join(self.test_bed, 'TestResult')
+        self.test_result = os.path.join(
+            self.test_bed,
+            'TestResult' + self.config['Test']['ID']
+        )
         self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')

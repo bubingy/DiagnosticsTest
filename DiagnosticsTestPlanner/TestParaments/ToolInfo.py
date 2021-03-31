@@ -55,7 +55,8 @@ class ToolInfo:
                     
                 )
             )
-            build = json.loads(response.read().decode())['value'][0]
+            response_content = response.read().decode('utf-8')
+            build = json.loads(response_content)['value'][0]
             acceptable_builds.append(build)
 
             if len(acceptable_builds) == 0:

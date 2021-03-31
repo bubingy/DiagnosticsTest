@@ -4,6 +4,7 @@ import os
 import time
 import json
 import shutil
+from datetime import datetime
 from subprocess import Popen
 
 import pika
@@ -51,7 +52,6 @@ def retrieve_task():
 
     for runner in runner_list:
         queue_name = runner['queue']
-        print(f'retrieving message from {queue_name}...')
         while True:
             try:
                 connection = pika.BlockingConnection(
@@ -61,12 +61,13 @@ def retrieve_task():
                 )
                 channel = connection.channel()
                 res = channel.queue_declare(queue=queue_name)
-                if res.method.message_count == 0: 
-                    print(f'queue `{queue_name}` is empty.')
+                if res.method.message_count == 0:
                     break
+                
+                print(f'retrieving message from {queue_name}...')
                 method, properties, body = channel.basic_get(
                     queue_name,
-                    False # turn to True before deploying.
+                    True # turn to True before deploying.
                 )
                 connection.close()
                 assign_task(json.loads(body.decode('utf-8')), runner)
@@ -105,6 +106,9 @@ def assign_task(message: dict, runner: dict):
     test_config['Test']['TestBed'] = os.path.join(
         runner['mount'][1],
         os.path.basename(runner['testbed'])
+    )
+    test_config['Test']['ID'] = datetime.now().strftime(
+        runner['queue'] + '-%Y%m%d%H%M%S'
     )
     if message['SDK'][0] == '3':
         test_config['Test']['RunBenchmarks'] = 'true'
@@ -154,7 +158,7 @@ def run_task_on_device(config: dict, runner: dict):
     start_script = os.path.join(automation_scripts_dir, 'run_test.py')
     command = f'{python_intepreter} {start_script}'
     print(f'exec {command}')
-    process = Popen(command.split(' ')) # env=test_env
+    process = Popen(command.split(' '))
     process.communicate()
     print('task completed!')
 
@@ -187,7 +191,7 @@ def run_task_on_docker(config: dict, runner: dict):
     command = (
         f'docker exec -ti {docker_name} '
         'python3 /root/DiagnosticsTestBed/AutomationScripts/run_test.py'
-    ) # TODO
+    )
     print(f'exec {command}')
     process = Popen(command.split(' '))
     process.communicate()
@@ -195,8 +199,7 @@ def run_task_on_docker(config: dict, runner: dict):
 
 
 if __name__ == "__main__":
-    # schedule.every().minute.do(retrieve_task)
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
-    retrieve_task()
+    schedule.every().minute.do(retrieve_task)
+    while True:
+        schedule.run_pending()
+        time.sleep(10)
