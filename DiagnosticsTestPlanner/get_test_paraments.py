@@ -1,10 +1,19 @@
 # coding=utf-8
 
+from datetime import datetime
+
+from OSRotation import get_os_rotation
 from TestParaments.SDKVersion import get_sdk_version
 from TestParaments.ToolInfo import ToolInfo
 
 
 if __name__ == '__main__':
+    print('OS ratation:')
+    print(
+        get_os_rotation(
+            datetime.today().strftime('%Y-%m-%d')
+        )
+    )
     sdk_version = get_sdk_version()
     print('Full version of sdk:')
     for branch in sdk_version.keys():

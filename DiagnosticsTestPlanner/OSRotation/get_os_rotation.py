@@ -1,7 +1,6 @@
 # coding=utf-8
 
 import os
-import json
 import datetime
 from utils import load_json
 

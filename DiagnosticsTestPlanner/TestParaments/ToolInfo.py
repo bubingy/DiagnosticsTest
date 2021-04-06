@@ -51,8 +51,7 @@ class ToolInfo:
                     url,
                     headers={
                         'cookie': self.configuration['headers']['cookie']
-                    },
-                    
+                    }   
                 )
             )
             response_content = response.read().decode('utf-8')

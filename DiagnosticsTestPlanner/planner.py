@@ -1,10 +1,10 @@
 # coding=utf-8
 
-import time
+import os
+import json
 import datetime
 
 import pika
-import schedule
 
 from OSRotation.get_os_rotation import get_os_rotation
 from TestParaments.SDKVersion import get_sdk_version
@@ -59,7 +59,6 @@ def get_plans() -> list:
 
 
 def publish_plan():
-    import os, json
     connection_info = load_json(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -109,9 +108,5 @@ def publish_plan():
 
 
 if __name__ == "__main__":
-    # schedule.every().wednesday.at("08:30").do(publish_plan)
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
     publish_plan()
     

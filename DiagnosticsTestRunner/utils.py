@@ -1,7 +1,6 @@
 # coding=utf-8
 
 import json
-from typing import Any
 
 class DictFromFile:
     def __init__(self, file_path) -> None:
