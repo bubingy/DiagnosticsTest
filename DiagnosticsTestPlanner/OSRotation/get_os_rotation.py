@@ -1,8 +1,10 @@
 # coding=utf-8
 
-import os
-import datetime
+from os import path
+from datetime import datetime
+
 from utils import load_json
+
 
 def calculate_week_increment(date_str: str) -> int:
     '''Calculate how much weeks between given day and week in `baseStatus.json`.
@@ -12,19 +14,19 @@ def calculate_week_increment(date_str: str) -> int:
     Return: number of weeks between given day and week in `baseStatus.json`.
     '''
     base_status = load_json(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
+        path.join(
+            path.dirname(path.abspath(__file__)),
             'baseStatus.json'
         )
     )
     year, month, day = date_str.split('-')
-    date_obj = datetime.datetime(
+    date_obj = datetime(
         year=int(year),
         month=int(month),
         day=int(day)
     )
     base_year, base_month, base_day = base_status['monday'].split('-')
-    base_date_obj = datetime.datetime(
+    base_date_obj = datetime(
         year=int(base_year),
         month=int(base_month),
         day=int(base_day)
@@ -51,12 +53,11 @@ def get_required_os_status(date_str: str) -> dict:
                             ...
         }
     '''
-    base_status = load_json(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'baseStatus.json'
-        )
+    base_status_json = path.join(
+        path.dirname(path.abspath(__file__)),
+        'baseStatus.json'
     )
+    base_status = load_json(base_status_json)
 
     required_oses = list(base_status['requiredOS'].keys())
     dotnet_major_versions = list()
@@ -92,8 +93,8 @@ def get_alternate_os_status(date_str: str) -> dict:
         }
     '''
     base_status = load_json(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
+        path.join(
+            path.dirname(path.abspath(__file__)),
             'baseStatus.json'
         )
     )
@@ -102,14 +103,15 @@ def get_alternate_os_status(date_str: str) -> dict:
         filter(
             lambda x: x[1] != 'required',
             load_json(
-                os.path.join(
-                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                path.join(
+                    path.dirname(path.dirname(path.abspath(__file__))),
                     'conf',
                     'OSTable.json'
                 )
             )
         )
     )
+    alternate_oses = list(alternate_oses)
     
     cycle_length = len(base_status['alternateOS'].keys())
     first_os_index = alternate_oses.index(base_status['alternateOS']['3.1'])
@@ -139,9 +141,8 @@ def get_week_info(date_str: str) -> dict:
             friday = date of friday
         } 
     '''
-    import datetime
     year, month, day = date_str.split('-')
-    date_obj = datetime.datetime(
+    date_obj = datetime(
         year=int(year),
         month=int(month),
         day=int(day)
@@ -164,7 +165,7 @@ def get_os_rotation(date_str):
         'monday': week_info['monday'],
         'friday': week_info['friday'],
         'requiredOS': required_os_status,
-        "alternateOS": alternate_os_status
+        'alternateOS': alternate_os_status
     }
     return os_rotation
 

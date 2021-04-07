@@ -2,19 +2,19 @@
 
 from datetime import datetime
 
-from OSRotation import get_os_rotation
-from TestParaments.SDKVersion import get_sdk_version
+import OSRotation.get_os_rotation as osr
+import TestParaments.SDKVersion as sdk
 from TestParaments.ToolInfo import ToolInfo
 
 
 if __name__ == '__main__':
     print('OS ratation:')
     print(
-        get_os_rotation(
+        osr.get_os_rotation(
             datetime.today().strftime('%Y-%m-%d')
         )
     )
-    sdk_version = get_sdk_version()
+    sdk_version = sdk.get_sdk_version()
     print('Full version of sdk:')
     for branch in sdk_version.keys():
         if branch[0] == '3':

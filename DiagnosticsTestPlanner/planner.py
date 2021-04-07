@@ -105,6 +105,7 @@ def publish_plan():
         except Exception as e:
             os_name = plan['OS']
             print(f'exception when publishing {os_name}: {e}')
+    connection.close()
 
 
 if __name__ == "__main__":
