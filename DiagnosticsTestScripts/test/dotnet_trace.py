@@ -4,7 +4,7 @@ import os
 import time
 
 from config import configuration
-from utils import run_command_async, run_command_sync
+from utils import run_command_async, run_command_sync, PIPE
 from project import projects
 
 log_path = os.path.join(configuration.test_result, 'dotnet_trace.log')
@@ -32,14 +32,15 @@ def test_trace():
 
     proc = run_command_async(
         f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace',
-        cwd=configuration.test_bed
+        cwd=configuration.test_bed,
+        stdin=PIPE,
+        stdout=PIPE,
+        stderr=PIPE
     )
     time.sleep(10)
-    proc.terminate()
+    proc.stdin.write(b'13')
     webapp.terminate()
-    while webapp.poll() is None:
-        time.sleep(1)
-    proc.communicate()
+
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace',
         log_path,
