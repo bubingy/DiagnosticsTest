@@ -4,7 +4,7 @@ import os
 import time
 
 from config import configuration
-from utils import run_command_async, run_command_sync
+from utils import run_command_async, run_command_sync, PIPE
 from project import projects
 
 log_path = os.path.join(configuration.test_result, 'dotnet_trace.log')
