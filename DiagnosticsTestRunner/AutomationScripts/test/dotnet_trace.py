@@ -38,7 +38,7 @@ def test_trace():
         stderr=PIPE
     )
     time.sleep(10)
-    proc.stdin.write(b'13')
+    proc.terminate()
     webapp.terminate()
 
     run_command_sync(
