@@ -30,16 +30,12 @@ def test_trace():
     for command in sync_commands_list:
         run_command_sync(command, log_path)
 
-    proc = run_command_async(
-        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace',
+    run_command_sync(
+        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace --duration 00:00:10',
         cwd=configuration.test_bed,
-        stdin=PIPE,
-        stdout=PIPE,
-        stderr=PIPE
     )
-    time.sleep(10)
-    proc.terminate()
     webapp.terminate()
+
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace',
         log_path,

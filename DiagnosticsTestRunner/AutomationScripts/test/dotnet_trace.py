@@ -30,15 +30,10 @@ def test_trace():
     for command in sync_commands_list:
         run_command_sync(command, log_path)
 
-    proc = run_command_async(
-        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace',
+    run_command_sync(
+        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace --duration 00:00:10',
         cwd=configuration.test_bed,
-        stdin=PIPE,
-        stdout=PIPE,
-        stderr=PIPE
     )
-    time.sleep(10)
-    proc.terminate()
     webapp.terminate()
 
     run_command_sync(
@@ -62,9 +57,11 @@ def test_trace():
     if 'win' in configuration.rid:
         extend_name = '.exe'
     proc = run_command_async(
-        'dotnet-trace collect -o consoleapp.nettrace ' + \
-            '--providers Microsoft-Windows-DotNETRuntime ' + \
-            f'-- {consoleapp_dir}/out/consoleapp{extend_name}',
+        (
+            'dotnet-trace collect -o consoleapp.nettrace '
+            '--providers Microsoft-Windows-DotNETRuntime '
+            f'-- {consoleapp_dir}/out/consoleapp{extend_name}'
+        ),
         cwd=configuration.test_result
     )
     proc.communicate()
