@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from os import path
-from datetime import datetime
+import datetime
 
 from utils import load_json
 
@@ -20,13 +20,13 @@ def calculate_week_increment(date_str: str) -> int:
         )
     )
     year, month, day = date_str.split('-')
-    date_obj = datetime(
+    date_obj = datetime.datetime(
         year=int(year),
         month=int(month),
         day=int(day)
     )
     base_year, base_month, base_day = base_status['monday'].split('-')
-    base_date_obj = datetime(
+    base_date_obj = datetime.datetime(
         year=int(base_year),
         month=int(base_month),
         day=int(base_day)
@@ -142,7 +142,7 @@ def get_week_info(date_str: str) -> dict:
         } 
     '''
     year, month, day = date_str.split('-')
-    date_obj = datetime(
+    date_obj = datetime.datetime(
         year=int(year),
         month=int(month),
         day=int(day)
