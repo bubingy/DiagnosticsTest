@@ -30,10 +30,14 @@ def test_trace():
     for command in sync_commands_list:
         run_command_sync(command, log_path)
 
-    run_command_sync(
+    proc = run_command_async(
         f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace --duration 00:00:10',
+        stdin=PIPE,
+        stdout=PIPE,
+        stderr=PIPE,
         cwd=configuration.test_bed,
     )
+    proc.communicate()
     webapp.terminate()
 
     run_command_sync(
