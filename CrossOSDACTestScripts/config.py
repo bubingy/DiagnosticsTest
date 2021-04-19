@@ -28,35 +28,9 @@ class GlobalConfig:
         self.test_bed = self.config['Test']['TestBed']
         self.dump_directory = os.path.join(self.test_bed, 'dumpfiles')
         self.analyze_output = os.path.join(self.test_bed, 'analyzeoutput')
-        self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
-        self.check_init_config()
-
-    def check_init_config(self):
-        '''Check configuration and create directories if necessary
-
-        '''
-        assert self.rid in [
-            'win-x64', 'win-x86', 'linux-x64', 'linux-musl-x64',
-            'linux-arm64', 'linux-musl-arm64', 'linux-arm'
-        ]
-        try:
-            if os.path.exists(self.test_bed) is False:
-                os.makedirs(self.test_bed)
-        except Exception as exception:
-            print(exception)
-            sys.exit(-1)
-
-        if os.path.exists(self.dump_directory) is False:
-            os.makedirs(self.dump_directory)
-
-        if os.path.exists(self.analyze_output) is False:
-            os.makedirs(self.analyze_output)
-
-    def get_rid(self) -> str:
+    def get_rid(self):
         '''Get `.Net RID` of current platform.
-
-        Return: `.Net RID` of current platform.
         '''
         system = platform.system().lower()
         if system == 'windows':
@@ -86,6 +60,7 @@ class GlobalConfig:
         else:
             raise f'unsupported machine type: {machine_type}'
 
-        return rid
+        self.rid = rid
+
 
 configuration = GlobalConfig()

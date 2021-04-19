@@ -31,7 +31,6 @@ class GlobalConfig:
             self.run_benchmarks = False
             
         self.test_result = os.path.join(self.test_bed, 'TestResult')
-        self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
         # add environment variables
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
@@ -49,10 +48,8 @@ class GlobalConfig:
         self.consoleapp_runnable = True
         self.gcplayground_runnable = True
 
-    def get_rid(self) -> str:
+    def get_rid(self):
         '''Get `.Net RID` of current platform.
-
-        Return: `.Net RID` of current platform.
         '''
         system = platform.system().lower()
         if system == 'windows':
@@ -85,7 +82,7 @@ class GlobalConfig:
         self.rid = rid
 
 
-    def get_debugger(self) -> str:
+    def get_debugger(self):
         '''Get full name of debugger.
         
         Args:

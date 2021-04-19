@@ -119,7 +119,7 @@ def create_publish_consoleapp() -> Result:
         configuration.consoleapp_runnable = False
         return Result(-1, 'fail to create consoleapp.', None)
     shutil.copy(
-        os.path.join(configuration.tool_root, 'project', 'consoleapp_tmp'), 
+        os.path.join(configuration.work_dir, 'project', 'consoleapp_tmp'), 
         os.path.join(project_dir, 'Program.cs')
     )
 
@@ -154,7 +154,7 @@ def create_publish_GCDumpPlayground() -> Result:
         return Result class
     '''
     template_project_dir = os.path.join(
-        configuration.tool_root,
+        configuration.work_dir,
         'project',
         'GCDumpPlayground2'
     )

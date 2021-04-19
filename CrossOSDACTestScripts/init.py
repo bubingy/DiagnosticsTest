@@ -11,7 +11,22 @@ from utils import run_command_sync, Result
 log_path = os.path.join(configuration.test_bed, 'init.log')
 
 
-def install_sdk():
+def prepare_test_bed():
+    '''Create folders for TestBed.
+    '''
+    try:
+        if not os.path.exists(configuration.test_bed):
+            os.makedirs(configuration.test_bed)
+        if not os.path.exists(configuration.dump_directory):
+            os.makedirs(configuration.dump_directory)
+        if os.path.exists(configuration.analyze_output):
+            os.makedirs(configuration.analyze_output)
+    except Exception as e:
+        print(e)
+        exit(-1)
+
+
+def install_sdk(arch):
     '''Install .net(core) sdk
     '''
     sdk_dir = os.environ['DOTNET_ROOT']
@@ -23,7 +38,7 @@ def install_sdk():
             ' '.join(
                 [
                     f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
-                    f'-i {sdk_dir} -v {configuration.sdk_version}'
+                    f'-i {sdk_dir} -v {configuration.sdk_version} --architecture {arch}'
                 ]
             ),
             log_path=log_path
@@ -63,12 +78,11 @@ def install_tools():
     '''Install diagnostics
     '''
     run_command_sync(
-        ' '.join(
-            [
-                'dotnet tool install -g dotnet-dump',
-                f'--version {configuration.tool_version}',
-                f'--add-source {configuration.tool_feed}'
-            ]
-        ),
+        (
+            'dotnet tool install -g dotnet-dump ',
+            f'--version {configuration.tool_version} ',
+            f'--add-source {configuration.tool_feed}'
+        )
+        ,
         log_path=log_path
     )
