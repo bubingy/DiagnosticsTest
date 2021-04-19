@@ -27,6 +27,7 @@ def analyze_on_linux():
 def init_on_windows(arch: str):
     '''Install sdk and tool on Windows.
     '''
+    init.prepare_test_bed()
     init.install_sdk(arch)
     init.install_tools()
 
@@ -39,7 +40,10 @@ def validate_on_windows(dump_path: os.PathLike, output_path: os.PathLike):
         for dump_name in os.listdir(dump_path):
             if 'dump_net' not in dump_name: continue # not a dump file
             full_dump_path = os.path.join(dump_path, dump_name)
-            full_out_path = full_dump_path.replace('dump', 'out') + '_win'
+            full_out_path = os.path.join(
+                output_path,
+                dump_name.replace('dump', 'out') + '_win'
+            ) 
             if 'linux-arm' in dump_path:
                 validate.validate_32bit(full_dump_path, full_out_path)
             else:

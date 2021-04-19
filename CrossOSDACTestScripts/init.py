@@ -38,7 +38,7 @@ def install_sdk(arch: str='x64'):
             ' '.join(
                 [
                     f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
-                    f'-i {sdk_dir} -v {configuration.sdk_version} --architecture {arch}'
+                    f'-i {sdk_dir} -v {configuration.sdk_version} -Architecture {arch}'
                 ]
             ),
             log_path=log_path
