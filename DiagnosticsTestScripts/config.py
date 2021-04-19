@@ -25,8 +25,6 @@ class GlobalConfig:
         self.tool_commit = self.config['Tool']['Commit']
         self.tool_feed = self.config['Tool']['Feed']
         self.test_bed = self.config['Test']['TestBed']
-        time_string = datetime.today().strftime('%Y%m%d%H%M%S')
-        self.test_bed = f'{self.test_bed}-{time_string}'
         if self.config['Test']['RunBenchmarks'] == 'true':
             self.run_benchmarks = True
         else:
@@ -38,7 +36,7 @@ class GlobalConfig:
         # add environment variables
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
 
-        if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
+        if 'win' in self.rid: home_path = os.environ['USERPROFILE']
         else: home_path = os.environ['HOME']
         diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
         os.environ['DOTNET_ROOT'] = dotnet_root

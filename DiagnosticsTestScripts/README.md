@@ -2,7 +2,8 @@
 Automation scripts for diagnostics tools test.
 
 ## Requirements
-* python3.6 or later
+* python3.6 or later;
+* lldb on Linux and OSX, CDB on Windows. (make lldb available in `/usr/bin`);
 
 ## Usage
 ### Step 1
