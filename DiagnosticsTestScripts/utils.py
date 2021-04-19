@@ -1,6 +1,11 @@
 # coding=utf-8
 
+import os
+import shutil
 from subprocess import PIPE, Popen
+
+from config import configuration
+
 
 def run_command_sync(command, log_path=None, bufsize=-1, 
     stdin=None, stdout=PIPE, stderr=PIPE, cwd=None)->int:

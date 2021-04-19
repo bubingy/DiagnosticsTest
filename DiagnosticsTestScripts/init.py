@@ -12,6 +12,19 @@ from utils import run_command_sync, Result
 log_path = os.path.join(configuration.test_result, 'init.log')
 
 
+def prepare_test_bed():
+    '''Create folders for TestBed and TestResult.
+    '''
+    try:
+        if not os.path.exists(configuration.test_bed):
+            os.makedirs(configuration.test_bed)
+        if not os.path.exists(configuration.test_result):
+            os.makedirs(configuration.test_result)
+    except Exception as e:
+        print(e)
+        exit(-1)
+
+
 def install_sdk():
     '''Install .net(core) sdk
     '''

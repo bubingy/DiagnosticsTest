@@ -39,10 +39,12 @@ def test_sos():
 
     # load dump for debugging
     analyze_output_path = os.path.join(configuration.test_result, 'debug-dump.log')
+    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
+    else: home_path = os.environ['HOME']
     if 'win' in configuration.rid:
         dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
         plugin_path = os.path.join(
-            os.environ['HOME'],
+            home_path,
             '.dotnet', 'sos', 'sos.dll'
         )
         analyze_commands = [
@@ -110,7 +112,7 @@ def test_sos():
     analyze_output_path = os.path.join(configuration.test_result, 'debug-process.log')
     if 'win' in configuration.rid:
         plugin_path = os.path.join(
-            os.environ['HOME'],
+            home_path,
             '.dotnet', 'sos', 'sos.dll'
         )
         analyze_commands = [
