@@ -19,14 +19,14 @@ def prepare_test_bed():
             os.makedirs(configuration.test_bed)
         if not os.path.exists(configuration.dump_directory):
             os.makedirs(configuration.dump_directory)
-        if os.path.exists(configuration.analyze_output):
+        if not os.path.exists(configuration.analyze_output):
             os.makedirs(configuration.analyze_output)
     except Exception as e:
         print(e)
         exit(-1)
 
 
-def install_sdk(arch):
+def install_sdk(arch: str='x64'):
     '''Install .net(core) sdk
     '''
     sdk_dir = os.environ['DOTNET_ROOT']
@@ -79,10 +79,9 @@ def install_tools():
     '''
     run_command_sync(
         (
-            'dotnet tool install -g dotnet-dump ',
-            f'--version {configuration.tool_version} ',
+            'dotnet tool install -g dotnet-dump '
+            f'--version {configuration.tool_version} '
             f'--add-source {configuration.tool_feed}'
-        )
-        ,
+        ),
         log_path=log_path
     )

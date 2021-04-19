@@ -74,10 +74,9 @@ def run_project(project_name: str):
     dump_path = os.path.join(
         configuration.dump_directory,
         (
-            'dump_',
-            f'net{configuration.sdk_version[0]}{configuration.sdk_version[2]}_',
-            f'{configuration.rid}_',
-            project_name
+            'dump_'
+            f'net{configuration.sdk_version[0]}{configuration.sdk_version[2]}_'
+            f'{configuration.rid}_{project_name}'
         )
     )
     env['COMPlus_DbgMiniDumpName'] = dump_path

@@ -4,7 +4,6 @@
 # coding=utf-8
 
 import os
-import sys
 import glob
 import platform
 import configparser
@@ -20,7 +19,7 @@ class GlobalConfig:
         config_file_path = os.path.join(self.work_dir, 'config.conf')
 
         self.config.read(config_file_path)
-        self.rid = self.get_rid()
+        self.get_rid()
         self.sdk_version = self.config['SDK']['Version']
         self.runtime_version = self.config['Runtime']['Version']
         self.tool_version = self.config['Tool']['Version']
@@ -28,6 +27,17 @@ class GlobalConfig:
         self.test_bed = self.config['Test']['TestBed']
         self.dump_directory = os.path.join(self.test_bed, 'dumpfiles')
         self.analyze_output = os.path.join(self.test_bed, 'analyzeoutput')
+
+        dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
+
+        if 'win' in self.rid: home_path = os.environ['USERPROFILE']
+        else: home_path = os.environ['HOME']
+        diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
+        os.environ['DOTNET_ROOT'] = dotnet_root
+        if 'win' in self.rid:
+            os.environ['PATH'] = f'{dotnet_root};{diagnostics_tool_root};' + os.environ['PATH'] 
+        else:
+            os.environ['PATH'] = f'{dotnet_root}:{diagnostics_tool_root}:' + os.environ['PATH']
 
     def get_rid(self):
         '''Get `.Net RID` of current platform.
