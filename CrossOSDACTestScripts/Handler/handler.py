@@ -41,9 +41,9 @@ def validate_on_windows(dump_path: os.PathLike, output_path: os.PathLike):
             full_dump_path = os.path.join(dump_path, dump_name)
             full_out_path = full_dump_path.replace('dump', 'out') + '_win'
             if 'linux-arm' in dump_path:
-                validate.validate_32bit(dump_path, output_path)
+                validate.validate_32bit(full_dump_path, full_out_path)
             else:
-                validate.validate(dump_path, output_path)
+                validate.validate(full_dump_path, full_out_path)
 
     if os.path.isfile(dump_path):
         assert os.path.isfile(dump_path) and os.path.isfile(output_path)
