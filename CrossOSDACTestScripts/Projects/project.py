@@ -41,7 +41,7 @@ def create_publish_project(project_name: str)->Result:
     except Exception as exception:
         return Result(
             -1, 
-            f'fail to copy f{project_name} to {configuration.test_bed}', 
+            f'fail to copy {project_name} to {configuration.test_bed}', 
             exception
         )
     rt_code_publish = run_command_sync(
@@ -82,7 +82,7 @@ def run_project(project_name: str):
     env['COMPlus_DbgMiniDumpName'] = dump_path
 
     run_command_sync(
-        f'{project_dir}/out/{project_name}',
+        f'dotnet {project_dir}/out/{project_name}.dll',
         env=env
     )
     return dump_path

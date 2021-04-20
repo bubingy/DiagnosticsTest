@@ -32,16 +32,6 @@ if __name__ == "__main__":
         'validate',
         'validate on Windows'
     )
-    validate_parser.add_argument(
-        '-d', '--dump',
-        required=('validate' in sys.argv),
-        help='the path of dump file or directory contains dump files'
-    )
-    validate_parser.add_argument(
-        '-o', '--output',
-        required=('validate' in sys.argv),
-        help='the path of output file  or directory contains output files'
-    )
     args = parser.parse_args()
 
     if args.action == 'analyze':
@@ -50,6 +40,4 @@ if __name__ == "__main__":
         arch = args.architecture
         handler.init_on_windows(arch)
     else:
-        dump_path = args.dump
-        output_path = args.output
-        handler.validate_on_windows(dump_path, output_path)
+        handler.validate_on_windows()

@@ -32,26 +32,17 @@ def init_on_windows(arch: str):
     init.install_tools()
 
 
-def validate_on_windows(dump_path: os.PathLike, output_path: os.PathLike):
+def validate_on_windows():
     '''Analyze dump on windows
     '''
-    if os.path.isdir(dump_path):
-        assert os.path.isdir(dump_path) and os.path.isdir(output_path)
-        for dump_name in os.listdir(dump_path):
-            if 'dump_net' not in dump_name: continue # not a dump file
-            full_dump_path = os.path.join(dump_path, dump_name)
-            full_out_path = os.path.join(
-                output_path,
-                dump_name.replace('dump', 'out') + '_win'
-            ) 
-            if 'linux-arm' in dump_path:
-                validate.validate_32bit(full_dump_path, full_out_path)
-            else:
-                validate.validate(full_dump_path, full_out_path)
-
-    if os.path.isfile(dump_path):
-        assert os.path.isfile(dump_path) and os.path.isfile(output_path)
-        if 'linux-arm' in dump_path:
+    for dump_name in os.listdir(configuration.dump_directory):
+        if 'dump_net' not in dump_name: continue # not a dump file
+        dump_path = os.path.join(configuration.dump_directory, dump_name)
+        output_path = os.path.join(
+            configuration.analyze_output,
+            dump_name.replace('dump', 'out') + '_win'
+        ) 
+        if 'linux-arm' in dump_name:
             validate.validate_32bit(dump_path, output_path)
         else:
             validate.validate(dump_path, output_path)
