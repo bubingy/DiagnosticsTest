@@ -96,11 +96,10 @@ def assign_task(message: dict, runner: dict):
     test_config['Test'] = dict()
     test_config['Test']['TestBed'] = os.path.join(
         runner['mount'][1],
-        os.path.basename(runner['testbed'])
+        os.path.basename(runner['testbed']) + '-' + \
+            datetime.now().strftime(runner['queue'] + '-%Y%m%d%H%M%S')    
     )
-    test_config['Test']['ID'] = datetime.now().strftime(
-        runner['queue'] + '-%Y%m%d%H%M%S'
-    )
+
     if message['SDK'][0] == '3':
         test_config['Test']['RunBenchmarks'] = 'true'
     else:

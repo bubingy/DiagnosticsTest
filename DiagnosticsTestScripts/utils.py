@@ -8,7 +8,7 @@ from config import configuration
 
 
 def run_command_sync(command, log_path=None, bufsize=-1, 
-    stdin=None, stdout=PIPE, stderr=PIPE, cwd=None)->int:
+    stdin=None, stdout=PIPE, stderr=PIPE, cwd=None, silent=False)->int:
     '''Run command and wait for return.
     
     '''
@@ -27,14 +27,15 @@ def run_command_sync(command, log_path=None, bufsize=-1,
             with open(log_path, 'a+') as log:
                 log.write(f'{outs}\n')
                 log.write(f'{errs}\n')
-        print(outs)
-        print(errs)
+        if not silent:
+            print(outs)
+            print(errs)
         return p.returncode
     except Exception as e:
         if log_path is not None:
             with open(log_path, 'a+') as log:
                 log.write(f'{e}\n')
-        print(e)
+        if not silent: print(e)
         return -1
 
 

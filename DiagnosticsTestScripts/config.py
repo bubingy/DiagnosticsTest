@@ -5,7 +5,6 @@ import re
 import glob
 import platform
 import configparser
-from datetime import datetime
 
 
 class GlobalConfig:

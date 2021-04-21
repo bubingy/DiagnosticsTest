@@ -21,7 +21,7 @@ class GlobalConfig:
         with open(config_path, 'r') as f:
             self.config = json.load(f)
         self.rid = self.config['Platform']['RID']
-        self.debugger = self.config['Platform']['Debugger']
+        self.get_debugger()
         self.sdk_version = self.config['SDK']['Version']
         self.tool_version = self.config['Tool']['Version']
         self.tool_commit = self.config['Tool']['Commit']
@@ -34,41 +34,24 @@ class GlobalConfig:
             
         self.test_result = os.path.join(
             self.test_bed,
-            'TestResult' + self.config['Test']['ID']
+            'TestResult'
         )
         self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
-        tool_root = os.path.join(os.environ['HOME'], '.dotnet', 'tools')
+
+        if 'win' in self.rid: home_path = os.environ['USERPROFILE']
+        else: home_path = os.environ['HOME']
+        diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
-            os.environ['PATH'] = f'{dotnet_root};{tool_root};' + os.environ['PATH'] 
+            os.environ['PATH'] = f'{dotnet_root};{diagnostics_tool_root};' + os.environ['PATH'] 
         else:
-            os.environ['PATH'] = f'{dotnet_root}:{tool_root}:' + os.environ['PATH']
+            os.environ['PATH'] = f'{dotnet_root}:{diagnostics_tool_root}:' + os.environ['PATH']
 
         self.webappapp_runnable = True
         self.consoleapp_runnable = True
         self.gcplayground_runnable = True
-
-        self.check_init_config()
-
-    def check_init_config(self):
-        '''Check configuration and create directories if necessary
-
-        '''
-        assert self.rid in [
-            'win-x64', 'osx-x64', 'linux-x64', 
-            'linux-musl-x64', 'linux-arm', 'linux-arm64'
-        ]
-        try:
-            if os.path.exists(self.test_bed) is False:
-                os.makedirs(self.test_bed)
-        except Exception as e:
-            print(e)
-            exit(-1)
-        
-        if os.path.exists(self.test_result) is False:
-            os.makedirs(self.test_result)
 
     def get_rid(self) -> str:
         '''Get `.Net RID` of current platform.
@@ -105,8 +88,7 @@ class GlobalConfig:
 
         return rid
 
-
-    def get_debugger(self) -> str:
+    def get_debugger(self):
         '''Get full name of debugger.
         
         Args:
@@ -116,15 +98,19 @@ class GlobalConfig:
         if 'musl' in self.rid:
             return ''
         elif 'win' in self.rid:
-            return 'cdb'
+            self.debugger = 'cdb'
+            return
         else: # linux or osx
             candidate_debuggers = glob.glob('/usr/bin/lldb*')
             if '/usr/bin/lldb' in candidate_debuggers:
-                return 'lldb'
+                self.debugger = 'lldb'
+                return
             else:
                 pattern = re.compile(r'/usr/bin/lldb-\d+')
                 for candidate_debugger in candidate_debuggers:
                     if pattern.match(candidate_debugger) is not None:
-                        return candidate_debugger.split('/')[-1]
+                        self.debugger = candidate_debugger.split('/')[-1]
+                        return
+
 
 configuration = GlobalConfig()

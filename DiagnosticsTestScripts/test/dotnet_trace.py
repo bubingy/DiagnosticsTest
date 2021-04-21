@@ -61,9 +61,11 @@ def test_trace():
     if 'win' in configuration.rid:
         extend_name = '.exe'
     proc = run_command_async(
-        'dotnet-trace collect -o consoleapp.nettrace ' + \
-            '--providers Microsoft-Windows-DotNETRuntime ' + \
-            f'-- {consoleapp_dir}/out/consoleapp{extend_name}',
+        (
+            'dotnet-trace collect -o consoleapp.nettrace '
+            '--providers Microsoft-Windows-DotNETRuntime '
+            f'-- {consoleapp_dir}/out/consoleapp{extend_name}'
+        ),
         cwd=configuration.test_result
     )
     proc.communicate()
