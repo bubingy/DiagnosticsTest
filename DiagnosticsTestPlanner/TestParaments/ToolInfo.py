@@ -2,21 +2,24 @@
 
 import os
 import json
+import base64
 import zipfile
 import tempfile
 from urllib import request
 
-from utils import load_json
+from utils import load_configuration
 
 
 class ToolInfo:
     def __init__(self):
-        self.configuration = load_json(
+        self.configuration = load_configuration(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                'configuration.json'
+                'configuration.ini'
             )
         )
+        pat = self.configuration['Auth']['pat']
+        self.authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
         self.build = self.get_latest_acceptable_build()
         self.artifact = self.get_artifact(self.build)
@@ -32,7 +35,7 @@ class ToolInfo:
         Return: a dict object.
         '''
 
-        results = self.configuration['results']
+        results = ['succeeded', 'partiallySucceeded']
 
         acceptable_builds = []
         for result in results:
@@ -50,7 +53,7 @@ class ToolInfo:
                 request.Request(
                     url,
                     headers={
-                        'cookie': self.configuration['headers']['cookie']
+                        'Authorization': f'Basic {self.authorization}'
                     }   
                 )
             )
@@ -88,9 +91,8 @@ class ToolInfo:
             request.Request(
                 url,
                 headers={
-                    'cookie': self.configuration['headers']['cookie']
-                },
-                
+                    'Authorization': f'Basic {self.authorization}'
+                }
             )
         )
         artifact = json.loads(response.read().decode())
@@ -109,9 +111,8 @@ class ToolInfo:
             request.Request(
                 url,
                 headers={
-                    'cookie': self.configuration['headers']['cookie']
-                },
-                
+                    'Authorization': f'Basic {self.authorization}'
+                }
             )
         )
         with tempfile.TemporaryDirectory() as tempdir:
