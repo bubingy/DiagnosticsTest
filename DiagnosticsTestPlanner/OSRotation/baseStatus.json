@@ -2,9 +2,9 @@
     "monday": "2021-04-19",
     "friday": "2021-04-23",
     "requiredOS": {
-        "alpine3.9": "6.0",
-        "windows10": "3.1",
-        "osx10.15": "5.0"
+        "Alpine3.9": "6.0",
+        "Windows10": "3.1",
+        "OSX10.15": "5.0"
     },
     "alternateOS": {
         "3.1": "Fedora30",

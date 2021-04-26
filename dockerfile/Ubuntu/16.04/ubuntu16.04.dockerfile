@@ -4,10 +4,11 @@ FROM ubuntu:16.04
 # RUN
     # install required packages
 RUN cd ~ && \ 
-    apt-get update && apt-get install -y apt-transport-https ca-certificates wget curl && \
+    apt-get update && apt-get install -y apt-transport-https ca-certificates curl gnupg2 wget && \
     echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-10 main" >> /etc/apt/sources.list && \
     echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-10 main" >> /etc/apt/sources.list && \
-    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && \
+    wget -O llvm-snapshot.gpg.key https://apt.llvm.org/llvm-snapshot.gpg.key && \
+    apt-key add llvm-snapshot.gpg.key && apt-get update && rm -rf llvm-snapshot.gpg.key && \
     apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install -y gettext git libicu-dev \
     libunwind8 lldb-10 zlib1g-dev libsqlite3-dev tar zip libffi-dev python-dev \

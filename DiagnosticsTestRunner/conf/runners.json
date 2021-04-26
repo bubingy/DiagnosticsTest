@@ -1,11 +1,41 @@
 [
     {
-        "name": "alpine3.13diag",
+        "name": "Alpine3.9diag",
         "type": "container",
         "queue": "linux-musl-x64",
-        "testbed": "/home/devopscti/Workspace/docker-mnt/alpine3.13diag/DiagnosticsTestBed",
+        "testbed": "/home/devopscti/Workspace/docker-mnt/alpine3.9diag/DiagnosticsTestBed",
         "mount": {
-            "host": "/home/devopscti/Workspace/docker-mnt/alpine3.13diag/",
+            "host": "/home/devopscti/Workspace/docker-mnt/alpine3.9diag/",
+            "container": "/root"
+        }
+    },
+    {
+        "name": "OpenSUSE15.1diag",
+        "type": "container",
+        "queue": "linux-x64",
+        "testbed": "/home/devopscti/Workspace/docker-mnt/suse15.1diag/DiagnosticsTestBed",
+        "mount": {
+            "host": "/home/devopscti/Workspace/docker-mnt/suse15.1diag/",
+            "container": "/root"
+        }
+    },
+    {
+        "name": "Ubuntu18.04diag",
+        "type": "container",
+        "queue": "linux-x64",
+        "testbed": "/home/devopscti/Workspace/docker-mnt/ubuntu18.04diag/DiagnosticsTestBed",
+        "mount": {
+            "host": "/home/devopscti/Workspace/docker-mnt/ubuntu18.04diag/",
+            "container": "/root"
+        }
+    },
+    {
+        "name": "Ubuntu20.04diag",
+        "type": "container",
+        "queue": "linux-x64",
+        "testbed": "/home/devopscti/Workspace/docker-mnt/ubuntu20.04diag/DiagnosticsTestBed",
+        "mount": {
+            "host": "/home/devopscti/Workspace/docker-mnt/ubuntu20.04diag/",
             "container": "/root"
         }
     }

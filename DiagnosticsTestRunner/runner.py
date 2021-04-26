@@ -50,8 +50,10 @@ def retrieve_task():
         print(message)
         return
 
-    for runner in runner_list:
-        queue_name = runner['queue']
+    candidate_queues = set()
+    for runner in runner_list: candidate_queues.add(runner['queue']) 
+
+    for queue_name in candidate_queues:
         while True:
             try:
                 connection = pika.BlockingConnection(
@@ -64,26 +66,50 @@ def retrieve_task():
                 if res.method.message_count == 0: break
                 
                 print(f'retrieving message from {queue_name}...')
-                method, properties, body = channel.basic_get(
+                _, _, body = channel.basic_get(
                     queue_name,
                     True # turn to True before deploying.
                 )
                 connection.close()
-                assign_task(json.loads(body.decode('utf-8')), runner)
             except Exception as e:
                 message = f'fail to retrieve tasks, Exception info: {e}'
                 print(message)
                 return
+
+            assign_task(json.loads(body.decode('utf-8')))
     return
 
 
-def assign_task(message: dict, runner: dict):
+def assign_task(message: dict):
     '''Assign retrieved tasks to runners.
 
     Args:
         message - message retrieved from rabbitmq
         runner - info about the runner
     '''
+    try:
+        runner_list = DictFromFile(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'conf',
+                'runners.json'
+            )
+        ).content
+    except Exception as e:
+        message = f'fail to load runners.json, Exception info: {e}'
+        print(message)
+        return
+    
+    runner = None
+    for _runner in runner_list:
+        if message['OS'] in _runner['name']: 
+            runner = _runner
+            break
+    if runner is None:
+        os_name = message['OS']
+        print(f'no valid runner for {os_name}.')
+        return
+    
     test_config = message.copy()
     test_config['Tool_Info']['feed'] = 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
     test_config['Test'] = dict()
@@ -128,10 +154,10 @@ def run_task_on_device(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    if not os.path.exists(runner['testbed']):
-        os.mkdir(runner['testbed'])
+    if not os.path.exists(config['Test']['TestBed']):
+        os.mkdir(config['Test']['TestBed'])
     automation_scripts_dir = os.path.join(
-        runner['testbed'],
+        config['Test']['TestBed'],
         'AutomationScripts'
     )
     if os.path.exists(automation_scripts_dir):
@@ -164,10 +190,14 @@ def run_task_on_docker(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    if not os.path.exists(runner['testbed']):
-        os.mkdir(runner['testbed'])  
+    test_bed = os.path.join(
+        os.path.dirname(runner['testbed']),
+        os.path.basename(config['Test']['TestBed'])
+    )
+    if not os.path.exists(test_bed):
+        os.mkdir(test_bed)
     automation_scripts_dir = os.path.join(
-        runner['testbed'],
+        test_bed,
         'AutomationScripts'
     )
     if os.path.exists(automation_scripts_dir) is True:
@@ -177,7 +207,7 @@ def run_task_on_docker(config: dict, runner: dict):
         json.dump(config, f)
 
     # run test
-    docker_name = runner['name']
+    docker_name = config['OS'] + 'diag'
     start_up_script = os.path.join(
         config['Test']['TestBed'],
         'AutomationScripts',
@@ -194,7 +224,7 @@ def run_task_on_docker(config: dict, runner: dict):
 
 
 if __name__ == "__main__":
-    schedule.every().minute.do(retrieve_task)
+    schedule.every(10).seconds.do(retrieve_task)
     while True:
         schedule.run_pending()
-        time.sleep(10)
+        time.sleep(5)
