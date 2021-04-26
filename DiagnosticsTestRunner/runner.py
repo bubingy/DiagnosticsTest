@@ -61,8 +61,7 @@ def retrieve_task():
                 )
                 channel = connection.channel()
                 res = channel.queue_declare(queue=queue_name)
-                if res.method.message_count == 0:
-                    break
+                if res.method.message_count == 0: break
                 
                 print(f'retrieving message from {queue_name}...')
                 method, properties, body = channel.basic_get(
@@ -85,19 +84,20 @@ def assign_task(message: dict, runner: dict):
         message - message retrieved from rabbitmq
         runner - info about the runner
     '''
-    test_config = dict()
-    test_config['Platform'] = dict()
-    test_config['SDK'] = dict()
-    test_config['SDK']['Version'] = message['SDK']
-    test_config['Tool'] = dict()
-    test_config['Tool']['Version'] = message['Tool_Info']['version']
-    test_config['Tool']['Commit'] = message['Tool_Info']['commit']
-    test_config['Tool']['Feed'] = 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
+    test_config = message.copy()
+    test_config['Tool_Info']['feed'] = 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
     test_config['Test'] = dict()
+    # TODO: make it readable.
     test_config['Test']['TestBed'] = os.path.join(
-        runner['mount'][1],
-        os.path.basename(runner['testbed']) + '-' + \
-            datetime.now().strftime(runner['queue'] + '-%Y%m%d%H%M%S')    
+        runner['mount']['container'],
+        '_'.join(
+            [
+                os.path.basename(runner['testbed']),
+                test_config['OS'],
+                runner['queue'],
+                datetime.now().strftime('%Y%m%d%H%M%S')
+            ]
+        )  
     )
 
     if message['SDK'][0] == '3':
@@ -128,13 +128,13 @@ def run_task_on_device(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    if os.path.exists(runner['testbed']) is False:
+    if not os.path.exists(runner['testbed']):
         os.mkdir(runner['testbed'])
     automation_scripts_dir = os.path.join(
         runner['testbed'],
         'AutomationScripts'
     )
-    if os.path.exists(automation_scripts_dir) is True:
+    if os.path.exists(automation_scripts_dir):
         os.removedirs(automation_scripts_dir)
     shutil.copytree(automation_scripts_template, automation_scripts_dir)
     with open(os.path.join(automation_scripts_dir, 'config.json'), 'w') as f:
@@ -164,7 +164,7 @@ def run_task_on_docker(config: dict, runner: dict):
         os.path.dirname(os.path.abspath(__file__)),
         'AutomationScripts'
     )
-    if os.path.exists(runner['testbed']) is False:
+    if not os.path.exists(runner['testbed']):
         os.mkdir(runner['testbed'])  
     automation_scripts_dir = os.path.join(
         runner['testbed'],
@@ -178,9 +178,14 @@ def run_task_on_docker(config: dict, runner: dict):
 
     # run test
     docker_name = runner['name']
+    start_up_script = os.path.join(
+        config['Test']['TestBed'],
+        'AutomationScripts',
+        'run_test.py'
+    )
     command = (
         f'docker exec -ti {docker_name} '
-        'python3 /root/DiagnosticsTestBed/AutomationScripts/run_test.py'
+        f'python3 {start_up_script}'
     )
     print(f'exec {command}')
     process = Popen(command.split(' '))

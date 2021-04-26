@@ -20,12 +20,13 @@ class GlobalConfig:
         )
         with open(config_path, 'r') as f:
             self.config = json.load(f)
-        self.rid = self.config['Platform']['RID']
+
+        self.get_rid()
         self.get_debugger()
-        self.sdk_version = self.config['SDK']['Version']
-        self.tool_version = self.config['Tool']['Version']
-        self.tool_commit = self.config['Tool']['Commit']
-        self.tool_feed = self.config['Tool']['Feed']
+        self.sdk_version = self.config['SDK']
+        self.tool_version = self.config['Tool_Info']['version']
+        self.tool_commit = self.config['Tool_Info']['commit']
+        self.tool_feed = self.config['Tool_Info']['feed']
         self.test_bed = self.config['Test']['TestBed']
         if self.config['Test']['RunBenchmarks'] == 'true':
             self.run_benchmarks = True
@@ -53,10 +54,8 @@ class GlobalConfig:
         self.consoleapp_runnable = True
         self.gcplayground_runnable = True
 
-    def get_rid(self) -> str:
+    def get_rid(self):
         '''Get `.Net RID` of current platform.
-
-        Return: `.Net RID` of current platform.
         '''
         system = platform.system().lower()
         if system == 'windows':
@@ -86,7 +85,8 @@ class GlobalConfig:
         else:
             raise f'unsupported machine type: {machine_type}'
 
-        return rid
+        self.rid = rid
+
 
     def get_debugger(self):
         '''Get full name of debugger.

@@ -25,34 +25,18 @@ def get_plans() -> list:
         plan = dict()
         plan['OS'] = key
         plan['SDK'] = sdk_version[os_rotation['requiredOS'][key]]
-        
-        plan['period'] = dict()
-        plan['period']['monday'] = os_rotation['monday']
-        plan['period']['friday'] = os_rotation['friday']
-
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_info.tool_version
         plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
-        plan['Tool_Info']['commit_html_url'] = tool_info.pr_info['commit_html_url']
-        plan['Tool_Info']['pull'] = tool_info.pr_info['pull']
-        plan['Tool_Info']['pull_html_url'] = tool_info.pr_info['pull_html_url']
         plans.append(plan)
 
     for key in os_rotation['alternateOS']:
         plan = dict()
         plan['OS'] = os_rotation['alternateOS'][key]
         plan['SDK'] = sdk_version[key]
-
-        plan['period'] = dict()
-        plan['period']['monday'] = os_rotation['monday']
-        plan['period']['friday'] = os_rotation['friday']
-
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_info.tool_version
         plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
-        plan['Tool_Info']['commit_html_url'] = tool_info.pr_info['commit_html_url']
-        plan['Tool_Info']['pull'] = tool_info.pr_info['pull']
-        plan['Tool_Info']['pull_html_url'] = tool_info.pr_info['pull_html_url']
         plans.append(plan)
 
     return plans
@@ -92,10 +76,9 @@ def publish_plan():
     )
     for os_info in OSTable:
         rid_map_info[os_info[0]] = os_info[2]
+        channel.queue_declare(queue=os_info[2])
     
     for plan in plans:
-        if plan['OS'] != 'windows10':
-            continue # remove after testing
         try:
             channel.basic_publish(
                 exchange='',

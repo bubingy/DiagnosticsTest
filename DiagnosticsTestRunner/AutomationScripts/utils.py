@@ -1,6 +1,10 @@
 # coding=utf-8
 
+import os
+import shutil
 from subprocess import PIPE, Popen
+
+from config import configuration
 
 
 def run_command_sync(command, log_path=None, bufsize=-1, 
@@ -48,6 +52,26 @@ def run_command_async(command, log_path=None, bufsize=-1,
     p = Popen(args, bufsize=-1, stdin=stdin, 
         stdout=stdout, stderr=stderr, cwd=cwd)
     return p
+
+
+def clean():
+    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
+    else: home_path = os.environ['HOME']
+
+    to_be_removed = [
+        os.path.join(home_path, '.aspnet'),
+        os.path.join(home_path, '.dotnet'),
+        os.path.join(home_path, '.nuget'),
+        os.path.join(home_path, '.templateengine'),
+        os.path.join(home_path, '.lldb'),
+        os.path.join(home_path, '.lldbinit'),
+        os.path.join(configuration.test_bed, '.dotnet-test')
+    ]
+
+    for f in to_be_removed:
+        if not os.path.exists(f): continue
+        if os.path.isdir(f): shutil.rmtree(f)
+        else: os.remove(f)
 
 
 class Result:

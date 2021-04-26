@@ -8,6 +8,7 @@ from test import dotnet_dump
 from test import dotnet_gcdump
 from test import dotnet_sos
 from test import dotnet_trace
+from utils import clean
 
 if __name__ == '__main__':
     init.prepare_test_bed()
@@ -26,3 +27,4 @@ if __name__ == '__main__':
     dotnet_gcdump.test_gcdump()
     dotnet_sos.test_sos()
     dotnet_trace.test_trace()
+    clean()
