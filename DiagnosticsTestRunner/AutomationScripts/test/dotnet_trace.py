@@ -39,6 +39,7 @@ def test_trace():
     )
     proc.communicate()
     webapp.terminate()
+    webapp.communicate()
 
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace',

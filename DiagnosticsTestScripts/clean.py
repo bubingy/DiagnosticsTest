@@ -17,6 +17,7 @@ if __name__ == '__main__':
         os.path.join(home_path, '.templateengine'),
         os.path.join(home_path, '.lldb'),
         os.path.join(home_path, '.lldbinit'),
+        os.path.join(home_path, '.local'),
         configuration.test_bed
     ]
 

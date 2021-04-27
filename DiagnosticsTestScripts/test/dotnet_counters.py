@@ -47,8 +47,7 @@ def test_counters():
             continue
 
     webapp.terminate()
-    while webapp.poll() is None:
-        time.sleep(1)
+    webapp.communicate()
 
     if configuration.sdk_version[0] == '3':
         print('dotnet-counters new feature isn\'t supported by .net core 3.x')

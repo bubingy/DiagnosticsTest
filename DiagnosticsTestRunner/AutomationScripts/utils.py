@@ -65,6 +65,7 @@ def clean():
         os.path.join(home_path, '.templateengine'),
         os.path.join(home_path, '.lldb'),
         os.path.join(home_path, '.lldbinit'),
+        os.path.join(home_path, '.local'),
         os.path.join(configuration.test_bed, '.dotnet-test')
     ]
 

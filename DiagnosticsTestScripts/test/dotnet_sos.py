@@ -139,3 +139,4 @@ def test_sos():
                     continue
             proc.communicate()
     webapp.terminate()
+    webapp.communicate()
