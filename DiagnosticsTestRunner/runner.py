@@ -63,7 +63,9 @@ def retrieve_task():
                 )
                 channel = connection.channel()
                 res = channel.queue_declare(queue=queue_name)
-                if res.method.message_count == 0: break
+                if res.method.message_count == 0:
+                    connection.close()
+                    break
                 
                 print(f'retrieving message from {queue_name}...')
                 _, _, body = channel.basic_get(
@@ -74,6 +76,7 @@ def retrieve_task():
             except Exception as e:
                 message = f'fail to retrieve tasks, Exception info: {e}'
                 print(message)
+                connection.close()
                 return
 
             assign_task(json.loads(body.decode('utf-8')))
