@@ -35,7 +35,7 @@ def test_trace():
         stdin=PIPE,
         stdout=PIPE,
         stderr=PIPE,
-        cwd=configuration.test_bed,
+        cwd=configuration.test_result,
     )
     proc.communicate()
     webapp.terminate()
@@ -44,7 +44,7 @@ def test_trace():
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace',
         log_path,
-        cwd=configuration.test_bed
+        cwd=configuration.test_result
     )
 
     if configuration.sdk_version[0] == '3':
