@@ -23,21 +23,21 @@ def load_json(file_path: os.PathLike) -> Any:
     return content
 
 
-def init_sos_unit_content(os_name):
-    if 'alpine' in os_name:
+def init_sos_unit_content(os_name: str):
+    if 'alpine' in os_name.lower():
         return 'NA'
     else:
         return ''
 
 
-def init_dump_unit_content(os_name):
-    if 'osx' in os_name:
+def init_dump_unit_content(os_name: str):
+    if 'osx' in os_name.lower():
         return 'NA'
     else:
         return ''
 
 
-def init_benchmarks_unit_content(sdk_version):
+def init_benchmarks_unit_content(sdk_version: str):
     if sdk_version[0] == '3':
         return ''
     else:
