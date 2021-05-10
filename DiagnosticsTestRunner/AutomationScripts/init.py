@@ -5,8 +5,8 @@ import os
 import sys
 from urllib import request
 
-from config import configuration
-from utils import run_command_sync, Result
+from AutomationScripts.config import configuration
+from AutomationScripts.utils import run_command_sync, Result
 
 
 log_path = os.path.join(configuration.test_result, 'init.log')

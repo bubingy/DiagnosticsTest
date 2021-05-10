@@ -1,11 +1,10 @@
 # coding=utf-8
 
 import os
-import time
 
-from config import configuration
-from utils import run_command_async, run_command_sync, PIPE
-from project import projects
+from AutomationScripts.config import configuration
+from AutomationScripts.utils import run_command_async, run_command_sync, PIPE
+from AutomationScripts.project import projects
 
 log_path = os.path.join(configuration.test_result, 'dotnet_trace.log')
 

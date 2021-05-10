@@ -2,7 +2,6 @@
 
 import re
 import os
-import json
 import glob
 import platform
 
@@ -11,28 +10,18 @@ class GlobalConfig:
     '''This class is used to store configuration and some global variables.
     
     '''
-    def __init__(self):
+    def __init__(self, test_config: dict):
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
-
-        config_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'config.json'
-        )
-        with open(config_path, 'r') as f:
-            self.config = json.load(f)
 
         self.get_rid()
         self.get_debugger()
-        self.sdk_version = self.config['SDK']
-        self.tool_version = self.config['Tool_Info']['version']
-        self.tool_commit = self.config['Tool_Info']['commit']
-        self.tool_feed = self.config['Tool_Info']['feed']
-        self.test_bed = self.config['Test']['TestBed']
-        if self.config['Test']['RunBenchmarks'] == 'true':
-            self.run_benchmarks = True
-        else:
-            self.run_benchmarks = False
-            
+        self.sdk_version = test_config['SDK']
+        self.tool_version = test_config['Tool_Info']['version']
+        self.tool_commit = test_config['Tool_Info']['commit']
+        self.tool_feed = test_config['Tool_Info']['feed']
+        self.test_bed = test_config['Test']['TestBed']
+        self.run_benchmarks = test_config['Test']['RunBenchmarks']
+
         self.test_result = os.path.join(
             self.test_bed,
             'TestResult'
@@ -113,4 +102,4 @@ class GlobalConfig:
                         return
 
 
-configuration = GlobalConfig()
+configuration = None

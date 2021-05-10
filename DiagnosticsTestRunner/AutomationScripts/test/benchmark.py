@@ -4,8 +4,8 @@ import os
 import shutil
 from xml.etree import ElementTree as ET
 
-from config import configuration
-from utils import run_command_sync, Result
+from AutomationScripts.config import configuration
+from AutomationScripts.utils import run_command_sync, Result
 
 log_path = os.path.join(configuration.test_result, 'benchmark.log')
 

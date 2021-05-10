@@ -4,7 +4,7 @@ import os
 import shutil
 from subprocess import PIPE, Popen
 
-from config import configuration
+from AutomationScripts.config import configuration
 
 
 def run_command_sync(command, log_path=None, bufsize=-1, 

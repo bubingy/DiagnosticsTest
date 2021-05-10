@@ -2,13 +2,12 @@
 '''
 
 import os
-import sys
 import time
 import shutil
 from xml.etree import ElementTree as ET
 
-from config import configuration
-from utils import run_command_async, Popen, \
+from AutomationScripts.config import configuration
+from AutomationScripts.utils import run_command_async, Popen, \
     run_command_sync, Result
 
 

@@ -1,3 +1,20 @@
-# DiagnosticsTestRunnerOverseer
+# DiagnosticsTestRunner
 
-## still in dev!
+## Introduce
+This script will query rabbitmq every 30 seconds. If there are tasks in the queue, the script will retrieve them and run in the backgroud.
+
+## Usage
+1. before deploying, please modify `conf.ini`.
+2. create and active virtualenv, then install requirements:
+```
+pip install -r requirements.txt
+```
+3. run this script in the background.  
+On windows:
+```
+Start-Job  { python \path\to\DiagnosticsTestRunner\runner.py --output \path\to\output_directory }
+```
+On Linux:
+```
+TODO
+```

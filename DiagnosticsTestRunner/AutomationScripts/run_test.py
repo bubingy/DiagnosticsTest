@@ -1,16 +1,16 @@
 # coding=utf-8
 
-import init
-from project import projects
-from test import benchmark
-from test import dotnet_counters
-from test import dotnet_dump
-from test import dotnet_gcdump
-from test import dotnet_sos
-from test import dotnet_trace
-from utils import clean
+from AutomationScripts import init
+from AutomationScripts.project import projects
+from AutomationScripts.test import benchmark
+from AutomationScripts.test import dotnet_counters
+from AutomationScripts.test import dotnet_dump
+from AutomationScripts.test import dotnet_gcdump
+from AutomationScripts.test import dotnet_sos
+from AutomationScripts.test import dotnet_trace
+from AutomationScripts.utils import clean
 
-if __name__ == '__main__':
+def run_test():
     init.prepare_test_bed()
     init.install_sdk()
     init.install_tools()
