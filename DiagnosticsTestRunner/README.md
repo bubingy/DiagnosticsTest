@@ -16,5 +16,5 @@ Start-Job  { python \path\to\DiagnosticsTestRunner\runner.py --output \path\to\o
 ```
 On Linux:
 ```
-TODO
+nohup python3 \path\to\DiagnosticsTestRunner\runner.py --output \path\to\output_directory &
 ```
