@@ -73,7 +73,7 @@ def print_test_matrix(os_rotation, output_file) -> None:
         if 'alpine' in key and '6' in required_oses[key]:
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
-                value=f'{os_name}/{sdk_version} enable SYS_PTACE'
+                value=f'{os_name}/{sdk_version}'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
@@ -91,7 +91,7 @@ def print_test_matrix(os_rotation, output_file) -> None:
 
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
-                value=f'{os_name}/{sdk_version} disable SYS_PTACE'
+                value=f'{os_name}/{sdk_version} disable SYS_PTACE, seccomp=unconfined'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
@@ -133,7 +133,7 @@ def print_test_matrix(os_rotation, output_file) -> None:
         if '6' in key:
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
-                value=f'{os_name}/{sdk_version} enable SYS_PTACE'
+                value=f'{os_name}/{sdk_version}'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
@@ -151,7 +151,7 @@ def print_test_matrix(os_rotation, output_file) -> None:
 
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
-                value=f'{os_name}/{sdk_version} disable SYS_PTACE'
+                value=f'{os_name}/{sdk_version} disable SYS_PTACE, seccomp=unconfined'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,

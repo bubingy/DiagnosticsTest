@@ -26,6 +26,8 @@ class ToolInfo:
         self.tool_version = self.get_tool_version(self.artifact)
         self.pr_info = self.get_pr_info(self.build)
 
+        self.feed = self.configuration['tool']['feed']
+
     def get_latest_acceptable_build(self) -> dict:
         '''Get latest acceptable build in dotnet-diagnostics.
 

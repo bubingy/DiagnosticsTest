@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import copy
 import json
 import datetime
 
@@ -28,16 +29,38 @@ def get_plans() -> list:
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_info.tool_version
         plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
+        plan['Tool_Info']['feed'] = tool_info.feed
+        plan['Test'] = dict()
+        plan['Test']['RunBenchmarks'] = plan['SDK'][0] == '3'
         plans.append(plan)
+
+        # this is temp plan
+        if plan['SDK'][0] == '6' and 'Alpine' in plan['OS']:
+            ext_plan = copy.deepcopy(plan)
+            ext_plan['OS'] = plan['OS'] + 'EXT'
+            plans.append(ext_plan)
 
     for key in os_rotation['alternateOS']:
         plan = dict()
         plan['OS'] = os_rotation['alternateOS'][key]
+
+        # we don't have arm32 device currently. 
+        if 'LinuxCross' == plan['OS']: continue
+
         plan['SDK'] = sdk_version[key]
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_info.tool_version
         plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
+        plan['Tool_Info']['feed'] = tool_info.feed
+        plan['Test'] = dict()
+        plan['Test']['RunBenchmarks'] = plan['SDK'][0] == '3'
         plans.append(plan)
+
+        # this is temp plan
+        if plan['SDK'][0] == '6':
+            ext_plan = copy.deepcopy(plan)
+            ext_plan['OS'] = plan['OS'] + 'EXT'
+            plans.append(ext_plan)
 
     return plans
 
@@ -64,25 +87,13 @@ def publish_plan():
     )
     channel = connection.channel()
     plans = get_plans()
-
-    rid_map_info = dict()
-
-    OSTable = load_json(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'conf',
-            'OSTable.json'
-        )
-    )
-    for os_info in OSTable:
-        rid_map_info[os_info[0]] = os_info[2]
-        channel.queue_declare(queue=os_info[2])
     
     for plan in plans:
         try:
+            channel.queue_declare(queue=plan['OS'])
             channel.basic_publish(
                 exchange='',
-                routing_key=rid_map_info[plan['OS']],
+                routing_key=plan['OS'],
                 body=json.dumps(plan)
             )
         except Exception as e:
@@ -92,5 +103,6 @@ def publish_plan():
 
 
 if __name__ == "__main__":
+    # TODO: the test plan is still in change
     publish_plan()
     
