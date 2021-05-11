@@ -5,12 +5,10 @@ import copy
 import json
 import datetime
 
-import pika
-
 from OSRotation.get_os_rotation import get_os_rotation
 from TestParaments.SDKVersion import get_sdk_version
 from TestParaments.ToolInfo import ToolInfo
-from utils import load_json
+from utils import load_json, AMQPRESTAPIConf, declare_queue, publish_message
 
 
 def get_plans() -> list:
@@ -45,6 +43,7 @@ def get_plans() -> list:
         plan['OS'] = os_rotation['alternateOS'][key]
 
         # we don't have arm32 device currently. 
+        # TODO
         if 'LinuxCross' == plan['OS']: continue
 
         plan['SDK'] = sdk_version[key]
@@ -74,32 +73,16 @@ def publish_plan():
         )
     )
 
-    user = connection_info['user']
-    password = connection_info['password']
-    ip = connection_info['ip']
-    port = connection_info['port']
-    vhost = connection_info['vhost']
-
-    connection = pika.BlockingConnection(
-        pika.URLParameters(
-            f'amqp://{user}:{password}@{ip}:{port}/{vhost}'
-        )
-    )
-    channel = connection.channel()
+    connection_conf = AMQPRESTAPIConf(connection_info)
     plans = get_plans()
     
     for plan in plans:
         try:
-            channel.queue_declare(queue=plan['OS'])
-            channel.basic_publish(
-                exchange='',
-                routing_key=plan['OS'],
-                body=json.dumps(plan)
-            )
+            declare_queue(plan['OS'], connection_conf)
+            publish_message(json.dumps(plan), plan['OS'], connection_conf)
         except Exception as e:
             os_name = plan['OS']
             print(f'exception when publishing {os_name}: {e}')
-    connection.close()
 
 
 if __name__ == "__main__":

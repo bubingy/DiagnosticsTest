@@ -1,7 +1,10 @@
 # coding=utf-8
 
 import os
+import json
+import base64
 import configparser
+from urllib import request
 from typing import Any
 
 from openpyxl import Workbook, load_workbook
@@ -273,3 +276,66 @@ def print_test_result_page(os_rotation, sdk_version, tool_info, output_file) -> 
     ).font = Font(color="0563C1")
     workbook.save(output_file)
     print_test_matrix(os_rotation, output_file)
+
+
+class AMQPRESTAPIConf:
+    def __init__(self, connection_info: dict) -> None:
+        for key in connection_info.keys():
+            self.__setattr__(key, connection_info[key])
+        
+        self.base_url = f'http://{self.ip}:{self.port}'
+        auth_str = str(
+            base64.b64encode(
+                bytes(
+                    f'{self.user}:{self.password}',
+                    'ascii'
+                )
+            ),
+            'ascii'
+        )
+        self.general_header = {
+            'Authorization': f'Basic {auth_str}',
+            'content-type':'application/json'
+        }
+
+
+def declare_queue(queue_name: str, connection_conf: AMQPRESTAPIConf) -> int:
+    data = {
+        'auto_delete':'false',
+        'durable':'false'
+    }
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='PUT'
+    )
+    try:
+        request.urlopen(req).read().decode('utf-8')
+        return 0
+    except Exception as e:
+        print(f'fail to declare queue: {e}')
+        return 1
+
+
+def publish_message(message: str, queue_name: str, connection_conf: AMQPRESTAPIConf) -> int:
+    data = {
+        'properties':{},
+        'routing_key':queue_name,
+        'payload':message,
+        'payload_encoding':'string'
+    }
+    uri = f'/api/exchanges/{connection_conf.vhost}//publish'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='POST'
+    )
+    try:
+        request.urlopen(req).read().decode('utf-8')
+        return 0
+    except Exception as e:
+        print(f'fail to publish message: {e}')
+        return 1

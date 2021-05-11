@@ -2,6 +2,6 @@
     "user": "diagnostics",
     "password": "root",
     "ip": "10.20.10.158",
-    "port": 5672,
+    "port": 15672,
     "vhost": "diagnostics"
 }

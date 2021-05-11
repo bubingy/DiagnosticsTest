@@ -2,7 +2,6 @@
 DiagnosticsTestPlanner is part of Diagnostics Automation Test System. Its main function is getting test plan and publishing test tasks on rabbitmq.
 
 ## Requirements
-pika
 schedule
 
 ## Deploy
