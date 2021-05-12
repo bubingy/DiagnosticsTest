@@ -1,8 +1,11 @@
 # coding=utf-8
 
 import os
+import json
+import base64
 import logging
 import configparser
+from urllib import request
 from typing import Any
 
 logging.root.setLevel(logging.NOTSET)
@@ -25,14 +28,20 @@ class RunnerConfig:
             for key in config[section].keys():
                 self.__setattr__(key, config[section][key])
         
-        self.rabbitmq_url = (
-            'amqp://'
-            f'{self.username}:'
-            f'{self.password}@'
-            f'{self.ipaddr}:'
-            f'{self.port}/'
-            f'{self.vhost}'    
+        self.base_url = f'http://{self.ipaddr}:{self.port}'
+        auth_str = str(
+            base64.b64encode(
+                bytes(
+                    f'{self.username}:{self.password}',
+                    'ascii'
+                )
+            ),
+            'ascii'
         )
+        self.general_header = {
+            'Authorization': f'Basic {auth_str}',
+            'content-type':'application/json'
+        }
 
 
 class Logger(logging.Logger):
@@ -57,6 +66,49 @@ class Logger(logging.Logger):
 
         self.addHandler(console_log_handler)
         self.addHandler(file_log_handler)
+
+
+def declare_queue(queue_name: str, connection_conf: RunnerConfig) -> int:
+    data = {
+        'auto_delete':'false',
+        'durable':'false'
+    }
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='PUT'
+    )
+    try:
+        request.urlopen(req).read().decode('utf-8')
+        return 0
+    except Exception as e:
+        print(f'fail to declare queue: {e}')
+        return 1
+
+
+def get_message(queue_name: str, connection_conf: RunnerConfig) -> str:
+    data = {
+        'count':1,
+        'ackmode':'ack_requeue_false',
+        'encoding':'auto'
+    }
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}/get'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='POST'
+    )
+    try:
+        content = json.loads(
+            request.urlopen(req).read().decode('utf-8')
+        )[0]['payload']
+    except Exception as e:
+        print(f'fail to publish message: {e}')
+        content = None
+    return content
 
 
 # if __name__ == '__main__':

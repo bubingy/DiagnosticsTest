@@ -6,10 +6,8 @@ import json
 import argparse
 from datetime import datetime
 
-import pika
-
 import global_var
-from utils import RunnerConfig, Logger
+from utils import RunnerConfig, Logger, declare_queue, get_message
 from AutomationScripts import config
 
 
@@ -19,31 +17,19 @@ def retrieve_task():
     # establish connection to rabbitmq
     while True:
         global_var.LOGGER.info('establish connection to rabbitmq.')
-        try:
-            connection = pika.BlockingConnection(
-                pika.URLParameters(
-                    global_var.RUNNERCONF.rabbitmq_url
-                )
-            )
-            channel = connection.channel()
-            res = channel.queue_declare(queue=global_var.RUNNERCONF.runnername)
-            if res.method.message_count == 0:
-                connection.close()
-                break
+        if declare_queue(
+            global_var.RUNNERCONF.runnername,
+            global_var.RUNNERCONF
+        ) != 0: break
             
-            
-            global_var.LOGGER.info(f'retrieving message from {global_var.RUNNERCONF.runnername}...')
-            _, _, body = channel.basic_get(
-                global_var.RUNNERCONF.runnername,
-                True # turn to True before deploying.
-            )
-            connection.close()
-        except Exception as e:
-            global_var.LOGGER.error(f'fail to retrieve tasks, Exception info: {e}')
-            connection.close()
-            return
+        global_var.LOGGER.info(f'retrieving message from {global_var.RUNNERCONF.runnername}...')
+        message = get_message(
+            global_var.RUNNERCONF.runnername,
+            global_var.RUNNERCONF
+        )
+        if message is None: break
 
-        test_config = json.loads(body.decode('utf-8'))
+        test_config = json.loads(message)
         test_config['Test']['TestBed'] = os.path.join(
             global_var.RUNNERCONF.output_dir,
             '_'.join(

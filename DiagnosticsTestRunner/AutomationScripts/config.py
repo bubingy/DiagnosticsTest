@@ -15,6 +15,7 @@ class GlobalConfig:
 
         self.get_rid()
         self.get_debugger()
+        self.os_name = test_config['OS']
         self.sdk_version = test_config['SDK']
         self.tool_version = test_config['Tool_Info']['version']
         self.tool_commit = test_config['Tool_Info']['commit']
@@ -24,7 +25,7 @@ class GlobalConfig:
 
         self.test_result = os.path.join(
             self.test_bed,
-            'TestResult'
+            f'TestResult-{self.os_name}' 
         )
         self.tool_root = os.path.dirname(os.path.abspath(__file__))
 
