@@ -5,11 +5,7 @@ This script will query rabbitmq every 30 seconds. If there are tasks in the queu
 
 ## Usage
 1. before deploying, please modify `conf.ini`.
-2. create and active virtualenv, then install requirements:
-```
-pip install -r requirements.txt
-```
-3. run this script in the background.  
+2. run this script in the background.  
 On windows:
 ```
 Start-Job  { python \path\to\DiagnosticsTestRunner\runner.py --output \path\to\output_directory }
