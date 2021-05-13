@@ -8,7 +8,7 @@ from urllib import request
 from datetime import datetime
 
 import global_var
-import AutomationScripts
+from AutomationScripts import config
 from utils import MQConnectionConf, RunnerConf, Logger
 
 
@@ -151,9 +151,9 @@ def consume_task():
         )
         test_bed = test_config['Test']['TestBed']
         global_var.LOGGER.info(f'run diagnostics test in {test_bed}.')
-        AutomationScripts.config.configuration = \
-            AutomationScripts.config.GlobalConfig(test_config)
-        AutomationScripts.run_test.run_test()
+        config.configuration = config.GlobalConfig(test_config)
+        from AutomationScripts import main
+        main.run_test()
 
         global_var.LOGGER.info(
             f'remove message from {global_var.RUNNERCONF.runner_name}.'
