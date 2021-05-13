@@ -4,31 +4,138 @@ import os
 import time
 import json
 import argparse
+from urllib import request
 from datetime import datetime
 
 import global_var
-from utils import MQConnectionConf, RunnerConf, \
-    Logger, declare_queue, get_message
-from AutomationScripts import config, run_test
+import AutomationScripts
+from utils import MQConnectionConf, RunnerConf, Logger
 
 
-def retrieve_task():
-    '''Retrieve tasks from rabbitmq.
+def declare_queue(queue_name: str, connection_conf: MQConnectionConf) -> int:
+    '''Declare a queue.
+
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: 0 if successes, 1 if fails. 
     '''
-    # establish connection to rabbitmq
+    data = {
+        'auto_delete':'false',
+        'durable':'false'
+    }
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='PUT'
+    )
+    try:
+        request.urlopen(req).read().decode('utf-8')
+        return 0
+    except Exception as e:
+        global_var.LOGGER.error(
+            f'declare queue {queue_name} failed with exception: {e}.'
+        )
+        return 1
+
+
+def get_queue_length(queue_name: str, connection_conf: MQConnectionConf) -> int:
+    '''Get length of queue.
+    
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: length of queue.
+    '''
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        method='GET'
+    )
+    try:
+        content = json.loads(
+            request.urlopen(req).read().decode('utf-8')
+        )
+        return content['messages']
+    except Exception as e:
+        global_var.LOGGER.error(
+            f'get length of queue {queue_name} failed with exception: {e}.'
+        )
+        return -1
+
+
+def get_message(queue_name: str, connection_conf: MQConnectionConf, requeue: bool=False) -> str:
+    '''Retrieve a message from queue.
+
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :param requeue: whether to requeue the message. 
+        False by default. if True, remove the message from the queue.
+    :return: retrieved message. 
+    '''
+    if requeue: ackmode = 'ack_requeue_true'
+    else: ackmode = 'ack_requeue_false'
+    data = {
+        'count':1,
+        'ackmode':ackmode,
+        'encoding':'auto'
+    }
+    uri = f'/api/queues/{connection_conf.vhost}/{queue_name}/get'
+    req = request.Request(
+        f'{connection_conf.base_url}{uri}',
+        headers=connection_conf.general_header,
+        data=json.dumps(data).encode("utf-8"),
+        method='POST'
+    )
+    try:
+        content = json.loads(
+            request.urlopen(req).read().decode('utf-8')
+        )[0]['payload']
+    except Exception as e:
+        global_var.LOGGER.error(
+            f'publish message to {queue_name} failed with exception {e}.'
+        )
+        content = None
+    return content
+
+
+def consume_task():
+    '''Retrieve tasks from rabbitmq and run test.
+    '''
     while True:
-        global_var.LOGGER.info('establish connection to rabbitmq.')
+        # declare queue.
+        global_var.LOGGER.info(
+            f'declaring queue {global_var.RUNNERCONF.runner_name}...'
+        )
         if declare_queue(
             global_var.RUNNERCONF.runner_name,
             global_var.MQCONNCONF
-        ) != 0: break
-            
-        global_var.LOGGER.info(f'retrieving message from {global_var.RUNNERCONF.runner_name}...')
+        ) != 0: return
+
+        # get length of queue.
+        global_var.LOGGER.info(
+            f'get length of queue {global_var.RUNNERCONF.runner_name}...'
+        )
+        while True:
+            queue_length = get_queue_length(
+                global_var.RUNNERCONF.runner_name,
+                global_var.MQCONNCONF
+            )
+            if queue_length > 0:   break
+            if queue_length == 0:  time.sleep(10)
+            if queue_length < 0:   return
+        
+        # get a message from queue.
+        global_var.LOGGER.info(
+            f'getting message from {global_var.RUNNERCONF.runner_name}...'
+        )
         message = get_message(
             global_var.RUNNERCONF.runner_name,
-            global_var.MQCONNCONF
+            global_var.MQCONNCONF,
+            True
         )
-        if message is None: break
+        if message is None: return
 
         test_config = json.loads(message)
         test_config['Test']['TestBed'] = os.path.join(
@@ -44,10 +151,24 @@ def retrieve_task():
         )
         test_bed = test_config['Test']['TestBed']
         global_var.LOGGER.info(f'run diagnostics test in {test_bed}.')
-        config.configuration = config.GlobalConfig(test_config)
-        run_test.run_test()
+        AutomationScripts.config.configuration = \
+            AutomationScripts.config.GlobalConfig(test_config)
+        AutomationScripts.run_test.run_test()
+
+        global_var.LOGGER.info(
+            f'remove message from {global_var.RUNNERCONF.runner_name}.'
+        )
+        if get_message(
+            global_var.RUNNERCONF.runner_name,
+            global_var.MQCONNCONF,
+            False
+        ) is None: return
         global_var.LOGGER.info(f'task run in {test_bed} is completed.')
-    return
+        
+        if queue_length - 1 > 0:
+            continue
+        else:
+            time.sleep(60)
 
 
 if __name__ == "__main__":
@@ -76,8 +197,7 @@ if __name__ == "__main__":
             'runner.ini'
         )
     )
-    global_var.RUNNERCONF.__setattr__('output_dir', output_dir)
+    global_var.RUNNERCONF.output_dir = output_dir
+    global_var.RUNNERCONF.init()
 
-    while True:
-        time.sleep(30)
-        retrieve_task()
+    consume_task()
