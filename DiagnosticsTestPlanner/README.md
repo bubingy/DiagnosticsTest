@@ -6,7 +6,7 @@ schedule
 
 ## Deploy
 1. Create a container with python3.6+ and required modules installed. 
-2. Modify `connection.ini` if necessary.
+2. Modify `rabbitmq.ini` if necessary.
 3. Run
 ```
 python weekly_test_planner.py

@@ -272,7 +272,7 @@ def print_test_result_page(os_rotation, sdk_version, tool_info, output_file) -> 
     print_test_matrix(os_rotation, output_file)
 
 
-class AMQPConnectionConf:
+class MQConnectionConf:
     '''Load rabbitmq connection info.
 
     This class include following properties:
@@ -309,7 +309,7 @@ class AMQPConnectionConf:
         }
 
 
-def declare_queue(queue_name: str, connection_conf: AMQPConnectionConf) -> int:
+def declare_queue(queue_name: str, connection_conf: MQConnectionConf) -> int:
     '''Declare a queue.
 
     :param queue_name: name of queue.
@@ -335,7 +335,7 @@ def declare_queue(queue_name: str, connection_conf: AMQPConnectionConf) -> int:
         return 1
 
 
-def publish_message(message: str, queue_name: str, connection_conf: AMQPConnectionConf) -> int:
+def publish_message(message: str, queue_name: str, connection_conf: MQConnectionConf) -> int:
     '''Publish a message.
 
     :param message: message in string format.

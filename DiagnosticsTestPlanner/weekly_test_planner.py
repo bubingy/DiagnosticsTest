@@ -68,7 +68,7 @@ def publish_plan():
     connection_conf = AMQPConnectionConf(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            'connection.ini'
+            'rabbitmq.ini'
         )
     )
     plans = get_plans()

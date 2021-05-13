@@ -11,22 +11,37 @@ from typing import Any
 logging.root.setLevel(logging.NOTSET)
 
 
-class RunnerConfig:
-    '''Read configuration from ini file.
-    
-    :param ini_file_path: path of ini file.
-    :return: a configparser.ConfigParser object.
+class RunnerConf:
+    '''Load configuration for runner.
+
     '''
     def __init__(self, ini_file_path: os.PathLike) -> None:
-        assert os.path.exists(ini_file_path)
-        assert os.path.isfile(ini_file_path)
+        runner_conf = configparser.ConfigParser()
+        runner_conf.read(ini_file_path)
+        self.runner_name = runner_conf['runner']['runnername']
+        self.output_dir = None
 
-        config = configparser.ConfigParser()
-        config.read(ini_file_path)
 
-        for section in config.sections():
-            for key in config[section].keys():
-                self.__setattr__(key, config[section][key])
+class MQConnectionConf:
+    '''Load rabbitmq connection info.
+
+    This class include following properties:
+        username: username of rabbitmq.
+        password: password.
+        ipaddr: ip address of host where rabbitmq run.
+        port: port number of rabbitmq-management-plugin.
+        vhost: name of vhost.
+        base_url: base url for http api.
+        general_header: request header for general usage.
+    '''
+    def __init__(self, ini_file_path: os.PathLike) -> None:
+        connection_conf = configparser.ConfigParser()
+        connection_conf.read(ini_file_path)
+        self.username = connection_conf['connection']['username']
+        self.password = connection_conf['connection']['password']
+        self.ipaddr = connection_conf['connection']['ipaddr']
+        self.port = connection_conf['connection']['port']
+        self.vhost = connection_conf['connection']['vhost']
         
         self.base_url = f'http://{self.ipaddr}:{self.port}'
         auth_str = str(
@@ -68,7 +83,13 @@ class Logger(logging.Logger):
         self.addHandler(file_log_handler)
 
 
-def declare_queue(queue_name: str, connection_conf: RunnerConfig) -> int:
+def declare_queue(queue_name: str, connection_conf: MQConnectionConf) -> int:
+    '''Declare a queue.
+
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: 0 if successes, 1 if fails. 
+    '''
     data = {
         'auto_delete':'false',
         'durable':'false'
@@ -88,7 +109,13 @@ def declare_queue(queue_name: str, connection_conf: RunnerConfig) -> int:
         return 1
 
 
-def get_message(queue_name: str, connection_conf: RunnerConfig) -> str:
+def get_message(queue_name: str, connection_conf: MQConnectionConf) -> str:
+    '''Retrieve a message from queue.
+
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: retrieved message. 
+    '''
     data = {
         'count':1,
         'ackmode':'ack_requeue_false',
