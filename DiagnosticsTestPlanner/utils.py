@@ -11,12 +11,6 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, Alignment
 
 
-def load_configuration(file_path: os.PathLike) -> configparser.ConfigParser:
-    config = configparser.ConfigParser()
-    config.read(file_path)
-    return config
-
-
 def load_json(file_path: os.PathLike) -> Any:
     import json
     content = None
@@ -278,16 +272,32 @@ def print_test_result_page(os_rotation, sdk_version, tool_info, output_file) -> 
     print_test_matrix(os_rotation, output_file)
 
 
-class AMQPRESTAPIConf:
-    def __init__(self, connection_info: dict) -> None:
-        for key in connection_info.keys():
-            self.__setattr__(key, connection_info[key])
+class AMQPConnectionConf:
+    '''Load rabbitmq connection info.
+
+    This class include following properties:
+        username: username of rabbitmq.
+        password: password.
+        ipaddr: ip address of host where rabbitmq run.
+        port: port number of rabbitmq-management-plugin.
+        vhost: name of vhost.
+        base_url: base url for http api.
+        general_header: request header for general usage.
+    '''
+    def __init__(self, ini_file_path: os.PathLike) -> None:
+        connection_conf = configparser.ConfigParser()
+        connection_conf.read(ini_file_path)
+        self.username = connection_conf['connection']['username']
+        self.password = connection_conf['connection']['password']
+        self.ipaddr = connection_conf['connection']['ipaddr']
+        self.port = connection_conf['connection']['port']
+        self.vhost = connection_conf['connection']['vhost']
         
-        self.base_url = f'http://{self.ip}:{self.port}'
+        self.base_url = f'http://{self.ipaddr}:{self.port}'
         auth_str = str(
             base64.b64encode(
                 bytes(
-                    f'{self.user}:{self.password}',
+                    f'{self.username}:{self.password}',
                     'ascii'
                 )
             ),
@@ -299,7 +309,13 @@ class AMQPRESTAPIConf:
         }
 
 
-def declare_queue(queue_name: str, connection_conf: AMQPRESTAPIConf) -> int:
+def declare_queue(queue_name: str, connection_conf: AMQPConnectionConf) -> int:
+    '''Declare a queue.
+
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: 0 if successes, 1 if fails. 
+    '''
     data = {
         'auto_delete':'false',
         'durable':'false'
@@ -319,7 +335,14 @@ def declare_queue(queue_name: str, connection_conf: AMQPRESTAPIConf) -> int:
         return 1
 
 
-def publish_message(message: str, queue_name: str, connection_conf: AMQPRESTAPIConf) -> int:
+def publish_message(message: str, queue_name: str, connection_conf: AMQPConnectionConf) -> int:
+    '''Publish a message.
+
+    :param message: message in string format.
+    :param queue_name: name of queue.
+    :param connection_conf: rabbitmq connection info.
+    :return: 0 if successes, 1 if fails. 
+    '''
     data = {
         'properties':{},
         'routing_key':queue_name,

@@ -5,17 +5,17 @@ import json
 import base64
 import zipfile
 import tempfile
+import configparser
 from urllib import request
-
-from utils import load_configuration
 
 
 class ToolInfo:
     def __init__(self):
-        self.configuration = load_configuration(
+        self.configuration = configparser.ConfigParser()
+        self.configuration.read(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                'configuration.ini'
+                'testargs.ini'
             )
         )
         pat = self.configuration['Auth']['pat']

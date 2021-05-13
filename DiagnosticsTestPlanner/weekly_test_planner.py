@@ -8,7 +8,7 @@ import datetime
 from OSRotation.get_os_rotation import get_os_rotation
 from TestParaments.SDKVersion import get_sdk_version
 from TestParaments.ToolInfo import ToolInfo
-from utils import load_json, AMQPRESTAPIConf, declare_queue, publish_message
+from utils import AMQPConnectionConf, declare_queue, publish_message
 
 
 def get_plans() -> list:
@@ -65,15 +65,12 @@ def get_plans() -> list:
 
 
 def publish_plan():
-    connection_info = load_json(
+    connection_conf = AMQPConnectionConf(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            'conf',
-            'connection.json'
+            'connection.ini'
         )
     )
-
-    connection_conf = AMQPRESTAPIConf(connection_info)
     plans = get_plans()
     
     for plan in plans:

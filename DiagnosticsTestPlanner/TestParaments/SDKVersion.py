@@ -1,18 +1,19 @@
 # coding=utf-8
 
 import os
+import configparser
 from urllib import request
 
-from utils import load_configuration
 
 def get_sdk_version():
     '''Print out latest `release` version of .net core 3, .net 5 and .net 6.
 
     '''
-    configuration = load_configuration(
+    configuration = configparser.ConfigParser()
+    configuration.read(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
-            'configuration.ini'
+            'testargs.ini'
         )
     )
 

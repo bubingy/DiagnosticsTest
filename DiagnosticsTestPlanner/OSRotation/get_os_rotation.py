@@ -104,8 +104,7 @@ def get_alternate_os_status(date_str: str) -> dict:
             lambda x: x[1] != 'required',
             load_json(
                 path.join(
-                    path.dirname(path.dirname(path.abspath(__file__))),
-                    'conf',
+                    path.dirname(path.abspath(__file__)),
                     'OSTable.json'
                 )
             )
