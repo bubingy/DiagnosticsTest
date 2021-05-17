@@ -8,7 +8,7 @@ import datetime
 from OSRotation.get_os_rotation import get_os_rotation
 from TestParaments.SDKVersion import get_sdk_version
 from TestParaments.ToolInfo import ToolInfo
-from utils import AMQPConnectionConf, declare_queue, publish_message
+from utils import MQConnectionConf, declare_queue, publish_message
 
 
 def get_plans() -> list:
@@ -65,7 +65,7 @@ def get_plans() -> list:
 
 
 def publish_plan():
-    connection_conf = AMQPConnectionConf(
+    connection_conf = MQConnectionConf(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'rabbitmq.ini'
