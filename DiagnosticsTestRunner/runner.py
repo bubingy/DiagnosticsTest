@@ -27,9 +27,6 @@ def consume_task():
         ) != 0: return
 
         # get length of queue.
-        global_var.LOGGER.info(
-            f'get length of queue {global_var.RUNNERCONF.runner_name}...'
-        )
         while True:
             queue_length = get_queue_length(
                 global_var.RUNNERCONF.runner_name,
