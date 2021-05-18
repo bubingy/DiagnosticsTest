@@ -1,14 +1,11 @@
 # coding=utf-8
 
-import os
 import copy
-import json
 import datetime
 
-from OSRotation.get_os_rotation import get_os_rotation
-from TestParaments.SDKVersion import get_sdk_version
-from TestParaments.ToolInfo import ToolInfo
-from utils import MQConnectionConf, declare_queue, publish_message
+from WeeklyTestPlanner.OSRotation.get_os_rotation import get_os_rotation
+from WeeklyTestPlanner.TestParaments.SDKVersion import get_sdk_version
+from WeeklyTestPlanner.TestParaments.ToolInfo import ToolInfo
 
 
 def get_plans() -> list:
@@ -62,27 +59,3 @@ def get_plans() -> list:
             plans.append(ext_plan)
 
     return plans
-
-
-def publish_plan():
-    connection_conf = MQConnectionConf(
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            'rabbitmq.ini'
-        )
-    )
-    plans = get_plans()
-    
-    for plan in plans:
-        try:
-            declare_queue(plan['OS'], connection_conf)
-            publish_message(json.dumps(plan), plan['OS'], connection_conf)
-        except Exception as e:
-            os_name = plan['OS']
-            print(f'exception when publishing {os_name}: {e}')
-
-
-if __name__ == "__main__":
-    # TODO: the test plan is still in change
-    publish_plan()
-    

@@ -3,7 +3,7 @@
 from os import path
 import datetime
 
-from utils import load_json
+from utils.conf import load_json
 
 
 def calculate_week_increment(date_str: str) -> int:
