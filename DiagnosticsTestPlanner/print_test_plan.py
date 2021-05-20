@@ -8,7 +8,7 @@ from WeeklyTestPlanner.OSRotation.get_os_rotation import get_os_rotation
 from WeeklyTestPlanner.TestParaments.SDKVersion import get_sdk_version
 from WeeklyTestPlanner.TestParaments.ToolInfo import get_tool_info
 from utils.print import print_weekly_test_plan, print_release_test_matrix
-from utils.conf import WeeklyTestConf, ReleaseTestConf
+from utils.conf import ReleaseTestConf
 
 
 if __name__ == '__main__':
@@ -25,7 +25,6 @@ if __name__ == '__main__':
         )
         sdk_version = get_sdk_version()
         tool_version, pr_info, tool_feed = get_tool_info()
-        # TODO
         print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, output_file)
 
     if test_type == 'release':
