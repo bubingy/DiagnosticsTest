@@ -1,9 +1,9 @@
 # coding=utf-8
 
-from utils.conf import TestConf
+from utils.conf import ReleaseTestConf
 
 
-def get_plans(test_conf: TestConf) -> list:
+def get_plans(test_conf: ReleaseTestConf) -> list:
     plans = list()
     for sdk in test_conf.sdk_list:
         for os_name in test_conf.os_list:

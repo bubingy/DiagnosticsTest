@@ -9,8 +9,7 @@ from utils.conf import load_json
 def calculate_week_increment(date_str: str) -> int:
     '''Calculate how much weeks between given day and week in `baseStatus.json`.
 
-    Args:
-        date_str - a string object in format `year-month-day`.
+    :param date_str: a string object in format `year-month-day`.
     Return: number of weeks between given day and week in `baseStatus.json`.
     '''
     base_status = load_json(
@@ -98,19 +97,12 @@ def get_alternate_os_status(date_str: str) -> dict:
             'baseStatus.json'
         )
     )
-    alternate_oses = map(
-        lambda x: x[0],
-        filter(
-            lambda x: x[1] != 'required',
-            load_json(
-                path.join(
-                    path.dirname(path.abspath(__file__)),
-                    'OSTable.json'
-                )
-            )
+    alternate_oses = load_json(
+        path.join(
+            path.dirname(path.abspath(__file__)),
+            'OSTable.json'
         )
     )
-    alternate_oses = list(alternate_oses)
     
     cycle_length = len(base_status['alternateOS'].keys())
     first_os_index = alternate_oses.index(base_status['alternateOS']['3.1'])

@@ -7,7 +7,7 @@ import argparse
 from WeeklyTestPlanner import weekly_test_planner
 from ReleaseTestPlanner import release_test_planner
 from utils.rabbitmq import declare_queue, publish_message
-from utils.conf import MQConnectionConf, TestConf
+from utils.conf import MQConnectionConf, ReleaseTestConf, WeeklyTestConf
 
 
 if __name__ == '__main__':
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     )
 
     if test_type == 'release':
-        test_conf = TestConf(
+        test_conf = ReleaseTestConf(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 'conf',

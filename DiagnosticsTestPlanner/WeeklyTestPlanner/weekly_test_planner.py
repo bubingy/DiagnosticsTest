@@ -5,7 +5,7 @@ import datetime
 
 from WeeklyTestPlanner.OSRotation.get_os_rotation import get_os_rotation
 from WeeklyTestPlanner.TestParaments.SDKVersion import get_sdk_version
-from WeeklyTestPlanner.TestParaments.ToolInfo import ToolInfo
+from WeeklyTestPlanner.TestParaments.ToolInfo import get_tool_info
 
 
 def get_plans() -> list:
@@ -14,7 +14,7 @@ def get_plans() -> list:
     os_rotation = get_os_rotation(
         datetime.datetime.today().strftime('%Y-%m-%d')
     )
-    tool_info = ToolInfo()
+    tool_version, pr_info, tool_feed = get_tool_info()
 
     sdk_version = get_sdk_version()
     for key in os_rotation['requiredOS']:
@@ -22,9 +22,9 @@ def get_plans() -> list:
         plan['OS'] = key
         plan['SDK'] = sdk_version[os_rotation['requiredOS'][key]]
         plan['Tool_Info'] = dict()
-        plan['Tool_Info']['version'] = tool_info.tool_version
-        plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
-        plan['Tool_Info']['feed'] = tool_info.feed
+        plan['Tool_Info']['version'] = tool_version
+        plan['Tool_Info']['commit'] = pr_info['commit']
+        plan['Tool_Info']['feed'] = tool_feed
         plan['Test'] = dict()
         plan['Test']['RunBenchmarks'] = plan['SDK'][0] == '3'
         plans.append(plan)
@@ -45,9 +45,9 @@ def get_plans() -> list:
 
         plan['SDK'] = sdk_version[key]
         plan['Tool_Info'] = dict()
-        plan['Tool_Info']['version'] = tool_info.tool_version
-        plan['Tool_Info']['commit'] = tool_info.pr_info['commit']
-        plan['Tool_Info']['feed'] = tool_info.feed
+        plan['Tool_Info']['version'] = tool_version
+        plan['Tool_Info']['commit'] = pr_info['commit']
+        plan['Tool_Info']['feed'] = tool_feed
         plan['Test'] = dict()
         plan['Test']['RunBenchmarks'] = plan['SDK'][0] == '3'
         plans.append(plan)

@@ -15,8 +15,20 @@ def load_json(file_path: os.PathLike) -> Any:
     return content
 
 
-class TestConf:
-    '''Load test configuration.
+class WeeklyTestConf:
+    '''Load weekly test configuration.
+    
+    '''
+    def __init__(self, ini_file_path: os.PathLike) -> None:
+        test_conf = configparser.ConfigParser()
+        test_conf.read(ini_file_path)
+        self.major_version_list = test_conf['Branch']['major'].split('\n')
+        self.major_version_list.remove('')
+        self.tool_feed = test_conf['Tool']['feed']
+
+
+class ReleaseTestConf:
+    '''Load release test configuration.
 
     '''
     def __init__(self, ini_file_path: os.PathLike) -> None:
@@ -28,6 +40,24 @@ class TestConf:
         self.tool_feed = test_conf['Tool']['feed']
         self.os_list = test_conf['Scenarios']['os'].split('\n')
         self.os_list.remove('')
+
+
+class AzureQueryConf:
+    '''Load Azure pipeline info.
+
+    '''
+    def __init__(self, ini_file_path: os.PathLike) -> None:
+        pipe_conf = configparser.ConfigParser()
+        pipe_conf.read(ini_file_path)
+        self.pat = pipe_conf['Auth']['pat']
+        self.definition_id_map = dict()
+        for pipeline_name in pipe_conf['Pipeline'].keys():
+            self.definition_id_map[pipeline_name] = \
+                pipe_conf['Pipeline'][pipeline_name]
+        self.authorization = str(
+            base64.b64encode(bytes(f':{self.pat}', 'ascii')),
+            'ascii'
+        )
 
 
 class MQConnectionConf:
