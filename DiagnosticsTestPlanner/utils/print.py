@@ -5,7 +5,7 @@ import os
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, Alignment
 
-from utils.conf import TestConf
+from utils.conf import ReleaseTestConf
 
 
 def init_sos_unit_content(os_name: str):
@@ -172,7 +172,7 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     workbook.save(output_file)
 
 
-def print_weekly_test_plan(os_rotation, sdk_version, tool_info, output_file) -> None:
+def print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, output_file) -> None:
     workbook = Workbook()
 
     # main sheet
@@ -220,25 +220,25 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_info, output_file) -> 
         row=1, column=1,
         value='Info of tool:'
     )
-    print(f'Version: {tool_info.tool_version}')
+    print(f'Version: {tool_version}')
     tool_info_sheet.cell(
         row=2, column=1,
         value=f'Version:'
     )
     tool_info_sheet.cell(
         row=2, column=2,
-        value=f'{tool_info.tool_version}'
+        value=f'{tool_version}'
     )
-    for key in tool_info.pr_info.keys():
-        print(f'{key}: {tool_info.pr_info[key]}')
+    for key in pr_info.keys():
+        print(f'{key}: {pr_info[key]}')
     tool_info_sheet.cell(
         row=3, column=1,
         value='pull'
     )
     tool_info_sheet.cell(
         row=3, column=2,
-        value=tool_info.pr_info['pull']
-    ).hyperlink = tool_info.pr_info['pull_html_url']
+        value=pr_info['pull']
+    ).hyperlink = pr_info['pull_html_url']
     tool_info_sheet.cell(
         row=3, column=2,
     ).font = Font(color="0563C1")
@@ -251,8 +251,8 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_info, output_file) -> 
     )
     tool_info_sheet.cell(
         row=4, column=2,
-        value=tool_info.pr_info['commit']
-    ).hyperlink = tool_info.pr_info['commit_html_url']
+        value=pr_info['commit']
+    ).hyperlink = pr_info['commit_html_url']
     tool_info_sheet.cell(
         row=4, column=2,
     ).font = Font(color="0563C1")
@@ -260,7 +260,7 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_info, output_file) -> 
     print_weekly_test_matrix(os_rotation, output_file)
 
 
-def print_release_test_matrix(test_conf: TestConf, output_file: os.PathLike) -> None:
+def print_release_test_matrix(test_conf: ReleaseTestConf, output_file: os.PathLike) -> None:
     workbook = Workbook()
     main_sheet = workbook.active
 
