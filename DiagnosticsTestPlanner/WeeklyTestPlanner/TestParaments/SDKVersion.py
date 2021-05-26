@@ -1,10 +1,9 @@
 # coding=utf-8
 
 import os
+from urllib import request
 
-from utils.conf import AzureQueryConf, WeeklyTestConf
-from utils.azure import get_artifact_version, \
-    get_latest_acceptable_build, get_artifact
+from utils.conf import WeeklyTestConf
 from utils.github import list_branches
 
 
@@ -27,13 +26,6 @@ def get_sdk_version():
     '''Print out latest `release` version of .net core 3, .net 5 and .net 6.
 
     '''
-    azure_conf = AzureQueryConf(
-        os.path.join(
-            os.environ['planner_conf_dir'],
-            'azure.ini'
-        )
-    )
-
     test_conf = WeeklyTestConf(
         os.path.join(
             os.environ['planner_conf_dir'],
@@ -45,13 +37,14 @@ def get_sdk_version():
     branch_list = list_branches('dotnet', 'installer')
     for major_version in test_conf.major_version_list:
         branch_name = get_latest_branches(major_version, branch_list)
-        
-        build = get_latest_acceptable_build(
-            azure_conf.definition_id_map['installer'],
-            azure_conf.authorization, 
-            branch_name
+        url = (
+            'https://dotnetcli.blob.core.windows.net/'
+            f'dotnet/Sdk/{branch_name}/latest.version'
         )
-        artifact = get_artifact(build, azure_conf.authorization)
-        version = get_artifact_version(artifact, azure_conf.authorization)
-        sdk_version[major_version] = version
+        response = request.urlopen(url)
+        lines = response.readlines()
+        for line in lines:
+            content = line.decode('utf-8')
+            if '-' in content or '.' in content:
+                sdk_version[major_version] = content.strip('\r\n')
     return sdk_version
