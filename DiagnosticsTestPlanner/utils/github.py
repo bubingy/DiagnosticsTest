@@ -11,7 +11,7 @@ def list_branches(owner: str, repo: str) -> list:
     :param repo: name of repo.
     :return: list of branches.
     '''
-    url = f'https://api.github.com/repos/{owner}/{repo}/branches'
+    url = f'https://api.github.com/repos/{owner}/{repo}/branches?per_page=100'
     response_content = request.urlopen(url).read().decode('utf-8')
     return json.loads(response_content)
 
