@@ -42,7 +42,7 @@ def validate_on_windows():
             configuration.analyze_output,
             dump_name.replace('dump', 'out') + '_win'
         ) 
-        if 'linux-arm' in dump_name:
+        if 'linux-arm' in dump_name and '64' not in dump_name:
             validate.validate_32bit(dump_path, output_path)
         else:
             validate.validate(dump_path, output_path)

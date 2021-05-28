@@ -38,7 +38,7 @@ def install_sdk(arch: str='x64'):
             ' '.join(
                 [
                     f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
-                    f'-i {sdk_dir} -v {configuration.sdk_version} -Architecture {arch}'
+                    f'-InstallDir {sdk_dir} -v {configuration.sdk_version} -Architecture {arch}'
                 ]
             ),
             log_path=log_path
@@ -77,16 +77,9 @@ def install_sdk(arch: str='x64'):
 def install_tools():
     '''Install diagnostics
     '''
-    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
-    else: home_path = os.environ['HOME']
-    tool_install_path = os.path.join(
-        home_path,
-        'dotnet-tools'
-    )
     run_command_sync(
         (
             'dotnet tool install -g dotnet-dump '
-            f'--tool-path {tool_install_path} '
             f'--version {configuration.tool_version} '
             f'--add-source {configuration.tool_feed}'
         ),
