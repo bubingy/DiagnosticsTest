@@ -77,9 +77,16 @@ def install_sdk(arch: str='x64'):
 def install_tools():
     '''Install diagnostics
     '''
+    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
+    else: home_path = os.environ['HOME']
+    tool_install_path = os.path.join(
+        home_path,
+        'dotnet-tools'
+    )
     run_command_sync(
         (
             'dotnet tool install -g dotnet-dump '
+            f'--tool-path {tool_install_path} '
             f'--version {configuration.tool_version} '
             f'--add-source {configuration.tool_feed}'
         ),
