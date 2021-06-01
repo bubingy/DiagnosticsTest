@@ -12,12 +12,13 @@ class RunnerConf:
     def __init__(self, ini_file_path: os.PathLike) -> None:
         runner_conf = configparser.ConfigParser()
         runner_conf.read(ini_file_path)
+        self.host_ip = runner_conf['runner']['hostip']
+        self.runner_type = runner_conf['runner']['type']
         self.runner_name = runner_conf['runner']['runnername']
-        self.output_dir = None
+        self.output_dir = runner_conf['runner']['output']
 
-    def init(self):
-        assert self.output_dir is not None
-        if not os.path.exists(self.output_dir): os.makedirs(self.output_dir)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
 
 
 class MQConnectionConf:

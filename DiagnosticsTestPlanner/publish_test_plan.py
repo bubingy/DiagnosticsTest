@@ -7,7 +7,7 @@ import argparse
 from WeeklyTestPlanner import weekly_test_planner
 from ReleaseTestPlanner import release_test_planner
 from utils.rabbitmq import declare_queue, publish_message
-from utils.conf import MQConnectionConf, ReleaseTestConf, WeeklyTestConf
+from utils.conf import MQConnectionConf, ReleaseTestConf
 
 
 if __name__ == '__main__':

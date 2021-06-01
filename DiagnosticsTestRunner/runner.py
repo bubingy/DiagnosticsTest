@@ -83,10 +83,6 @@ if __name__ == "__main__":
     output_dir = args.output
 
     time_stamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    global_var.LOGGER = Logger(
-        'diagnostics runner',
-        os.path.join(output_dir, f'{time_stamp}.log')
-    )
     global_var.MQCONNCONF = MQConnectionConf(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -101,7 +97,9 @@ if __name__ == "__main__":
             'runner.ini'
         )
     )
-    global_var.RUNNERCONF.output_dir = output_dir
-    global_var.RUNNERCONF.init()
+    global_var.LOGGER = Logger(
+        'diagnostics runner',
+        os.path.join(output_dir, f'{time_stamp}.log')
+    )
 
     consume_task()
