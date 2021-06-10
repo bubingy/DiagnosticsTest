@@ -5,6 +5,8 @@ import base64
 import configparser
 from typing import Any
 
+import redis
+
 
 def load_json(file_path: os.PathLike) -> Any:
     import json
@@ -60,38 +62,20 @@ class AzureQueryConf:
         )
 
 
-class MQConnectionConf:
-    '''Load rabbitmq connection info.
+class RedisConnection:
+    def __init__(self, ini_file_path) -> None:
+        config = configparser.ConfigParser()
+        config.read(ini_file_path)
+        self.host = config['Redis'].get('host')
+        self.port = config['Redis'].getint('port')
 
-    This class include following properties:
-        username: username of rabbitmq.
-        password: password.
-        ipaddr: ip address of host where rabbitmq run.
-        port: port number of rabbitmq-management-plugin.
-        vhost: name of vhost.
-        base_url: base url for http api.
-        general_header: request header for general usage.
-    '''
-    def __init__(self, ini_file_path: os.PathLike) -> None:
-        connection_conf = configparser.ConfigParser()
-        connection_conf.read(ini_file_path)
-        self.username = connection_conf['connection']['username']
-        self.password = connection_conf['connection']['password']
-        self.ipaddr = connection_conf['connection']['ipaddr']
-        self.port = connection_conf['connection']['port']
-        self.vhost = connection_conf['connection']['vhost']
-        
-        self.base_url = f'http://{self.ipaddr}:{self.port}'
-        auth_str = str(
-            base64.b64encode(
-                bytes(
-                    f'{self.username}:{self.password}',
-                    'ascii'
-                )
-            ),
-            'ascii'
+        self.task_table_conn = redis.Redis(
+            self.host,
+            self.port,
+            0
         )
-        self.general_header = {
-            'Authorization': f'Basic {auth_str}',
-            'content-type':'application/json'
-        }
+        self.runner_table_conn = redis.Redis(
+            self.host,
+            self.port,
+            1
+        )

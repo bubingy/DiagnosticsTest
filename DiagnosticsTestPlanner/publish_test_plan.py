@@ -6,8 +6,7 @@ import argparse
 
 from WeeklyTestPlanner import weekly_test_planner
 from ReleaseTestPlanner import release_test_planner
-from utils.rabbitmq import declare_queue, publish_message
-from utils.conf import MQConnectionConf, ReleaseTestConf
+from utils.conf import ReleaseTestConf, RedisConnection
 
 
 if __name__ == '__main__':
@@ -16,11 +15,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     test_type = args.type
 
-    connection_conf = MQConnectionConf(
+    redis_conn = RedisConnection(
         os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'conf',
-            'rabbitmq.ini'
+            'redis.ini'
         )
     )
 
@@ -37,9 +36,8 @@ if __name__ == '__main__':
         plans = weekly_test_planner.get_plans()
   
     for plan in plans:
+        os_name = plan['OS']
         try:
-            declare_queue(plan['OS'], connection_conf)
-            publish_message(json.dumps(plan), plan['OS'], connection_conf)
+            redis_conn.task_table_conn.rpush(os_name, json.dumps(plan))
         except Exception as e:
-            os_name = plan['OS']
             print(f'exception when publishing {os_name}: {e}')
