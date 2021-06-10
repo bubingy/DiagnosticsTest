@@ -1,3 +1,3 @@
 LOGGER = None
 RUNNERCONF = None
-MQCONNCONF = None
+REDISCONN = None

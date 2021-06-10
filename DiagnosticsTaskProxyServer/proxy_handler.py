@@ -21,6 +21,6 @@ class ProxyServerStreamHandler(BaseServerStreamHandler):
             function_kwargs['redis_conn'] = self.redis_conf
             try:
                 result = self.call(function_name, function_args, function_kwargs)
-                self.send(writer, result)
+                if result is not None: self.send(writer, result)
             except Exception as e:
                 print(f'fail to call {function_name}: {e}')

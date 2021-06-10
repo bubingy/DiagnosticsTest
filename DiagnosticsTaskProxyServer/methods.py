@@ -59,5 +59,7 @@ def retrieve_task(client_info: dict,
         return None
     
     if redis_conn.task_table_conn.llen() == 0: return None
-    return redis_conn.task_table_conn.lpop(runner_name)
+    plan = redis_conn.task_table_conn.lpop(runner_name)
+    update_status(client_info, 'running', redis_conn)
+    return plan
  

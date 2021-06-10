@@ -8,9 +8,9 @@ from datetime import datetime
 
 import global_var
 from AutomationScripts import config
-from utils.rabbitmq import get_message, get_queue_length, declare_queue
 from utils.log import Logger
-from utils.conf import MQConnectionConf, RunnerConf
+from utils.conf import RunnerConf
+from SimpleRPC import *
 
 
 def consume_task():
