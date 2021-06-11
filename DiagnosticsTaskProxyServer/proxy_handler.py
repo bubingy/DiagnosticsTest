@@ -19,6 +19,7 @@ class ProxyServerStreamHandler(BaseServerStreamHandler):
             function_args = message['function_args']
             function_kwargs = message['function_kwargs']
             function_kwargs['redis_conn'] = self.redis_conf
+            print(f'running {function_name}...')
             try:
                 result = self.call(function_name, function_args, function_kwargs)
                 if result is not None: self.send(writer, result)

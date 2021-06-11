@@ -226,13 +226,15 @@ class RPCClient:
             self.event_loop = loop
             asyncio.set_event_loop()
         else:
-            self.event_loop = asyncio.get_event_loop()
+            self.event_loop = asyncio.new_event_loop()
 
-        self.event_loop.run_until_complete(
-            self.handler.connect_to_server(host, port)
+        asyncio.run_coroutine_threadsafe(
+            self.handler.connect_to_server(host, port),
+            self.event_loop
         )
-        self.event_loop.run_until_complete(
-            self.handler.communicate_with_server()
+        asyncio.run_coroutine_threadsafe(
+            self.handler.communicate_with_server(),
+            self.event_loop
         )
         self.event_loop.run_forever()
 

@@ -1,3 +1,0 @@
-LOGGER = None
-RUNNERCONF = None
-REDISCONN = None
