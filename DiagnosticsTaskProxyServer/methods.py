@@ -54,12 +54,15 @@ def retrieve_task(client_info: dict,
 
     # check if the host is working.
     for key in redis_conn.runner_table_conn.scan_iter():
-        if runner_host not in key: continue
-        if redis_conn.runner_table_conn.get(key) == b'idling': continue
+        if runner_host not in key.decode('utf-8'): continue
+        if redis_conn.runner_table_conn.get(key.decode('utf-8')) == b'idling':
+            continue
         return None
     
-    if redis_conn.task_table_conn.llen() == 0: return None
+    if redis_conn.task_table_conn.llen(runner_name) == 0: return None
     plan = redis_conn.task_table_conn.lpop(runner_name)
     update_status(client_info, 'running', redis_conn)
+    # TODO: delete following line
+    redis_conn.task_table_conn.rpush(runner_name, plan)
     return plan
  

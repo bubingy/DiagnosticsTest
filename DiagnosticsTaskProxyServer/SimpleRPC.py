@@ -120,6 +120,7 @@ class BaseStreamHandler:
                     **function_kwargs
                 )
             except Exception as e:
+                returned_value = None
                 print(f'fail to call {function_name}: {e}')
         return returned_value
 
