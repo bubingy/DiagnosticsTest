@@ -59,7 +59,7 @@ def retrieve_task(client_info: dict,
             continue
         return None
     
-    if redis_conn.task_table_conn.llen(runner_name) == 0: return None
-    plan = redis_conn.task_table_conn.lpop(runner_name)
+    if redis_conn.diagnostics_task_table_conn.llen(runner_name) == 0: return None
+    plan = redis_conn.diagnostics_task_table_conn.lpop(runner_name)
     return plan
  

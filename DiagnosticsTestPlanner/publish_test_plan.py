@@ -38,6 +38,6 @@ if __name__ == '__main__':
     for plan in plans:
         os_name = plan['OS']
         try:
-            redis_conn.task_table_conn.rpush(os_name, json.dumps(plan))
+            redis_conn.diagnostics_task_table_conn.rpush(os_name, json.dumps(plan))
         except Exception as e:
             print(f'exception when publishing {os_name}: {e}')

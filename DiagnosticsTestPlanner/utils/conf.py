@@ -69,12 +69,12 @@ class RedisConnection:
         self.host = config['Redis'].get('host')
         self.port = config['Redis'].getint('port')
 
-        self.task_table_conn = redis.Redis(
+        self.runner_table_conn = redis.Redis(
             self.host,
             self.port,
             0
         )
-        self.runner_table_conn = redis.Redis(
+        self.diagnostics_task_table_conn = redis.Redis(
             self.host,
             self.port,
             1
