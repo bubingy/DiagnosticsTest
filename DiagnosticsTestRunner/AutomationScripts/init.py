@@ -48,7 +48,7 @@ def install_sdk():
         ' '.join(
             [
                 f'{shell_name} {configuration.test_bed}/{os.path.basename(script_url)}',
-                f'-i {sdk_dir} -v {configuration.sdk_version}'
+                f'-InstallDir {sdk_dir} -v {configuration.sdk_version}'
             ]
         ),
         log_path=log_path

@@ -66,11 +66,11 @@ def clean():
         os.path.join(home_path, '.lldb'),
         os.path.join(home_path, '.lldbinit'),
         os.path.join(home_path, '.local'),
-        os.path.join(configuration.test_bed, '.dotnet-test'),
-        os.path.join(configuration.test_bed, 'consoleapp'),
-        os.path.join(configuration.test_bed, 'GCDumpPlayground2'),
-        os.path.join(configuration.test_bed, 'webapp'),
-        os.path.join(configuration.test_bed, 'dotnet-install.sh'),
+        # os.path.join(configuration.test_bed, '.dotnet-test'),
+        # os.path.join(configuration.test_bed, 'consoleapp'),
+        # os.path.join(configuration.test_bed, 'GCDumpPlayground2'),
+        # os.path.join(configuration.test_bed, 'webapp'),
+        # os.path.join(configuration.test_bed, 'dotnet-install.sh'),
     ]
 
     for f in to_be_removed:

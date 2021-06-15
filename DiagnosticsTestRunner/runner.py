@@ -3,8 +3,7 @@ from datetime import datetime
 
 from utils.log import Logger
 from utils.conf import RunnerConf, ProxyServerConf
-from SimpleRPC import *
-from handler import ClientStreamHandler, run_task
+from handler import ClientHandler, RunnerClient
 
 if __name__ == "__main__":
     conf_dir = os.path.join(
@@ -21,8 +20,7 @@ if __name__ == "__main__":
         os.path.join(output_dir, f'{time_stamp}.log')
     )
 
-    client_handler = ClientStreamHandler(runner_conf, logger)
-    client_handler.register_function(run_task)
+    client_handler = ClientHandler(proxy_server_conf, runner_conf, logger)
 
-    client = RPCClient(client_handler)
-    client.start_communicate(proxy_server_conf.host, proxy_server_conf.port)
+    client = RunnerClient(client_handler)
+    client.start_communicate()

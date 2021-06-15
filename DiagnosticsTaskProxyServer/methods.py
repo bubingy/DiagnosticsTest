@@ -61,8 +61,5 @@ def retrieve_task(client_info: dict,
     
     if redis_conn.task_table_conn.llen(runner_name) == 0: return None
     plan = redis_conn.task_table_conn.lpop(runner_name)
-    update_status(client_info, 'running', redis_conn)
-    # TODO: delete following line
-    redis_conn.task_table_conn.rpush(runner_name, plan)
     return plan
  
