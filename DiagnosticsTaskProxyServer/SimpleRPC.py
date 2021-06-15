@@ -107,8 +107,8 @@ class BaseStreamHandler:
                     **function_kwargs
                 )
             except Exception as e:
+                returned_value = None
                 print(f'fail to call {instance_name}.{function_name}: {e}')
-                return
         else:
             try:
                 method_to_call = getattr(
@@ -144,22 +144,6 @@ class BaseServerStreamHandler(BaseStreamHandler):
         :param reader: a StreamReader object.
         :param writer: a StreamWriter object.
         '''
-        pass
-
-
-class BaseClientStreamHandler(BaseStreamHandler):
-    '''BaseClientStreamHandler class
-
-    Please implement following method by yourself:
-        communicate_with_server(self) -> None
-    '''
-    def __init__(self) -> None:
-        super().__init__()
-
-    async def connect_to_server(self, host: str, port: int) -> None:
-        self.reader, self.writer = await asyncio.open_connection(host, port)
-
-    async def communicate_with_server(self) -> None:
         pass
 
 
@@ -203,40 +187,6 @@ class RPCServer:
             **kwargs
         )
         self.event_loop.run_until_complete(self.server_coro)
-        self.event_loop.run_forever()
-
-
-##############################
-#           Client           #
-##############################
-class RPCClient:
-    '''A basic async RPC client.
-
-    '''
-    def __init__(self, handler: BaseClientStreamHandler) -> None:
-        '''Constructor.
-
-        :param handler: a BaseClientStreamHandler object which 
-            implement client_connected_cb method.
-        '''
-        self.handler = handler
-
-    def start_communicate(self, host: str, port: int, **kwargs):
-        loop = kwargs.get('loop')
-        if loop is not None: 
-            self.event_loop = loop
-            asyncio.set_event_loop()
-        else:
-            self.event_loop = asyncio.new_event_loop()
-
-        asyncio.run_coroutine_threadsafe(
-            self.handler.connect_to_server(host, port),
-            self.event_loop
-        )
-        asyncio.run_coroutine_threadsafe(
-            self.handler.communicate_with_server(),
-            self.event_loop
-        )
         self.event_loop.run_forever()
 
 
