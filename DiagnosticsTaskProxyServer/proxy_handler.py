@@ -1,4 +1,4 @@
-from SimpleRPC import *
+from PickleRPC import *
 
 
 class ProxyServerStreamHandler(BaseServerStreamHandler):

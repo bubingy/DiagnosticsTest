@@ -1,4 +1,4 @@
-from SimpleRPC import *
+from PickleRPC import *
 from proxy_handler import ProxyServerStreamHandler
 from redis_conn import RedisConnection
 from methods import refresh_status, retrieve_task, update_status
