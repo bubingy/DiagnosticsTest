@@ -4,22 +4,22 @@ import os
 from urllib import request
 
 from utils.conf import WeeklyTestConf
-from utils.github import list_branches
+# from utils.github import list_branches
 
 
-def get_latest_branches(major_version: str, branch_list: list):
-    '''Get latest branch of given major version of .NET installer
+# def get_latest_branches(major_version: str, branch_list: list):
+#     '''Get latest branch of given major version of .NET installer
     
-    '''
-    return max(
-        map(
-            lambda x: x['name'],
-            filter(
-                lambda x: f'release/{major_version}' in x['name'][:12],
-                branch_list
-            )
-        )
-    ) 
+#     '''
+#     return max(
+#         map(
+#             lambda x: x['name'],
+#             filter(
+#                 lambda x: f'release/{major_version}' in x['name'][:12],
+#                 branch_list
+#             )
+#         )
+#     ) 
 
 
 def get_sdk_version():
@@ -34,12 +34,13 @@ def get_sdk_version():
     )
 
     sdk_version = dict()
-    branch_list = list_branches('dotnet', 'installer')
-    for major_version in test_conf.major_version_list:
-        branch_name = get_latest_branches(major_version, branch_list)
+    # branch_list = list_branches('dotnet', 'installer')
+    for major_version, branch_name in zip(
+        test_conf.major_version_list, test_conf.branch_list):
+        # branch_name = get_latest_branches(major_version, branch_list)
         url = (
             'https://dotnetcli.blob.core.windows.net/'
-            f'dotnet/Sdk/{branch_name}/latest.version'
+            f'dotnet/Sdk/release/{branch_name}/latest.version'
         )
         response = request.urlopen(url)
         lines = response.readlines()

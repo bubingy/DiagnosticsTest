@@ -24,8 +24,15 @@ class WeeklyTestConf:
     def __init__(self, ini_file_path: os.PathLike) -> None:
         test_conf = configparser.ConfigParser()
         test_conf.read(ini_file_path)
-        self.major_version_list = test_conf['Branch']['major'].split('\n')
-        self.major_version_list.remove('')
+        self.branch_list = test_conf['Branch']['major'].split('\n')
+        self.branch_list.remove('')
+
+        self.major_version_list = list(
+            map(
+                lambda x: x[:3],
+                self.branch_list
+            )
+        )
         self.tool_feed = test_conf['Tool']['feed']
 
 
