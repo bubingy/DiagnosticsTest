@@ -78,11 +78,13 @@ def install_tools():
     '''Install diagnostics
     '''
     run_command_sync(
-        (
-            f'dotnet tool install dotnet-dump',
-            f'--tool-path {configuration.tool_root}',
-            f'--version {configuration.tool_version} '
-            f'--add-source {configuration.tool_feed}'
+        ' '.join(
+            [
+                'dotnet tool install dotnet-dump',
+                f'--tool-path {configuration.tool_root}',
+                f'--version {configuration.tool_version}',
+                f'--add-source {configuration.tool_feed}'
+            ]
         ),
         log_path=log_path
     )
