@@ -9,7 +9,7 @@ import platform
 import configparser
 
 
-class GlobalConfig:
+class TestConfig:
     '''This class is used to store configuration and some global variables.
 
     '''
@@ -25,19 +25,28 @@ class GlobalConfig:
         self.tool_version = self.config['Tool']['Version']
         self.tool_feed = self.config['Tool']['Feed']
         self.test_bed = self.config['Test']['TestBed']
-        self.dump_directory = os.path.join(self.test_bed, 'dumpfiles')
-        self.analyze_output = os.path.join(self.test_bed, 'analyzeoutput')
-
-        dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
-
-        if 'win' in self.rid: home_path = os.environ['USERPROFILE']
-        else: home_path = os.environ['HOME']
-        diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
+        self.dump_directory = os.path.join(
+            self.test_bed,
+            f'dumpfiles-dotnet{self.sdk_version}'
+        )
+        self.analyze_output = os.path.join(
+            self.test_bed,
+            f'analyzeoutput-dotnet{self.sdk_version}'
+        )
+        self.tool_root = os.path.join(
+            self.test_bed,
+            f'tools-dotnet{self.sdk_version}'
+        )
+        dotnet_root = os.path.join(
+            self.test_bed,
+            f'.dotnet-test{self.sdk_version}-{self.rid}'
+        )
+    
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
-            os.environ['PATH'] = f'{dotnet_root};{diagnostics_tool_root};' + os.environ['PATH'] 
+            os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
         else:
-            os.environ['PATH'] = f'{dotnet_root}:{diagnostics_tool_root}:' + os.environ['PATH']
+            os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
 
     def get_rid(self):
         '''Get `.Net RID` of current platform.
@@ -73,4 +82,4 @@ class GlobalConfig:
         self.rid = rid
 
 
-configuration = GlobalConfig()
+configuration = TestConfig()

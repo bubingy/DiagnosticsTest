@@ -25,7 +25,7 @@ def create_publish_project(project_name: str)->Result:
     )
     project_dir = os.path.join(
         configuration.test_bed,
-        project_name
+        f'{project_name}-net{configuration.sdk_version}'
     )
     project_file = os.path.join(project_dir, f'{project_name}.csproj')
     try:
@@ -67,16 +67,16 @@ def run_project(project_name: str):
     '''
     project_dir = os.path.join(
         configuration.test_bed,
-        project_name
+        f'{project_name}-net{configuration.sdk_version}'
     )
     env = os.environ.copy()
     env['COMPlus_DbgEnableMiniDump'] = '1'
     dump_path = os.path.join(
         configuration.dump_directory,
         (
-            'dump_'
-            f'net{configuration.sdk_version[0]}{configuration.sdk_version[2]}_'
-            f'{configuration.rid}_{project_name}'
+            f'dump_{project_name}_'
+            f'net{configuration.sdk_version}_'
+            f'{configuration.rid}'
         )
     )
     env['COMPlus_DbgMiniDumpName'] = dump_path

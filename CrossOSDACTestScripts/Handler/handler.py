@@ -24,17 +24,12 @@ def analyze_on_linux():
         analyze.analyze(dump_path)
 
 
-def init_on_windows(arch: str):
-    '''Install sdk and tool on Windows.
+def validate_on_windows(arch: str):
+    '''Analyze dump on windows
     '''
     init.prepare_test_bed()
     init.install_sdk(arch)
     init.install_tools()
-
-
-def validate_on_windows():
-    '''Analyze dump on windows
-    '''
     for dump_name in os.listdir(configuration.dump_directory):
         if 'dump_net' not in dump_name: continue # not a dump file
         dump_path = os.path.join(configuration.dump_directory, dump_name)

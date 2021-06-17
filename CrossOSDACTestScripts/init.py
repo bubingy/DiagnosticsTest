@@ -63,7 +63,7 @@ def install_sdk(arch: str='x64'):
                 ' '.join(
                     [
                         f'/bin/bash {configuration.test_bed}/dotnet-install.sh',
-                        f'-i {sdk_dir} -v {configuration.sdk_version}'
+                        f'-InstallDir {sdk_dir} -v {configuration.sdk_version}'
                     ]
                 ),
                 log_path=log_path
@@ -79,7 +79,8 @@ def install_tools():
     '''
     run_command_sync(
         (
-            'dotnet tool install -g dotnet-dump '
+            f'dotnet tool install dotnet-dump',
+            f'--tool-path {configuration.tool_root}',
             f'--version {configuration.tool_version} '
             f'--add-source {configuration.tool_feed}'
         ),
