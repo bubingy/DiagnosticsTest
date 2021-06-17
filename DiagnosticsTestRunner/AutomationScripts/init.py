@@ -75,7 +75,8 @@ def install_tools():
         rt_code = run_command_sync(
             ' '.join(
                 [
-                    f'dotnet tool install -g {tool}',
+                    f'dotnet tool install {tool}',
+                    f'--tool-path {configuration.tool_root}',
                     f'--version {configuration.tool_version}',
                     f'--add-source {configuration.tool_feed}'
                 ]

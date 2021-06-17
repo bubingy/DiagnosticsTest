@@ -31,14 +31,14 @@ class GlobalConfig:
 
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
 
-        if 'win' in self.rid: home_path = os.environ['USERPROFILE']
-        else: home_path = os.environ['HOME']
-        diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
+        # if 'win' in self.rid: home_path = os.environ['USERPROFILE']
+        # else: home_path = os.environ['HOME']
+        # diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
-            os.environ['PATH'] = f'{dotnet_root};{diagnostics_tool_root};' + os.environ['PATH'] 
+            os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
         else:
-            os.environ['PATH'] = f'{dotnet_root}:{diagnostics_tool_root}:' + os.environ['PATH']
+            os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
 
         self.webappapp_runnable = True
         self.consoleapp_runnable = True
