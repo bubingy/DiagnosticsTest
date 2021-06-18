@@ -5,8 +5,8 @@
 
 import os
 
-# from config import configuration
 from utils import run_command_async, PIPE
+from config import TestConfig
 
 
 COMMANDS = [
@@ -46,29 +46,29 @@ def validate(dump_path: os.PathLike, output_path: os.PathLike):
         process.communicate()
 
 
-def validate_32bit(dump_path: os.PathLike, output_path: os.PathLike):
+def validate_32bit(conf: TestConfig, dump_path: os.PathLike, output_path: os.PathLike):
     """ analyze dump file and redirect output to a file
 
     params
         dump_path: the path of dump file
         output_path: the path of output file
     """
-    home_directory = os.getenv('HOME')
-
-    # with open(output_path, 'w+') as stream:
-    #     tool_version = configuration.tool_version
-    #     process = run_command_async(
-    #         f'dotnet {home_directory}\\.dotnet\\tools\\.store\\' + \
-    #         f'dotnet-dump\\{tool_version}\\dotnet-dump\\{tool_version}\\' + \
-    #         f'tools\\netcoreapp2.1\\any\\dotnet-dump.dll analyze {dump_path}',
-    #         stdin=PIPE,
-    #         stdout=stream,
-    #         stderr=stream
-    #     )
-    #     for command in COMMANDS:
-    #         try:
-    #             process.stdin.write(command)
-    #         except Exception as exception:
-    #             stream.write(f'{exception}\n'.encode('utf-8'))
-    #             continue
-    #     process.communicate()
+    with open(output_path, 'w+') as stream:
+        tool_version = conf.tool_version
+        process = run_command_async(
+            (
+                'dotnet '
+                f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp2.1/any/dotnet-dump.dll '
+                f'analyze {dump_path}'
+            ),
+            stdin=PIPE,
+            stdout=stream,
+            stderr=stream
+        )
+        for command in COMMANDS:
+            try:
+                process.stdin.write(command)
+            except Exception as exception:
+                stream.write(f'{exception}\n'.encode('utf-8'))
+                continue
+        process.communicate()

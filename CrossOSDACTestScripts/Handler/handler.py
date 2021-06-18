@@ -3,11 +3,13 @@
 # coding=utf-8
 
 import os
+import shutil
 
 import init
 from config import GlobalConfig
 from Projects import project
 from Handler import analyze, validate
+from clean import get_remove_candidate
 
 
 def analyze_on_linux(global_conf: GlobalConfig):
@@ -26,20 +28,54 @@ def analyze_on_linux(global_conf: GlobalConfig):
             analyze.analyze(conf, dump_path)
 
 
-def validate_on_windows(arch: str):
+def filter_32bit_dump(dump_directory: os.PathLike) -> list:
+    return list(
+        filter(
+            lambda dump_name: 'linux-arm' in dump_name and '64' not in dump_name,
+            os.listdir(dump_directory)
+        )
+    )
+
+
+def filter_64bit_dump(dump_directory: os.PathLike) -> list:
+    return list(
+        filter(
+            lambda dump_name: 'x64' in dump_name or 'arm64' in dump_name ,
+            os.listdir(dump_directory)
+        )
+    )
+
+
+def validate_on_windows(global_conf: GlobalConfig):
     '''Analyze dump on windows
     '''
-    init.prepare_test_bed()
-    init.install_sdk(arch)
-    init.install_tools()
-    # for dump_name in os.listdir(configuration.dump_directory):
-    #     if 'dump_' not in dump_name: continue # not a dump file
-    #     dump_path = os.path.join(configuration.dump_directory, dump_name)
-    #     output_path = os.path.join(
-    #         configuration.analyze_output,
-    #         dump_name.replace('dump', 'out') + '_win'
-    #     ) 
-    #     if 'linux-arm' in dump_name and '64' not in dump_name:
-    #         validate.validate_32bit(dump_path, output_path)
-    #     else:
-    #         validate.validate(dump_path, output_path)
+    for idx, _ in enumerate(global_conf.sdk_version_list):
+        for arch in ['x86', 'x64']:
+            # must put `global_conf.get` in the inner loop
+            conf = global_conf.get(idx)
+            init.prepare_test_bed(conf)
+            init.install_sdk(conf, arch)
+            init.install_tools(conf)
+
+            if arch == 'x86': dump_name_list = filter_32bit_dump(conf.dump_directory)
+            if arch == 'x64': dump_name_list = filter_64bit_dump(conf.dump_directory)
+            for dump_name in dump_name_list:
+                if 'dump_' not in dump_name: continue # not a dump file
+                dump_path = os.path.join(conf.dump_directory, dump_name)
+                output_path = os.path.join(
+                    conf.analyze_output,
+                    dump_name.replace('dump', 'out') + '_win'
+                )
+                if arch == 'x86': validate.validate_32bit(conf, dump_path, output_path)
+                else: validate.validate(dump_path, output_path)
+
+            # TODO: delete sdk
+            to_be_removed = get_remove_candidate(global_conf)
+            to_be_removed.add(conf.tool_root)
+            for f in to_be_removed:
+                if not os.path.exists(f): continue
+                try:
+                    if os.path.isdir(f): shutil.rmtree(f)
+                    else: os.remove(f)
+                except Exception as e:
+                    print(f'fail to remove {f}: {e}')

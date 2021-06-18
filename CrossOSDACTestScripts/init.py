@@ -26,7 +26,6 @@ def prepare_test_bed(conf: TestConfig):
 def install_sdk(conf: TestConfig, arch: str='x64'):
     '''Install .net(core) sdk
     '''
-    sdk_dir = os.environ['DOTNET_ROOT']
     if 'win' in conf.rid:
         req = request.urlopen('https://dot.net/v1/dotnet-install.ps1')
         with open(f'{conf.test_bed}/dotnet-install.ps1', 'w+') as f:
@@ -35,7 +34,7 @@ def install_sdk(conf: TestConfig, arch: str='x64'):
             ' '.join(
                 [
                     f'powershell.exe {conf.test_bed}/dotnet-install.ps1',
-                    f'-InstallDir {sdk_dir} -v {conf.sdk_version} -Architecture {arch}'
+                    f'-InstallDir {conf.dotnet_root} -v {conf.sdk_version} -Architecture {arch}'
                 ]
             )
         )
@@ -59,7 +58,7 @@ def install_sdk(conf: TestConfig, arch: str='x64'):
                 ' '.join(
                     [
                         f'/bin/bash {conf.test_bed}/dotnet-install.sh',
-                        f'-InstallDir {sdk_dir} -v {conf.sdk_version}'
+                        f'-InstallDir {conf.dotnet_root} -v {conf.sdk_version}'
                     ]
                 )
             )
@@ -75,7 +74,7 @@ def install_tools(conf: TestConfig):
     run_command_sync(
         ' '.join(
             [
-                'dotnet tool install dotnet-dump',
+                f'dotnet tool install dotnet-dump',
                 f'--tool-path {conf.tool_root}',
                 f'--version {conf.tool_version}',
                 f'--add-source {conf.tool_feed}'

@@ -30,6 +30,6 @@ if __name__ == "__main__":
     if args.action == 'analyze':
         handler.analyze_on_linux(global_conf)
     elif args.action == 'validate':
-        handler.validate_on_windows()
+        handler.validate_on_windows(global_conf)
     else:
         raise f'unknown action: {args.action}'

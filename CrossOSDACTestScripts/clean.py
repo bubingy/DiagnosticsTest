@@ -6,11 +6,8 @@ import shutil
 from config import GlobalConfig
 
 
-if __name__ == '__main__':
-    to_be_removed = set() 
-
-    global_conf = GlobalConfig()
-
+def get_remove_candidate(global_conf: GlobalConfig) -> set:
+    to_be_removed = set()
     for idx, _ in enumerate(global_conf.sdk_version_list):
         conf = global_conf.get(idx)
         if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
@@ -27,7 +24,12 @@ if __name__ == '__main__':
                 conf.dotnet_root,
             }
         )
+    return to_be_removed
 
+
+if __name__ == '__main__':
+    global_conf = GlobalConfig()
+    to_be_removed = get_remove_candidate(global_conf)
     print('Following files or dirs would be removed:')
     for f in to_be_removed: print(f'    {f}')
     key = input('input `y` to continue, other input will be take as a no:')
@@ -40,3 +42,4 @@ if __name__ == '__main__':
             else: os.remove(f)
         except Exception as e:
             print(f'fail to remove {f}: {e}')
+    

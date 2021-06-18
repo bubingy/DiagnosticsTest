@@ -109,9 +109,15 @@ class GlobalConfig:
         )
 
         os.environ['DOTNET_ROOT'] = test_conf.dotnet_root
-        os.environ['PATH'] = self.origin_ev['PATH'] + (
-            f':{test_conf.dotnet_root}'
-            f':{test_conf.tool_root}'
-        )
 
+        if 'win' in test_conf.rid: connector = ';'
+        else: connector = ':'
+
+        os.environ['PATH'] = connector.join(
+            [
+                test_conf.dotnet_root,
+                test_conf.tool_root,
+                self.origin_ev['PATH']
+            ]
+        )
         return test_conf
