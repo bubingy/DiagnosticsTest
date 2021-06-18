@@ -3,23 +3,30 @@
 import os
 import shutil
 
-from config import configuration
+from config import GlobalConfig
 
 
 if __name__ == '__main__':
-    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
-    else: home_path = os.environ['HOME']
+    to_be_removed = set() 
 
-    to_be_removed = [
-        os.path.join(home_path, '.aspnet'),
-        os.path.join(home_path, '.dotnet'),
-        os.path.join(home_path, '.nuget'),
-        os.path.join(home_path, '.templateengine'),
-        os.path.join(home_path, '.lldb'),
-        os.path.join(home_path, '.lldbinit'),
-        os.path.join(home_path, '.local'),
-        os.environ['DOTNET_ROOT'],
-    ]
+    global_conf = GlobalConfig()
+
+    for idx, _ in enumerate(global_conf.sdk_version_list):
+        conf = global_conf.get(idx)
+        if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
+        else: home_path = os.environ['HOME']
+        to_be_removed = to_be_removed.union(
+            {
+                os.path.join(home_path, '.aspnet'),
+                os.path.join(home_path, '.dotnet'),
+                os.path.join(home_path, '.nuget'),
+                os.path.join(home_path, '.templateengine'),
+                os.path.join(home_path, '.lldb'),
+                os.path.join(home_path, '.lldbinit'),
+                os.path.join(home_path, '.local'),
+                conf.dotnet_root,
+            }
+        )
 
     print('Following files or dirs would be removed:')
     for f in to_be_removed: print(f'    {f}')

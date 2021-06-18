@@ -5,7 +5,7 @@
 
 import os
 
-from config import configuration
+# from config import configuration
 from utils import run_command_async, PIPE
 
 
@@ -55,20 +55,20 @@ def validate_32bit(dump_path: os.PathLike, output_path: os.PathLike):
     """
     home_directory = os.getenv('HOME')
 
-    with open(output_path, 'w+') as stream:
-        tool_version = configuration.tool_version
-        process = run_command_async(
-            f'dotnet {home_directory}\\.dotnet\\tools\\.store\\' + \
-            f'dotnet-dump\\{tool_version}\\dotnet-dump\\{tool_version}\\' + \
-            f'tools\\netcoreapp2.1\\any\\dotnet-dump.dll analyze {dump_path}',
-            stdin=PIPE,
-            stdout=stream,
-            stderr=stream
-        )
-        for command in COMMANDS:
-            try:
-                process.stdin.write(command)
-            except Exception as exception:
-                stream.write(f'{exception}\n'.encode('utf-8'))
-                continue
-        process.communicate()
+    # with open(output_path, 'w+') as stream:
+    #     tool_version = configuration.tool_version
+    #     process = run_command_async(
+    #         f'dotnet {home_directory}\\.dotnet\\tools\\.store\\' + \
+    #         f'dotnet-dump\\{tool_version}\\dotnet-dump\\{tool_version}\\' + \
+    #         f'tools\\netcoreapp2.1\\any\\dotnet-dump.dll analyze {dump_path}',
+    #         stdin=PIPE,
+    #         stdout=stream,
+    #         stderr=stream
+    #     )
+    #     for command in COMMANDS:
+    #         try:
+    #             process.stdin.write(command)
+    #         except Exception as exception:
+    #             stream.write(f'{exception}\n'.encode('utf-8'))
+    #             continue
+    #     process.communicate()

@@ -2,10 +2,10 @@
 
 # coding=utf-8
 
-import sys
 import argparse
 
 from Handler import handler
+from config import GlobalConfig
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -23,18 +23,13 @@ if __name__ == "__main__":
         'validate',
         'validate on Windows'
     )
-    validate_parser.add_argument(
-        '-a', '--architecture',
-        required=('init' in sys.argv),
-        choices=['x86', 'x64'],
-        help='specify the bit width of CPU.'
-    )
     args = parser.parse_args()
 
+    global_conf = GlobalConfig()
+
     if args.action == 'analyze':
-        handler.analyze_on_linux()
+        handler.analyze_on_linux(global_conf)
     elif args.action == 'validate':
-        arch = args.architecture
-        handler.validate_on_windows(arch)
+        handler.validate_on_windows()
     else:
         raise f'unknown action: {args.action}'

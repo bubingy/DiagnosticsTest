@@ -5,7 +5,7 @@
 
 import os
 
-from config import configuration
+from config import TestConfig
 from utils import run_command_async, PIPE
 
 
@@ -23,36 +23,25 @@ COMMANDS = [
 ]
 
 
-def analyze(dump_path, output_path=None):
+def analyze(conf: TestConfig, dump_path: os.PathLike):
     """ analyze dump file and redirect output to a file
 
     params
         dump_path: the path of dump file
     """
-    project_name = dump_path.split('_')[-1]
+    dump_name = os.path.basename(dump_path)
 
-    if output_path is not None:
-        analyze_output_path = output_path
-    else:
-        analyze_output_path = os.path.join(
-            configuration.analyze_output,
-            '_'.join(
-                [
-                    'out',
-                    f'net{configuration.sdk_version[0]}{configuration.sdk_version[2]}',
-                    configuration.rid,
-                    project_name
-                ]
-            )
-        )
+    analyze_output_path = os.path.join(
+        conf.analyze_output,
+        dump_name.replace('dump', 'out')
+    )
     with open(analyze_output_path, 'w+') as stream:
-        if configuration.rid == 'linux-musl-arm64':
-            home_path = os.environ['HOME']
-            tool_version = configuration.tool_version
+        if conf.rid == 'linux-musl-arm64':
+            tool_version = conf.tool_version
             process = run_command_async(
                 (
                     'dotnet '
-                    f'{home_path}/.dotnet/tools/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp2.1/any/dotnet-dump.dll '
+                    f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp2.1/any/dotnet-dump.dll '
                     f'analyze {dump_path}'
                 ),
                 stdin=PIPE,

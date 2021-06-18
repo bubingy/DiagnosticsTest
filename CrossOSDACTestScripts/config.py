@@ -13,18 +13,19 @@ class TestConfig:
     '''This class is used to store configuration and some global variables.
 
     '''
-    def __init__(self):
-        self.config = configparser.ConfigParser()
+    def __init__(self,
+                 sdk_version: str,
+                 runtime_version: str,
+                 tool_version: str,
+                 tool_feed: str,
+                 test_bed: os.PathLike):
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
-        config_file_path = os.path.join(self.work_dir, 'config.conf')
-
-        self.config.read(config_file_path)
         self.get_rid()
-        self.sdk_version = self.config['SDK']['Version']
-        self.runtime_version = self.config['Runtime']['Version']
-        self.tool_version = self.config['Tool']['Version']
-        self.tool_feed = self.config['Tool']['Feed']
-        self.test_bed = self.config['Test']['TestBed']
+        self.sdk_version = sdk_version
+        self.runtime_version = runtime_version
+        self.tool_version = tool_version
+        self.tool_feed = tool_feed
+        self.test_bed = test_bed
         self.dump_directory = os.path.join(
             self.test_bed,
             f'dumpfiles-dotnet{self.sdk_version}'
@@ -37,16 +38,10 @@ class TestConfig:
             self.test_bed,
             f'tools-dotnet{self.sdk_version}'
         )
-        dotnet_root = os.path.join(
+        self.dotnet_root = os.path.join(
             self.test_bed,
             f'.dotnet-test{self.sdk_version}-{self.rid}'
         )
-    
-        os.environ['DOTNET_ROOT'] = dotnet_root
-        if 'win' in self.rid:
-            os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
-        else:
-            os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
 
     def get_rid(self):
         '''Get `.Net RID` of current platform.
@@ -82,4 +77,41 @@ class TestConfig:
         self.rid = rid
 
 
-configuration = TestConfig()
+class GlobalConfig:
+    def __init__(self) -> None:
+        self.config = configparser.ConfigParser()
+        self.work_dir = os.path.dirname(os.path.abspath(__file__))
+        config_file_path = os.path.join(self.work_dir, 'config.conf')
+
+        self.config.read(config_file_path)
+
+        self.sdk_version_list = self.config['SDK']['Version'].split('\n')
+        self.sdk_version_list.remove('')
+        self.runtime_version_list = self.config['Runtime']['Version'].split('\n')
+        self.runtime_version_list.remove('')
+
+        self.tool_version = self.config['Tool']['Version']
+        self.tool_feed = self.config['Tool']['Feed']
+        self.test_bed = self.config['Test']['TestBed']
+
+        self.origin_ev = os.environ.copy()
+
+    def get(self, index: int):
+        sdk_version, runtime_version = \
+            self.sdk_version_list[index], self.runtime_version_list[index]
+
+        test_conf = TestConfig(
+            sdk_version,
+            runtime_version,
+            self.tool_version,
+            self.tool_feed,
+            self.test_bed
+        )
+
+        os.environ['DOTNET_ROOT'] = test_conf.dotnet_root
+        os.environ['PATH'] = self.origin_ev['PATH'] + (
+            f':{test_conf.dotnet_root}'
+            f':{test_conf.tool_root}'
+        )
+
+        return test_conf
