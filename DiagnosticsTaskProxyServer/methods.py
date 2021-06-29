@@ -10,17 +10,15 @@ def refresh_status(client_info: dict,
     '''
     runner_name = client_info['runner_name']
     runner_host = client_info['host_name']
-    runner_status = redis_conn.runner_table_conn.get(
-        f'{runner_name}@{runner_host}'
+    redis_conn.conn.run_command('SELECT 0')
+    runner_status = redis_conn.conn.run_command(
+        f'GET {runner_name}@{runner_host}'
     )
 
-    if runner_status is None: runner_status = b'idling'
-    runner_status = runner_status.decode('utf-8')
+    if runner_status is None: runner_status = 'idling'
 
-    redis_conn.runner_table_conn.set(
-        f'{runner_name}@{runner_host}',
-        runner_status,
-        ex=10
+    runner_status = redis_conn.conn.run_command(
+        f'SET {runner_name}@{runner_host} {runner_status} EX 10'
     )
 
 
@@ -35,10 +33,10 @@ def update_status(client_info: dict,
     '''
     runner_name = client_info['runner_name']
     runner_host = client_info['host_name']
-    redis_conn.runner_table_conn.set(
-        f'{runner_name}@{runner_host}',
-        runner_status,
-        ex=10
+
+    redis_conn.conn.run_command('SELECT 0')
+    runner_status = redis_conn.conn.run_command(
+        f'SET {runner_name}@{runner_host} {runner_status} EX 10'
     )
 
 
@@ -53,13 +51,20 @@ def retrieve_task(client_info: dict,
     runner_host = client_info['host_name']
 
     # check if the host is working.
-    for key in redis_conn.runner_table_conn.scan_iter():
-        if runner_host not in key.decode('utf-8'): continue
-        if redis_conn.runner_table_conn.get(key.decode('utf-8')) == b'idling':
-            continue
+    redis_conn.conn.run_command('SELECT 0')
+    keys = redis_conn.conn.run_command('KEYS *')
+    for key in keys:
+        if runner_host not in key: continue
+        runner_status = redis_conn.conn.run_command(
+            f'GET {runner_name}@{runner_host}'
+        )
+        if runner_status == 'idling': continue
         return None
     
-    if redis_conn.diagnostics_task_table_conn.llen(runner_name) == 0: return None
-    plan = redis_conn.diagnostics_task_table_conn.lpop(runner_name)
+    
+    redis_conn.conn.run_command('SELECT 1')
+    if redis_conn.conn.run_command(f'LLEN {runner_name}') == 0: return None
+
+    plan = redis_conn.conn.run_command(f'LPOP {runner_name}')
     return plan
  

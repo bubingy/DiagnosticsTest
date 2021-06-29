@@ -1,5 +1,6 @@
-import redis
 import configparser
+
+from RedisTCPClient import RedisTCPClient
 
 
 class RedisConnection:
@@ -9,13 +10,4 @@ class RedisConnection:
         self.host = config['Redis'].get('host')
         self.port = config['Redis'].getint('port')
 
-        self.runner_table_conn = redis.Redis(
-            self.host,
-            self.port,
-            0
-        )
-        self.diagnostics_task_table_conn = redis.Redis(
-            self.host,
-            self.port,
-            1
-        )
+        self.conn = RedisTCPClient(self.host, self.port)
