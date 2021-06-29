@@ -5,7 +5,7 @@ import base64
 import configparser
 from typing import Any
 
-import redis
+from utils.RedisTCPClient import RedisTCPClient
 
 
 def load_json(file_path: os.PathLike) -> Any:
@@ -73,16 +73,8 @@ class RedisConnection:
     def __init__(self, ini_file_path) -> None:
         config = configparser.ConfigParser()
         config.read(ini_file_path)
+
         self.host = config['Redis'].get('host')
         self.port = config['Redis'].getint('port')
 
-        self.runner_table_conn = redis.Redis(
-            self.host,
-            self.port,
-            0
-        )
-        self.diagnostics_task_table_conn = redis.Redis(
-            self.host,
-            self.port,
-            1
-        )
+        self.conn = RedisTCPClient(self.host, self.port)
