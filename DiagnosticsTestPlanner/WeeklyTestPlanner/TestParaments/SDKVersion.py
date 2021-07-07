@@ -38,10 +38,16 @@ def get_sdk_version():
     for major_version, branch_name in zip(
         test_conf.major_version_list, test_conf.branch_list):
         # branch_name = get_latest_branches(major_version, branch_list)
-        url = (
-            'https://dotnetcli.blob.core.windows.net/'
-            f'dotnet/Sdk/release/{branch_name}/latest.version'
-        )
+        if major_version == '6.0':
+            url = (
+                'https://dotnetcli.blob.core.windows.net/'
+                f'dotnet/Sdk/main/latest.version'
+            )
+        else:
+            url = (
+                'https://dotnetcli.blob.core.windows.net/'
+                f'dotnet/Sdk/release/{branch_name}/latest.version'
+            )
         response = request.urlopen(url)
         lines = response.readlines()
         for line in lines:
