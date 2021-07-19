@@ -1,16 +1,17 @@
 import os
 from datetime import datetime
+from threading import Thread, Lock
 
+from handler import RunnerHandler
 from utils.log import Logger
-from utils.conf import RunnerConf, ProxyServerConf
-from handler import ClientHandler, RunnerClient
+from utils.conf import RunnerConf, RedisClient
+
 
 if __name__ == "__main__":
     conf_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         'conf'
     )
-    proxy_server_conf = ProxyServerConf(os.path.join(conf_dir, 'proxyserver.ini'))
     runner_conf = RunnerConf(os.path.join(conf_dir, 'runner.ini'))
 
     output_dir = runner_conf.output_folder
@@ -20,7 +21,7 @@ if __name__ == "__main__":
         os.path.join(output_dir, f'{time_stamp}.log')
     )
 
-    client_handler = ClientHandler(proxy_server_conf, runner_conf, logger)
-
-    client = RunnerClient(client_handler)
-    client.start_communicate()
+    redis_client = RedisClient(os.path.join(conf_dir, 'redis.ini'))
+    
+    runner_handler = RunnerHandler(runner_conf, redis_client, logger)
+    runner_handler.retrieve_task()
