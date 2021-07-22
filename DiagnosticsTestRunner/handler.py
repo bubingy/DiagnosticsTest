@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import pickle
 from datetime import datetime
 from threading import Lock
 
@@ -34,25 +33,30 @@ class RunnerHandler:
     def retrieve_task(self) -> None:
         while True:
             key_name = f'{self.runner_conf.runner_name}@{self.runner_conf.host_name}'
-            self.redis_client.run_command('SELECT 0')
-            status = self.redis_client.run_command(f'GET {key_name}')
+            
+            result = self.redis_client.run_commands(
+                [
+                    'SELECT 0',
+                    f'GET {key_name}'
+                ]
+            )
+            status = result[1]
             if status is 'running':
                 time.sleep(60)
                 continue
 
-            self.redis_client.run_command('SELECT 1')
-            tasks_list_size = self.redis_client.run_command(
-                f'LLEN {self.runner_conf.runner_name}'
+            result = self.redis_client.run_commands(
+                [
+                    'SELECT 1',
+                    f'RPOP {self.runner_conf.runner_name}'
+                ]
             )
-            if tasks_list_size <= 0:
+            task_str = result[1]
+            if task_str is None:
                 time.sleep(60)
                 continue
 
-            self.redis_client.run_command('SELECT 1')
-            result = self.redis_client.run_command(
-                f'RPOP {self.runner_conf.runner_name}'
-            )
-            plan = json.loads(pickle.loads(result))
+            plan = json.loads(task_str)
             self.logger.info('get a task, start running...')
             
             self.update_status('running', self.runner_conf, self.redis_client)

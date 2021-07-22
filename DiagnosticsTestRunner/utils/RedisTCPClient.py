@@ -16,10 +16,10 @@ class RedisTCPClient:
         self.conn = socket.socket()
         self.conn.connect((self.host, self.port))
 
-    def receive_response(self) -> Any:
+    def __receive_response(self) -> Any:
         '''Receive and parse response.
         
-        For more details about REdis Serialization Protocol,
+        For more details about Redis Serialization Protocol,
         please visit https://redis.io/topics/protocol
         '''
         # first character indicates data type.
@@ -78,7 +78,7 @@ class RedisTCPClient:
             # To handle with arrays of arrays scenario,
             # call `receive_response()` recursively.
             for _ in range(array_size):
-                array.append(self.receive_response())
+                array.append(self.__receive_response())
             return array
 
         else:
@@ -93,7 +93,23 @@ class RedisTCPClient:
         result = None
         try:
             self.conn.send(f'{command}\r\n'.encode('utf-8'))
-            result = self.receive_response()
+            result = self.__receive_response()
+        except Exception as e:
+            print(e)
+        return result
+
+    def run_commands(self, commands: list) -> list:
+        '''Allow the execution of a group of commands in a single step.
+
+        :param command: a list of redis command
+        :return: result.
+        '''
+        result = None
+        try:
+            self.run_command(f'MULTI\r\n')
+            for command in commands:
+                self.run_command(f'{command}\r\n')
+            result = self.run_command(f'EXEC\r\n')
         except Exception as e:
             print(e)
         return result
