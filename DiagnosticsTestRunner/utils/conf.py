@@ -3,6 +3,8 @@
 import os
 import configparser
 
+from utils.RedisTCPClient import RedisTCPClient
+
 
 class RunnerConf:
     '''Load configuration for runner.
@@ -19,9 +21,16 @@ class RunnerConf:
             os.makedirs(self.output_folder)
 
 
-class ProxyServerConf:
-    def __init__(self, ini_file_path) -> None:
-        config = configparser.ConfigParser()
-        config.read(ini_file_path)
-        self.host = config['connection'].get('host')
-        self.port = config['connection'].getint('port')
+class RedisClient(RedisTCPClient):
+    '''Redis client.
+
+    '''
+    def __init__(self,
+                 ini_file_path: os.PathLike,
+                 buffer_size: int=4096,
+                 coding='utf-8') -> None:
+        redis_conf = configparser.ConfigParser()
+        redis_conf.read(ini_file_path)
+        host = redis_conf['redis']['hostname']
+        port = redis_conf['redis']['port']
+        super().__init__(host, port, buffer_size=buffer_size, coding=coding)
