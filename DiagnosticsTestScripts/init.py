@@ -87,3 +87,4 @@ def install_tools():
             with open(log_path, 'a+') as log:
                 log.write(f'fail to install tool: {tool}!\n')
             sys.exit(-1)
+

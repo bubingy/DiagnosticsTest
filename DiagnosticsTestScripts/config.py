@@ -20,6 +20,7 @@ class GlobalConfig:
         self.get_rid()
         self.get_debugger()
         self.sdk_version = self.config['SDK']['Version']
+        self.source_feed = self.config['SDK']['Feed']
         self.tool_version = self.config['Tool']['Version']
         self.tool_commit = self.config['Tool']['Commit']
         self.tool_feed = self.config['Tool']['Feed']

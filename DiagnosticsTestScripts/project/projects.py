@@ -13,6 +13,7 @@ from utils import run_command_async, Popen, \
 
 log_path = os.path.join(configuration.test_result, 'projects.log')
 
+
 def create_publish_webapp() -> Result:
     '''Create and publish a dotnet webapp
 
@@ -32,17 +33,18 @@ def create_publish_webapp() -> Result:
         configuration.webappapp_runnable = False
         return Result(-1, 'fail to create webapp.', None)
 
-    rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
-        cwd=project_dir,
-        log_path=log_path
-    )
-    if rt_code == 0:
-        return Result(0, 'successfully create and publish webapp.', project_dir)
+    if configuration.source_feed != '':
+        rt_code = run_command_sync(
+            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            cwd=project_dir,
+            log_path=log_path
+        )
+        if rt_code == 0:
+            return Result(0, 'successfully create and publish webapp.', project_dir)
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out',
+        f'dotnet publish --self-contained -o out',
         cwd=project_dir,
         log_path=log_path
     )
@@ -122,20 +124,21 @@ def create_publish_consoleapp() -> Result:
         os.path.join(project_dir, 'Program.cs')
     )
 
-    rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
-        cwd=project_dir,
-        log_path=log_path
-    )
-    if rt_code == 0:
-        return Result(0, 'successfully create and publish consoleapp.', project_dir)
-    if 'osx' in configuration.rid:
-        configuration.consoleapp_runnable = False
-        return Result(-1, 'fail to publish consoleapp.', None)
+    if configuration.source_feed != '':
+        rt_code = run_command_sync(
+            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            cwd=project_dir,
+            log_path=log_path
+        )
+        if rt_code == 0:
+            return Result(0, 'successfully create and publish consoleapp.', project_dir)
+        if 'osx' in configuration.rid:
+            configuration.consoleapp_runnable = False
+            return Result(-1, 'fail to publish consoleapp.', None)
 
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out',
+        f'dotnet publish --self-contained -o out',
         cwd=project_dir,
         log_path=log_path
     )
@@ -176,17 +179,18 @@ def create_publish_GCDumpPlayground() -> Result:
         configuration.gcplayground_runnable = False
         return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
 
-    rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
-        cwd=project_dir,
-        log_path=log_path
-    )
-    if rt_code == 0:
-        return Result(0, 'successfully create and publish GCDumpPlayground.', project_dir)
+    if configuration.source_feed != '':
+        rt_code = run_command_sync(
+            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            cwd=project_dir,
+            log_path=log_path
+        )
+        if rt_code == 0:
+            return Result(0, 'successfully create and publish GCDumpPlayground.', project_dir)
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out',
+        f'dotnet publish --self-contained -o out',
         cwd=project_dir,
         log_path=log_path
     )
