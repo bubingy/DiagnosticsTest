@@ -44,7 +44,7 @@ def create_publish_webapp() -> Result:
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish --self-contained -o out',
+        f'dotnet build -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
@@ -138,7 +138,7 @@ def create_publish_consoleapp() -> Result:
 
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish --self-contained -o out',
+        f'dotnet build -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
@@ -190,7 +190,7 @@ def create_publish_GCDumpPlayground() -> Result:
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish --self-contained -o out',
+        f'dotnet build -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
