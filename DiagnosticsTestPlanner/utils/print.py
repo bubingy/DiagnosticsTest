@@ -55,7 +55,7 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     for idx, key in enumerate(required_oses.keys()):
         os_name = key
         sdk_version = required_oses[key]
-        if 'alpine' in key and '6' in required_oses[key]:
+        if 'Alpine' in key and '6' in required_oses[key]:
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
                 value=f'{os_name}/{sdk_version}'
