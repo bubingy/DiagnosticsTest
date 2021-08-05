@@ -44,10 +44,17 @@ def create_publish_webapp() -> Result:
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet build -o out -r {configuration.rid}',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
+    if rt_code != 0:
+        rt_code = run_command_sync(
+            f'dotnet publish -o out',
+            cwd=project_dir,
+            log_path=log_path
+        )
+
     if rt_code != 0:
         configuration.webappapp_runnable = False
         return Result(-1, 'fail to publish webapp.', None)
@@ -132,16 +139,19 @@ def create_publish_consoleapp() -> Result:
         )
         if rt_code == 0:
             return Result(0, 'successfully create and publish consoleapp.', project_dir)
-        if 'osx' in configuration.rid:
-            configuration.consoleapp_runnable = False
-            return Result(-1, 'fail to publish consoleapp.', None)
-
+        
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet build -o out -r {configuration.rid}',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
+    if rt_code != 0:
+        rt_code = run_command_sync(
+            f'dotnet publish -o out',
+            cwd=project_dir,
+            log_path=log_path
+        )
     if rt_code != 0:
         configuration.consoleapp_runnable = False
         return Result(-1, 'fail to publish consoleapp.', None)
@@ -190,10 +200,16 @@ def create_publish_GCDumpPlayground() -> Result:
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet build -o out -r {configuration.rid}',
+        f'dotnet publish -o out -r {configuration.rid}',
         cwd=project_dir,
         log_path=log_path
     )
+    if rt_code != 0:
+        rt_code = run_command_sync(
+            f'dotnet publish -o out',
+            cwd=project_dir,
+            log_path=log_path
+        )
     if rt_code != 0:
         configuration.gcplayground_runnable = False
         return Result(-1, 'fail to publish gcdumpplayground.', None)
