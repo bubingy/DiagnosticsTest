@@ -4,22 +4,6 @@ import os
 from urllib import request
 
 from utils.conf import WeeklyTestConf
-# from utils.github import list_branches
-
-
-# def get_latest_branches(major_version: str, branch_list: list):
-#     '''Get latest branch of given major version of .NET installer
-    
-#     '''
-#     return max(
-#         map(
-#             lambda x: x['name'],
-#             filter(
-#                 lambda x: f'release/{major_version}' in x['name'][:12],
-#                 branch_list
-#             )
-#         )
-#     ) 
 
 
 def get_sdk_version():
@@ -54,4 +38,10 @@ def get_sdk_version():
             content = line.decode('utf-8')
             if '-' in content or '.' in content:
                 sdk_version[major_version] = content.strip('\r\n')
-    return sdk_version
+
+    source_feed_version = dict()
+    for major_version, source_feed in zip(
+        test_conf.major_version_list, test_conf.source_feed_list):
+        source_feed_version[major_version] = source_feed
+
+    return sdk_version, source_feed_version
