@@ -25,6 +25,13 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
                 conf.tool_root
             }
         )
+        for f in os.listdir(conf.test_bed):
+            if conf.dump_directory == f: continue
+            if conf.analyze_output == f: continue
+
+            to_be_removed.add(
+                os.path.join(conf.test_bed, f)
+            )
     return to_be_removed
 
 
@@ -43,4 +50,5 @@ if __name__ == '__main__':
             else: os.remove(f)
         except Exception as e:
             print(f'fail to remove {f}: {e}')
+
     
