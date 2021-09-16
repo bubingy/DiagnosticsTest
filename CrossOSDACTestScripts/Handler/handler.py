@@ -9,7 +9,6 @@ import init
 from config import GlobalConfig
 from Projects import project
 from Handler import analyze, validate
-from clean import get_remove_candidate
 
 
 def analyze_on_linux(global_conf: GlobalConfig):
@@ -52,7 +51,7 @@ def validate_on_windows(global_conf: GlobalConfig):
     for idx, _ in enumerate(global_conf.sdk_version_list):
         for arch in ['x86', 'x64']:
             # must put `global_conf.get` in the inner loop
-            conf = global_conf.get(idx)
+            conf = global_conf.get(idx, arch)
             init.prepare_test_bed(conf)
             init.install_sdk(conf, arch)
             init.install_tools(conf)
@@ -68,14 +67,3 @@ def validate_on_windows(global_conf: GlobalConfig):
                 )
                 if arch == 'x86': validate.validate_32bit(conf, dump_path, output_path)
                 else: validate.validate(dump_path, output_path)
-
-            # TODO: delete sdk
-            to_be_removed = get_remove_candidate(global_conf)
-            to_be_removed.add(conf.tool_root)
-            for f in to_be_removed:
-                if not os.path.exists(f): continue
-                try:
-                    if os.path.isdir(f): shutil.rmtree(f)
-                    else: os.remove(f)
-                except Exception as e:
-                    print(f'fail to remove {f}: {e}')

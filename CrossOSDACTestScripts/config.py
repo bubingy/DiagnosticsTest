@@ -18,7 +18,8 @@ class TestConfig:
                  runtime_version: str,
                  tool_version: str,
                  tool_feed: str,
-                 test_bed: os.PathLike):
+                 test_bed: os.PathLike,
+                 arch: str):
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
         self.get_rid()
         self.sdk_version = sdk_version
@@ -36,11 +37,11 @@ class TestConfig:
         )
         self.tool_root = os.path.join(
             self.test_bed,
-            f'tools-dotnet{self.sdk_version}'
+            f'tools-dotnet{self.sdk_version}-{arch}'
         )
         self.dotnet_root = os.path.join(
             self.test_bed,
-            f'.dotnet-test{self.sdk_version}-{self.rid}'
+            f'.dotnet-test{self.sdk_version}-{self.rid}-{arch}'
         )
 
     def get_rid(self):
@@ -96,7 +97,7 @@ class GlobalConfig:
 
         self.origin_ev = os.environ.copy()
 
-    def get(self, index: int):
+    def get(self, index: int, arch: str):
         sdk_version, runtime_version = \
             self.sdk_version_list[index], self.runtime_version_list[index]
 
@@ -105,7 +106,8 @@ class GlobalConfig:
             runtime_version,
             self.tool_version,
             self.tool_feed,
-            self.test_bed
+            self.test_bed,
+            arch
         )
 
         os.environ['DOTNET_ROOT'] = test_conf.dotnet_root

@@ -22,6 +22,7 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
                 os.path.join(home_path, '.lldbinit'),
                 os.path.join(home_path, '.local'),
                 conf.dotnet_root,
+                conf.tool_root
             }
         )
     return to_be_removed
