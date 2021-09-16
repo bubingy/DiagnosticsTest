@@ -27,12 +27,11 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
                 }
             )
             for f in os.listdir(conf.test_bed):
-                if conf.dump_directory == os.path.join(conf.test_bed, f): continue
-                if conf.analyze_output == os.path.join(conf.test_bed, f): continue
+                file_path = os.path.join(conf.test_bed, f)
+                if conf.dump_directory == file_path: continue
+                if conf.analyze_output == file_path: continue
 
-                to_be_removed.add(
-                    os.path.join(conf.test_bed, f)
-                )
+                to_be_removed.add(file_path)
     return to_be_removed
 
 
