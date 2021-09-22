@@ -5,50 +5,58 @@ import re
 import glob
 import platform
 import configparser
+from typing import Union
 
 
-class GlobalConfig:
+class TestConfig:
     '''This class is used to store configuration and some global variables.
     
     '''
-    def __init__(self):
+    def __init__(self, config: Union[os.PathLike, dict]=None):
         self.config = configparser.ConfigParser()
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
-        config_file_path = os.path.join(self.work_dir, 'config.conf')
 
-        self.config.read(config_file_path)
-        self.get_rid()
-        self.get_debugger()
+        if config is None:
+            config_file_path = os.path.join(self.work_dir, 'config.conf')
+            self.config.read(config_file_path)
+        elif isinstance(config, os.PathLike) is True:
+            config_file_path = config
+            self.config.read(config_file_path)
+        elif isinstance(config, dict) is True:
+            self.config = config
+        else:
+            raise "fail to read config!"
+    
+        self.__get_rid()
+        self.__get_debugger()
         self.sdk_version = self.config['SDK']['Version']
         self.source_feed = self.config['SDK']['Feed']
         self.tool_version = self.config['Tool']['Version']
         self.tool_commit = self.config['Tool']['Commit']
         self.tool_feed = self.config['Tool']['Feed']
+
         self.test_bed = self.config['Test']['TestBed']
+        self.run_benchmarks = True
+        self.run_webapp = True
+        self.run_consoleapp = True
+        self.run_gcplayground = True
         if self.config['Test']['RunBenchmarks'] == 'true':
             self.run_benchmarks = True
-        else:
-            self.run_benchmarks = False
+        else: self.run_benchmarks = False
             
         self.test_result = os.path.join(self.test_bed, 'TestResult')
         self.tool_root = os.path.join(self.test_bed, 'dotnet-tools')
         # add environment variables
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
 
-        # if 'win' in self.rid: home_path = os.environ['USERPROFILE']
-        # else: home_path = os.environ['HOME']
-        # diagnostics_tool_root = os.path.join(home_path, '.dotnet', 'tools')
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
             os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
         else:
             os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
 
-        self.webappapp_runnable = True
-        self.consoleapp_runnable = True
-        self.gcplayground_runnable = True
 
-    def get_rid(self):
+    def __get_rid(self):
         '''Get `.Net RID` of current platform.
         '''
         system = platform.system().lower()
@@ -82,7 +90,7 @@ class GlobalConfig:
         self.rid = rid
 
 
-    def get_debugger(self):
+    def __get_debugger(self):
         '''Get full name of debugger.
         
         Args:
@@ -107,4 +115,4 @@ class GlobalConfig:
                         return
 
 
-configuration = GlobalConfig()
+configuration: TestConfig = None

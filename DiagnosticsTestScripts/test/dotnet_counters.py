@@ -3,22 +3,22 @@
 import os
 import time
 
-from config import configuration
-from utils import run_command_async, run_command_sync
+import config
+from utils import run_command_async, run_command_sync, test_logger
 from project import projects
 
-log_path = os.path.join(configuration.test_result, 'dotnet_counters.log')
 
-def test_counters():
+@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
+def test_dotnet_counters(log_path: os.PathLike=None):
     '''Run sample apps and perform tests.
 
     '''
-    if configuration.webappapp_runnable is False:
+    if config.configuration.run_webapp is False:
         with open(log_path, 'a+') as f:
             f.write(f'can\'t run webapp for dotnet-counters.\n')
         return
     webapp_dir = os.path.join(
-        configuration.test_bed,
+        config.configuration.test_bed,
         'webapp'
     )
     webapp = projects.run_webapp(webapp_dir)
@@ -36,7 +36,7 @@ def test_counters():
     ]
     for command in async_commands_list:
         try:
-            p = run_command_async(command, cwd=configuration.test_result)
+            p = run_command_async(command, cwd=config.configuration.test_result)
             time.sleep(10)
             p.terminate()
             with open(log_path, 'a+') as f:
@@ -49,20 +49,20 @@ def test_counters():
     webapp.terminate()
     webapp.communicate()
 
-    if configuration.sdk_version[0] == '3':
+    if config.configuration.sdk_version[0] == '3':
         print('dotnet-counters new feature isn\'t supported by .net core 3.x')
         return
     
-    if configuration.consoleapp_runnable is False:
+    if config.configuration.run_consoleapp is False:
         with open(log_path, 'a+') as f:
             f.write(f'can\'t run consoleapp for dotnet-counters.\n')
         return
     consoleapp_dir = os.path.join(
-        configuration.test_bed,
+        config.configuration.test_bed,
         'consoleapp'
     )
     extend_name = ''
-    if 'win' in configuration.rid:
+    if 'win' in config.configuration.rid:
         extend_name = '.exe'
     try:
         p = run_command_async(

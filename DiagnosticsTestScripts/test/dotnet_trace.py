@@ -1,24 +1,23 @@
 # coding=utf-8
 
 import os
-import time
 
-from config import configuration
-from utils import run_command_async, run_command_sync, PIPE
+import config
+from utils import run_command_async, run_command_sync, PIPE, test_logger
 from project import projects
 
-log_path = os.path.join(configuration.test_result, 'dotnet_trace.log')
 
-def test_trace():
+@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
+def test_dotnet_trace(log_path: os.PathLike=None):
     '''Run sample apps and perform tests.
 
     '''
-    if configuration.webappapp_runnable is False:
+    if config.configuration.run_webapp is False:
         with open(log_path, 'a+') as f:
             f.write(f'can\'t run webapp for dotnet-trace.\n')
         return
     webapp_dir = os.path.join(
-        configuration.test_bed,
+        config.configuration.test_bed,
         'webapp'
     )
     webapp = projects.run_webapp(webapp_dir)
@@ -35,7 +34,7 @@ def test_trace():
         stdin=PIPE,
         stdout=PIPE,
         stderr=PIPE,
-        cwd=configuration.test_result,
+        cwd=config.configuration.test_result,
     )
     proc.communicate()
     webapp.terminate()
@@ -44,22 +43,22 @@ def test_trace():
     run_command_sync(
         'dotnet-trace convert --format speedscope webapp.nettrace',
         log_path,
-        cwd=configuration.test_result
+        cwd=config.configuration.test_result
     )
 
-    if configuration.sdk_version[0] == '3':
+    if config.configuration.sdk_version[0] == '3':
         print('dotnet-trace new feature isn\'t supported by .net core 3.x')
         return
-    if configuration.consoleapp_runnable is False:
+    if config.configuration.run_consoleapp is False:
         with open(log_path, 'a+') as f:
             f.write(f'can\'t run consoleapp for dotnet-trace.\n')
         return
     consoleapp_dir = os.path.join(
-        configuration.test_bed,
+        config.configuration.test_bed,
         'consoleapp'
     )
     extend_name = ''
-    if 'win' in configuration.rid:
+    if 'win' in config.configuration.rid:
         extend_name = '.exe'
     proc = run_command_async(
         (
@@ -67,6 +66,6 @@ def test_trace():
             '--providers Microsoft-Windows-DotNETRuntime '
             f'-- {consoleapp_dir}/out/consoleapp{extend_name}'
         ),
-        cwd=configuration.test_result
+        cwd=config.configuration.test_result
     )
     proc.communicate()

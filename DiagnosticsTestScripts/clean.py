@@ -3,11 +3,13 @@
 import os
 import shutil
 
-from config import configuration
+import config
 
 
 if __name__ == '__main__':
-    if 'win' in configuration.rid: home_path = os.environ['USERPROFILE']
+    config.configuration = config.TestConfig()
+
+    if 'win' in config.configuration.rid: home_path = os.environ['USERPROFILE']
     else: home_path = os.environ['HOME']
 
     to_be_removed = [
@@ -18,7 +20,7 @@ if __name__ == '__main__':
         os.path.join(home_path, '.lldb'),
         os.path.join(home_path, '.lldbinit'),
         os.path.join(home_path, '.local'),
-        configuration.test_bed
+        config.configuration.test_bed
     ]
 
     print('Following files or dirs would be removed:')

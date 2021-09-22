@@ -3,27 +3,27 @@
 import os
 import glob
 
-from config import configuration
-from utils import run_command_async, run_command_sync, PIPE
+import config
+from utils import run_command_async, run_command_sync, PIPE, test_logger
 from project import projects
 
-log_path = os.path.join(configuration.test_result, 'dotnet_sos.log')
 
-def test_sos():
+@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
+def test_dotnet_sos(log_path: os.PathLike=None):
     '''Run sample apps and perform tests.
 
     '''
-    if 'musl' in configuration.rid:
+    if 'musl' in config.configuration.rid:
         print('lldb isn\'t available for alpine.')
         return
     
-    if configuration.webappapp_runnable is False:
+    if config.configuration.run_webapp is False:
         with open(log_path, 'a+') as f:
             f.write(f'can\'t run webapp for dotnet-sos.\n')
         return
 
     webapp_dir = os.path.join(
-        configuration.test_bed,
+        config.configuration.test_bed,
         'webapp'
     )
     sync_commands_list = [
@@ -33,9 +33,9 @@ def test_sos():
         'dotnet-sos install',
     ]
     for command in sync_commands_list:
-        run_command_sync(command, log_path, cwd=configuration.test_bed)
+        run_command_sync(command, log_path, cwd=config.configuration.test_bed)
 
-    if 'win' in configuration.rid:
+    if 'win' in config.configuration.rid:
         home_path = os.environ['USERPROFILE']
         plugin_path = os.path.join(
             home_path,
@@ -56,7 +56,7 @@ def test_sos():
             b'q\n'
         ]
         debug_script = os.path.join(
-            configuration.test_bed,
+            config.configuration.test_bed,
             'cdb_debug_script'
         )
         with open(debug_script, 'wb+') as fs:
@@ -76,13 +76,13 @@ def test_sos():
         ]
     
     # load dump for debugging
-    analyze_output_path = os.path.join(configuration.test_result, 'debug_dump.log')
-    if 'win' in configuration.rid:
-        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
+    analyze_output_path = os.path.join(config.configuration.test_result, 'debug_dump.log')
+    if 'win' in config.configuration.rid:
+        dump_path = glob.glob(f'{config.configuration.test_bed}/dump*.dmp')[0]
         with open(analyze_output_path, 'w+') as fs:
             run_command_async(
                 (
-                    f'{configuration.debugger} -z {dump_path} '
+                    f'{config.configuration.debugger} -z {dump_path} '
                     f'-cf {debug_script}'
                 ),
                 log_path=log_path,
@@ -90,12 +90,12 @@ def test_sos():
                 stderr=fs
             ).communicate()
 
-    if 'linux' in configuration.rid:
-        dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
+    if 'linux' in config.configuration.rid:
+        dump_path = glob.glob(f'{config.configuration.test_bed}/core_*')[0]
         with open(analyze_output_path, 'w+') as f:
             proc = run_command_async(
-                f'{configuration.debugger} -c {dump_path}',
-                cwd=configuration.test_result,
+                f'{config.configuration.debugger} -c {dump_path}',
+                cwd=config.configuration.test_result,
                 stdin=PIPE,
                 stdout=f,
                 stderr=f
@@ -110,12 +110,12 @@ def test_sos():
 
     # attach process for debugging
     webapp = projects.run_webapp(webapp_dir)
-    analyze_output_path = os.path.join(configuration.test_result, 'debug_process.log')
-    if 'win' in configuration.rid:
+    analyze_output_path = os.path.join(config.configuration.test_result, 'debug_process.log')
+    if 'win' in config.configuration.rid:
         with open(analyze_output_path, 'w+') as fs:
             run_command_async(
                 (
-                    f'{configuration.debugger} -p {webapp.pid} '
+                    f'{config.configuration.debugger} -p {webapp.pid} '
                     f'-cf {debug_script}'
                 ),
                 log_path=log_path,
@@ -125,8 +125,8 @@ def test_sos():
     else:
         with open(analyze_output_path, 'w+') as f:
             proc = run_command_async(
-                f'{configuration.debugger} -p {webapp.pid}',
-                cwd=configuration.test_result,
+                f'{config.configuration.debugger} -p {webapp.pid}',
+                cwd=config.configuration.test_result,
                 stdin=PIPE,
                 stdout=f,
                 stderr=f

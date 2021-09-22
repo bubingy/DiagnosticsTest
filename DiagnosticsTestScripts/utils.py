@@ -1,10 +1,9 @@
 # coding=utf-8
 
 import os
-import shutil
+from functools import wraps
 from subprocess import PIPE, Popen
-
-from config import configuration
+from typing import Callable
 
 
 def run_command_sync(command, log_path=None, bufsize=-1, 
@@ -52,6 +51,20 @@ def run_command_async(command, log_path=None, bufsize=-1,
     p = Popen(args, bufsize=-1, stdin=stdin, 
         stdout=stdout, stderr=stderr, cwd=cwd)
     return p
+
+
+def test_logger(log_path):
+    def logging_decorator(func: Callable):
+        @wraps(func)
+        def decorated(*args, **kwargs):
+            with open(log_path, 'a+') as fs:
+                fs.write(f'****** run {func.__name__} ******\r\n')
+            rt = func(*args, log_path=log_path, **kwargs)
+            with open(log_path, 'a+') as fs:
+                fs.write(f'****** completed ******\r\n')  
+            return rt
+        return decorated
+    return logging_decorator
 
 
 class Result:
