@@ -14,12 +14,17 @@ def test_dotnet_sos(log_path: os.PathLike=None):
 
     '''
     if 'musl' in config.configuration.rid:
-        print('lldb isn\'t available for alpine.')
+        message = 'lldb isn\'t available for alpine.\n'
+        print(message)
+        with open(log_path, 'a+') as f:
+            f.write(message)
         return
     
     if config.configuration.run_webapp is False:
+        message = f'can\'t run webapp for dotnet-sos.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'can\'t run webapp for dotnet-sos.\n')
+            f.write(message)
         return
 
     webapp_dir = os.path.join(

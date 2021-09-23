@@ -15,8 +15,10 @@ def test_dotnet_gcdump(log_path: os.PathLike=None):
 
     '''
     if config.configuration.run_gcplayground is False:
+        message = f'can\'t run gcdumpplayground for dotnet-gcdump.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'can\'t run gcdumpplayground for dotnet-gcdump.\n')
+            f.write(message)
         return
     project_dir = os.path.join(
         config.configuration.test_bed,
@@ -30,12 +32,13 @@ def test_dotnet_gcdump(log_path: os.PathLike=None):
     ]
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=config.configuration.test_result)
-    gcdumpplayground.terminate()
+
     while gcdumpplayground.poll() is None:
         time.sleep(1)
 
     gcdump = glob.glob(f'{config.configuration.test_result}/*.gcdump')
     if len(gcdump) == 0 or gcdump is None:
-        print('fail to generate gcdump.')
+        message = 'fail to generate gcdump!\n'
+        print(message)
         with open(log_path, 'a+') as log:
-            log.write('fail to generate gcdump\n')
+            log.write(message)

@@ -14,11 +14,16 @@ def test_dotnet_dump(log_path: os.PathLike=None):
 
     '''
     if 'osx' in config.configuration.rid:
-        print('dotnet-dump doesn\'t support on osx.')
+        message = 'dotnet-dump doesn\'t support on osx.\n'
+        print(message)
+        with open(log_path, 'a+') as f:
+            f.write(message)
         return
     if config.configuration.run_webapp is False:
+        message = f'can\'t run webapp for dotnet-dump.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'can\'t run webapp for dotnet-dump.\n')
+            f.write(message)
         return
     webapp_dir = os.path.join(
         config.configuration.test_bed,
@@ -41,8 +46,10 @@ def test_dotnet_dump(log_path: os.PathLike=None):
         dump_paths = glob.glob(f'{config.configuration.test_bed}/core_*')
 
     if len(dump_paths) == 0:
+        message = f'no dump files available.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'no dump files available.\n')
+            f.write(message)
         return
 
     analyze_commands = [
