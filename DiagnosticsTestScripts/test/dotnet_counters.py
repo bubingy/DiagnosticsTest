@@ -14,8 +14,10 @@ def test_dotnet_counters(log_path: os.PathLike=None):
 
     '''
     if config.configuration.run_webapp is False:
+        message = 'can\'t run webapp for dotnet-counters.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'can\'t run webapp for dotnet-counters.\n')
+            f.write(message)
         return
     webapp_dir = os.path.join(
         config.configuration.test_bed,
@@ -36,27 +38,37 @@ def test_dotnet_counters(log_path: os.PathLike=None):
     ]
     for command in async_commands_list:
         try:
-            p = run_command_async(command, cwd=config.configuration.test_result)
+            p = run_command_async(
+                command,
+                log_path=log_path,
+                cwd=config.configuration.test_result
+            )
             time.sleep(10)
             p.terminate()
+        except Exception as e:
+            message = f'fail to run command: {e}.\n'
+            print(message)
             with open(log_path, 'a+') as f:
-                f.write(f'successfully run command {command}\n')
-        except Exception as exception:
-            with open(log_path, 'a+') as f:
-                f.write(f'fail to run command: {exception}\n')
+                f.write(message)
             continue
 
     webapp.terminate()
     webapp.communicate()
 
     if config.configuration.sdk_version[0] == '3':
-        print('dotnet-counters new feature isn\'t supported by .net core 3.x')
+        message = 'dotnet-counters new feature isn\'t supported by .net core 3.x.\n'
+        print(message)
+        with open(log_path, 'a+') as f:
+            f.write(message)
         return
     
     if config.configuration.run_consoleapp is False:
+        message = 'can\'t run consoleapp for dotnet-counters.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'can\'t run consoleapp for dotnet-counters.\n')
+            f.write(message)
         return
+
     consoleapp_dir = os.path.join(
         config.configuration.test_bed,
         'consoleapp'
@@ -66,11 +78,12 @@ def test_dotnet_counters(log_path: os.PathLike=None):
         extend_name = '.exe'
     try:
         p = run_command_async(
-            f'dotnet-counters monitor -- {consoleapp_dir}/out/consoleapp{extend_name}'
+            f'dotnet-counters monitor -- {consoleapp_dir}/out/consoleapp{extend_name}',
+            log_path=log_path
         )
         p.communicate()
+    except Exception as e:
+        message = f'fail to run command: {e}.\n'
+        print(message)
         with open(log_path, 'a+') as f:
-            f.write(f'successfully run command {command}\n')
-    except Exception as exception:
-        with open(log_path, 'a+') as f:
-            f.write(f'fail to run command: {exception}\n')
+            f.write(message)

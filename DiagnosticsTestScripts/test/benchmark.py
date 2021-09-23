@@ -5,18 +5,18 @@ import shutil
 from xml.etree import ElementTree as ET
 
 import config
-from utils import run_command_sync, Result, test_logger
+from utils import run_command_sync, test_logger
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def download_diagnostics(log_path: os.PathLike=None)->Result:
+def download_diagnostics(log_path: os.PathLike=None):
     '''Clone diagnostics from github
     '''
     if config.configuration.run_benchmarks is False:
-        message = 'ignore benchmarks, so the repo won\'t be downloaded.'
+        message = 'ignore benchmarks, so the repo won\'t be downloaded.\n'
         print(message)
-        with open(log_path, 'a+') as fs:
-            fs.write(f'{message}\r\n')
+        with open(log_path, 'a+') as log:
+            log.write(message)
         return
     rt_code = run_command_sync(
         'git clone https://github.com/dotnet/diagnostics.git',
@@ -24,7 +24,11 @@ def download_diagnostics(log_path: os.PathLike=None)->Result:
         cwd=config.configuration.test_bed
     )
     if rt_code != 0:
-        return Result(rt_code, 'fail to download diagnostics', None)
+        message = 'fail to download diagnostics!\n'
+        print(message)
+        with open(log_path, 'a+') as log:
+            log.write(message)
+        return
 
     repo_dir = os.path.join(
         config.configuration.test_bed, 'diagnostics'
@@ -35,7 +39,11 @@ def download_diagnostics(log_path: os.PathLike=None)->Result:
         cwd=repo_dir
     )
     if rt_code != 0:
-        return Result(rt_code, 'fail to reset commit id', None)
+        message = 'fail to reset commit id!\n'
+        print(message)
+        with open(log_path, 'a+') as log:
+            log.write(message)
+        return
 
     project_dir = os.path.join(
         repo_dir, 'src', 'tests', 'benchmarks'
@@ -47,21 +55,25 @@ def download_diagnostics(log_path: os.PathLike=None)->Result:
         root.find('PropertyGroup').find('TargetFramework').text = \
             f'netcoreapp{config.configuration.sdk_version[:3]}'
         tree.write(project_file)
-        return Result(0, 'successfully config benchmark', project_dir)
+        message = 'successfully config benchmark.\n'
     except Exception as e:
-        return Result(-1, 'fail to config benchmark', e)
+        message = f'fail to config benchmark: {e}.\n'
+
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)
     
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def run_benchmark(log_path: os.PathLike=None)->Result:
+def run_benchmark(log_path: os.PathLike=None):
     '''Run benchmark
 
     '''
     if config.configuration.run_benchmarks is False:
-        message = 'ignore benchmarks.'
+        message = 'ignore benchmarks.\n'
         print(message)
-        with open(log_path, 'a+') as fs:
-            fs.write(f'{message}\r\n')
+        with open(log_path, 'a+') as log:
+            log.write(message)
         return
     project_dir = os.path.join(
         config.configuration.test_bed, 'diagnostics', 
@@ -78,9 +90,12 @@ def run_benchmark(log_path: os.PathLike=None)->Result:
             os.path.join(config.configuration.test_result, 'BenchmarkDotNet.Artifacts')
         )
         if rt_code == 0:
-            return Result(0, 'successfully run benchmark', None)
+            message = 'successfully run benchmark.\n'
         else:
-            return Result(rt_code, 'fail to run benchmark', None)
+            message = 'fail to run benchmark!\n'
     except Exception as e:
-        return Result(-1, 'fail to run benchmark', e)
-    
+        message = f'fail to run benchmark: {e}.\n'
+
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)

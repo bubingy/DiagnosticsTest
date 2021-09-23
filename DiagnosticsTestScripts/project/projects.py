@@ -8,11 +8,11 @@ from xml.etree import ElementTree as ET
 
 import config
 from utils import run_command_async, Popen, \
-    run_command_sync, Result, test_logger
+    run_command_sync, test_logger
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def create_publish_webapp(log_path: os.PathLike=None) -> Result:
+def create_publish_webapp(log_path: os.PathLike=None):
     '''Create and publish a dotnet webapp
 
     Return:
@@ -111,7 +111,7 @@ def run_webapp(project_dir: str) -> Popen:
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
+def create_publish_consoleapp(log_path: os.PathLike=None):
     '''Create and publish a dotnet console app.
 
     The console app is used to test startup feature of
@@ -121,10 +121,12 @@ def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
         return Result class
     '''
     if int(config.configuration.sdk_version[0]) == 3:
-        with open(log_path, 'a+') as f:
-            f.write(f'won\'t create and publish consoleapp: new feature isn\'t supported by .net core 3.\n')
         config.configuration.run_consoleapp = False
-        return Result(-1, 'not supported sdk.', None)
+        message = f'ignore consoleapp: new feature isn\'t supported by .net core 3.1.\n'
+        print(message)
+        with open(log_path, 'a+') as f:
+            f.write(message)
+        return
     project_dir = os.path.join(
         config.configuration.test_bed,
         'consoleapp'
@@ -183,7 +185,7 @@ def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def create_publish_GCDumpPlayground(log_path: os.PathLike=None) -> Result:
+def create_publish_GCDumpPlayground(log_path: os.PathLike=None):
     '''Copy GCDumpPlayground to testbed then publish.
 
     Return:
