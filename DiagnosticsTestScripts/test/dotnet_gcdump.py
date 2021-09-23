@@ -33,6 +33,7 @@ def test_dotnet_gcdump(log_path: os.PathLike=None):
     for command in sync_commands_list:
         run_command_sync(command, log_path, cwd=config.configuration.test_result)
 
+    gcdumpplayground.terminate()
     while gcdumpplayground.poll() is None:
         time.sleep(1)
 

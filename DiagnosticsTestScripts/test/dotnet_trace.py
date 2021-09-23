@@ -31,7 +31,7 @@ def test_dotnet_trace(log_path: os.PathLike=None):
         'dotnet-trace convert --format speedscope webapp.nettrace'
     ]
     for command in sync_commands_list:
-        run_command_sync(command, log_path)
+        run_command_sync(command, log_path, cwd=config.configuration.test_result)
 
     webapp.terminate()
     webapp.communicate()
@@ -57,7 +57,7 @@ def test_dotnet_trace(log_path: os.PathLike=None):
     extend_name = ''
     if 'win' in config.configuration.rid:
         extend_name = '.exe'
-    proc = run_command_sync(
+    proc = run_command_async(
         (
             'dotnet-trace collect -o consoleapp.nettrace '
             '--providers Microsoft-Windows-DotNETRuntime '
