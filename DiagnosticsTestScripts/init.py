@@ -6,7 +6,7 @@ import sys
 from urllib import request
 
 import config
-from utils import run_command_sync, Result, test_logger
+from utils import run_command_sync, test_logger
 
 
 def prepare_test_bed():
@@ -39,8 +39,10 @@ def install_sdk(log_path: os.PathLike=None):
         with open(f'{config.configuration.test_bed}/{os.path.basename(script_url)}', 'w+') as f:
             f.write(req.read().decode())
     except Exception as e:
+        message = f'fail to download install script: {e}\n'
+        print(message)
         with open(log_path, 'a+') as log:
-            log.write('fail to download install script!\n')
+            log.write(message)
         sys.exit(-1)
     rt_code = run_command_sync(
         ' '.join(
@@ -52,11 +54,15 @@ def install_sdk(log_path: os.PathLike=None):
         log_path=log_path
     )
     if rt_code == 0:
-        return Result(0, 'successfully install sdk', None)
+        message = 'successfully install sdk!\n'
     else:
-        with open(log_path, 'a+') as log:
-            log.write('fail to install sdk!\n')
-        sys.exit(-1)
+        message = 'fail to install sdk!\n'
+
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)
+    
+    if rt_code != 0: sys.exit(-1)
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
@@ -83,7 +89,9 @@ def install_tools(log_path: os.PathLike=None):
             log_path=log_path
         )
         if rt_code != 0:
+            message = f'fail to install tool: {tool}!\n'
+            print(message)
             with open(log_path, 'a+') as log:
-                log.write(f'fail to install tool: {tool}!\n')
+                log.write(message)
             sys.exit(-1)
 

@@ -29,7 +29,11 @@ def create_publish_webapp(log_path: os.PathLike=None) -> Result:
     )
     if rt_code != 0:
         config.configuration.run_webapp = False
-        return Result(-1, 'fail to create webapp.', None)
+        message = 'fail to build webapp!\n'
+        print(message)
+        with open(log_path, 'a+') as log:
+            log.write(message)
+        return
 
     if config.configuration.source_feed != '':
         rt_code = run_command_sync(
@@ -38,7 +42,11 @@ def create_publish_webapp(log_path: os.PathLike=None) -> Result:
             log_path=log_path
         )
         if rt_code == 0:
-            return Result(0, 'successfully create and publish webapp.', project_dir)
+            message = 'successfully create and build webapp.\n'
+            print(message)
+            with open(log_path, 'a+') as log:
+                log.write(message)
+            return
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
@@ -55,9 +63,13 @@ def create_publish_webapp(log_path: os.PathLike=None) -> Result:
 
     if rt_code != 0:
         config.configuration.run_webapp = False
-        return Result(-1, 'fail to publish webapp.', None)
+        message = 'fail to publish webapp.\n'
     else:
-        return Result(0, 'successfully create and publish webapp.', project_dir)
+        message = 'successfully create and build webapp.\n'
+
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)
 
 
 def run_webapp(project_dir: str) -> Popen:
@@ -124,7 +136,11 @@ def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
     )
     if rt_code != 0:
         config.configuration.run_consoleapp = False
-        return Result(-1, 'fail to create consoleapp.', None)
+        message = 'fail to create console app!\n'
+        print(message)
+        with open(log_path, 'a+') as log:
+            log.write(message)
+        return
     shutil.copy(
         os.path.join(config.configuration.work_dir, 'project', 'consoleapp_tmp'), 
         os.path.join(project_dir, 'Program.cs')
@@ -137,7 +153,11 @@ def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
             log_path=log_path
         )
         if rt_code == 0:
-            return Result(0, 'successfully create and publish consoleapp.', project_dir)
+            message = 'successfully create and build console app.\n'
+            print(message)
+            with open(log_path, 'a+') as log:
+                log.write(message)
+            return
         
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
@@ -153,9 +173,13 @@ def create_publish_consoleapp(log_path: os.PathLike=None) -> Result:
         )
     if rt_code != 0:
         config.configuration.run_consoleapp = False
-        return Result(-1, 'fail to publish consoleapp.', None)
+        message = 'fail to build console app!\n'
     else:
-        return Result(0, 'successfully create and publish consoleapp', project_dir)
+        message = 'successfully create and build console app.\n'
+    
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)
 
 
 @test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
@@ -185,9 +209,12 @@ def create_publish_GCDumpPlayground(log_path: os.PathLike=None) -> Result:
             framework = 'net' + config.configuration.sdk_version[:3]
         root.find('PropertyGroup').find('TargetFramework').text = framework
         tree.write(project_file)
-    except Exception as exception:
+    except Exception as e:
         config.configuration.run_gcplayground = False
-        return Result(-1, 'fail to copy GCDumpPlayground to testbed', exception)
+        message = f'fail to copy GCDumpPlayground to testbed: {e}.\n'
+        print(message)
+        with open(log_path, 'a+') as log:
+            log.write(message)
 
     if config.configuration.source_feed != '':
         rt_code = run_command_sync(
@@ -196,7 +223,11 @@ def create_publish_GCDumpPlayground(log_path: os.PathLike=None) -> Result:
             log_path=log_path
         )
         if rt_code == 0:
-            return Result(0, 'successfully create and publish GCDumpPlayground.', project_dir)
+            message = 'successfully create and build GCDumpPlayground.\n'
+            print(message)
+            with open(log_path, 'a+') as log:
+                log.write(message)
+            return
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
@@ -212,9 +243,13 @@ def create_publish_GCDumpPlayground(log_path: os.PathLike=None) -> Result:
         )
     if rt_code != 0:
         config.configuration.run_gcplayground = False
-        return Result(-1, 'fail to publish gcdumpplayground.', None)
+        message = 'fail to build gcdumpplayground!\n'
     else:
-        return Result(0, 'successfully create and publish gcdumpplayground.', project_dir)
+        message = 'successfully create and publish gcdumpplayground.\n'
+
+    print(message)
+    with open(log_path, 'a+') as log:
+        log.write(message)
 
 
 def run_GCDumpPlayground(project_dir: str)->Popen:

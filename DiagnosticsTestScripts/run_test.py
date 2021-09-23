@@ -2,6 +2,8 @@
 
 import config
 
+# must init `config.configuration` before
+# importing other modules.
 config.configuration = config.TestConfig()
 
 import init
