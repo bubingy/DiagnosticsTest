@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import os
 from functools import wraps
 from subprocess import PIPE, Popen
 from typing import Callable
