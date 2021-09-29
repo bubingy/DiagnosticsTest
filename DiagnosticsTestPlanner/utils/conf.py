@@ -26,14 +26,6 @@ class WeeklyTestConf:
         test_conf.read(ini_file_path)
         self.branch_list = test_conf['Branch']['major'].split('\n')
         self.branch_list.remove('')
-        self.source_feed_list = test_conf['Branch']['feed'].split('\n')
-        self.source_feed_list.remove('')
-        self.major_version_list = list(
-            map(
-                lambda x: x[:3],
-                self.branch_list
-            )
-        )
         self.tool_feed = test_conf['Tool']['feed']
 
 
@@ -46,8 +38,6 @@ class ReleaseTestConf:
         test_conf.read(ini_file_path)
         self.sdk_list = test_conf['SDK']['version'].split('\n')
         self.sdk_list.remove('')
-        self.source_feed_list = test_conf['SDK']['feed'].split('\n')
-        self.source_feed_list.remove('')
         self.tool_version = test_conf['Tool']['version']
         self.tool_feed = test_conf['Tool']['feed']
         self.os_list = test_conf['Scenarios']['os'].split('\n')

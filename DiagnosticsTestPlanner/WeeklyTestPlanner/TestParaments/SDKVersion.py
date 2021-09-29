@@ -18,11 +18,8 @@ def get_sdk_version():
     )
 
     sdk_version = dict()
-    # branch_list = list_branches('dotnet', 'installer')
-    for major_version, branch_name in zip(
-        test_conf.major_version_list, test_conf.branch_list):
-        # branch_name = get_latest_branches(major_version, branch_list)
-        if major_version == '6.0':
+    for branch_name in test_conf.branch_list:
+        if '6.0' in branch_name:
             url = (
                 'https://dotnetcli.blob.core.windows.net/'
                 f'dotnet/Sdk/main/latest.version'
@@ -30,18 +27,13 @@ def get_sdk_version():
         else:
             url = (
                 'https://dotnetcli.blob.core.windows.net/'
-                f'dotnet/Sdk/release/{branch_name}/latest.version'
+                f'dotnet/Sdk/{branch_name.lower()}/latest.version'
             )
         response = request.urlopen(url)
         lines = response.readlines()
         for line in lines:
             content = line.decode('utf-8')
             if '-' in content or '.' in content:
-                sdk_version[major_version] = content.strip('\r\n')
+                sdk_version[branch_name] = content.strip('\r\n')
 
-    source_feed_version = dict()
-    for major_version, source_feed in zip(
-        test_conf.major_version_list, test_conf.source_feed_list):
-        source_feed_version[major_version] = source_feed
-
-    return sdk_version, source_feed_version
+    return sdk_version

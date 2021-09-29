@@ -23,7 +23,7 @@ if __name__ == '__main__':
         os_rotation = get_os_rotation(
             datetime.today().strftime('%Y-%m-%d')
         )
-        sdk_version, source_feed_version = get_sdk_version()
+        sdk_version = get_sdk_version()
         tool_version, pr_info, tool_feed = get_tool_info()
         print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, output_file)
 

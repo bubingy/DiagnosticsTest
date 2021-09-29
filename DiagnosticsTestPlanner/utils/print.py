@@ -197,14 +197,10 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, outp
     )
 
     for idx, branch in enumerate(sdk_version.keys()):
-        if branch[0] == '3':
-            dotnet_prefix = '.net core'
-        else:
-            dotnet_prefix = '.net'
-        print(f'{dotnet_prefix} {branch}: {sdk_version[branch]}')
+        print(f'{branch}: {sdk_version[branch]}')
         sdk_version_sheet.cell(
             row=2+idx, column=1,
-            value=f'{dotnet_prefix} {branch}:'
+            value=f'{branch}:'
         )
         sdk_version_sheet.cell(
             row=2+idx, column=2,

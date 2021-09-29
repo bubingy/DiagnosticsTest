@@ -16,12 +16,11 @@ def get_plans() -> list:
     )
     tool_version, pr_info, tool_feed = get_tool_info()
 
-    sdk_version, source_feed_version = get_sdk_version()
+    sdk_version = get_sdk_version()
     for key in os_rotation['requiredOS']:
         plan = dict()
         plan['OS'] = key
         plan['SDK'] = sdk_version[os_rotation['requiredOS'][key]]
-        plan['Source_Feed'] = source_feed_version[os_rotation['requiredOS'][key]]
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_version
         plan['Tool_Info']['commit'] = pr_info['commit']
@@ -45,7 +44,6 @@ def get_plans() -> list:
         if 'LinuxCross' == plan['OS']: continue
 
         plan['SDK'] = sdk_version[key]
-        plan['Source_Feed'] = source_feed_version[key]
         plan['Tool_Info'] = dict()
         plan['Tool_Info']['version'] = tool_version
         plan['Tool_Info']['commit'] = pr_info['commit']
