@@ -3,7 +3,7 @@
 # coding=utf-8
 
 import os
-import shutil
+import platform
 
 import init
 from config import GlobalConfig
@@ -14,8 +14,18 @@ from Handler import analyze, validate
 def analyze_on_linux(global_conf: GlobalConfig):
     '''Analyze dump on linux
     '''
+    machine_type = platform.machine().lower()
+    if machine_type in ['x86_64', 'amd64']:
+        arch = 'x64'
+    elif machine_type in ['aarch64']:
+        arch = 'arm64'
+    elif machine_type in ['armv7l']:
+        arch = 'arm'
+    else:
+        raise Exception(f'unsupported machine type: {machine_type}')
+
     for idx, _ in enumerate(global_conf.sdk_version_list):
-        conf = global_conf.get(idx)
+        conf = global_conf.get(idx, arch)
         init.prepare_test_bed(conf)
         init.install_sdk(conf)
         if conf.rid != 'linux-musl-arm64':
