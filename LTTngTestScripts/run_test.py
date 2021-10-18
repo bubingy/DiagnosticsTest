@@ -27,3 +27,4 @@ if __name__ == "__main__":
             f'trace_net{conf.sdk_version}_{conf.rid}'
         )
         project.collect_trace(conf)
+        proc.terminate()
