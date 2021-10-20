@@ -14,12 +14,10 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
         else: home_path = os.environ['HOME']
         to_be_removed = to_be_removed.union(
             {
-                os.path.join(home_path, '.aspnet'),
+                os.path.join(home_path, '.debug'),
                 os.path.join(home_path, '.dotnet'),
                 os.path.join(home_path, '.nuget'),
-                os.path.join(home_path, '.templateengine'),
-                os.path.join(home_path, '.lldb'),
-                os.path.join(home_path, '.lldbinit'),
+                os.path.join(home_path, 'lttng-traces'),
                 os.path.join(home_path, '.local'),
                 conf.dotnet_root
             }
