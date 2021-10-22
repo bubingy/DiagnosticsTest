@@ -12,21 +12,26 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
         conf = global_conf.get(idx)
         if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
         else: home_path = os.environ['HOME']
-        to_be_removed = to_be_removed.union(
+        to_be_removed.union(
             {
-                os.path.join(home_path, '.debug'),
-                os.path.join(home_path, '.dotnet'),
-                os.path.join(home_path, '.nuget'),
-                os.path.join(home_path, 'lttng-traces'),
-                os.path.join(home_path, '.local'),
-                conf.dotnet_root
+                conf.dotnet_root,
+                os.path.join(
+                    conf.test_bed,
+                    f'gcperfsim-net{conf.sdk_version}'
+                )
             }
         )
-        for f in os.listdir(conf.test_bed):
-            file_path = os.path.join(conf.test_bed, f)
-            if conf.trace_directory == file_path: continue
 
-            to_be_removed.add(file_path)
+    to_be_removed = to_be_removed.union(
+        {
+            os.path.join(home_path, '.debug'),
+            os.path.join(home_path, '.dotnet'),
+            os.path.join(home_path, '.nuget'),
+            os.path.join(home_path, 'lttng-traces'),
+            os.path.join(home_path, '.local'),
+            conf.dotnet_root
+        }
+    )
     return to_be_removed
 
 

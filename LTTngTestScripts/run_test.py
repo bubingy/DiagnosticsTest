@@ -21,10 +21,5 @@ if __name__ == "__main__":
         init.download_perfcollect(conf)
         project.create_publish_project(conf, 'gcperfsim')
         proc = project.run_project(conf, 'gcperfsim')
-
-        trace_path = os.path.join(
-            conf.trace_directory,
-            f'trace_net{conf.sdk_version}_{conf.rid}'
-        )
         project.collect_trace(conf)
         proc.terminate()
