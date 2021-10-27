@@ -12,7 +12,7 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
         conf = global_conf.get(idx)
         if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
         else: home_path = os.environ['HOME']
-        to_be_removed.union(
+        to_be_removed = to_be_removed.union(
             {
                 conf.dotnet_root,
                 os.path.join(
