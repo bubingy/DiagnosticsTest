@@ -7,7 +7,7 @@ import os
 import init
 from Projects import project
 from config import GlobalConfig
-
+from clean import get_remove_candidate, do_clean
 
 if __name__ == "__main__":
     if os.geteuid() != 0:
@@ -23,3 +23,6 @@ if __name__ == "__main__":
         proc = project.run_project(conf, 'gcperfsim')
         project.collect_trace(conf)
         proc.terminate()
+
+        to_be_removed = get_remove_candidate(global_conf)
+        do_clean(to_be_removed)

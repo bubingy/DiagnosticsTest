@@ -35,14 +35,7 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
     return to_be_removed
 
 
-if __name__ == '__main__':
-    global_conf = GlobalConfig()
-    to_be_removed = get_remove_candidate(global_conf)
-    print('Following files or dirs would be removed:')
-    for f in to_be_removed: print(f'    {f}')
-    key = input('input `y` to continue, other input will be take as a no:')
-    if key != 'y': exit(0)
-
+def do_clean(to_be_removed: set) -> None:
     for f in to_be_removed:
         if not os.path.exists(f): continue
         try:
@@ -51,4 +44,14 @@ if __name__ == '__main__':
         except Exception as e:
             print(f'fail to remove {f}: {e}')
 
+
+if __name__ == '__main__':
+    global_conf = GlobalConfig()
+    to_be_removed = get_remove_candidate(global_conf)
+    print('Following files or dirs would be removed:')
+    for f in to_be_removed: print(f'    {f}')
+    key = input('input `y` to continue, other input will be take as a no:')
+    if key != 'y': exit(0)
+
+    do_clean(to_be_removed)
     
