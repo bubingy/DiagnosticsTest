@@ -29,11 +29,22 @@ def create_publish_webapp(log_path: os.PathLike=None):
     )
     if rt_code != 0:
         config.configuration.run_webapp = False
-        message = 'fail to build webapp!\n'
+        message = 'fail to create webapp!\n'
         print(message)
         with open(log_path, 'a+') as log:
             log.write(message)
         return
+
+    project_file = os.path.join(project_dir, 'webapp.csproj')
+
+    tree = ET.parse(project_file)
+    root = tree.getroot()
+    if config.configuration.sdk_version[0] == '3':
+        framework = 'netcoreapp' + config.configuration.sdk_version[:3]
+    else:
+        framework = 'net' + config.configuration.sdk_version[:3]
+    root.find('PropertyGroup').find('TargetFramework').text = framework
+    tree.write(project_file)
 
     if config.configuration.source_feed != '':
         rt_code = run_command_sync(
@@ -147,6 +158,17 @@ def create_publish_consoleapp(log_path: os.PathLike=None):
         os.path.join(config.configuration.work_dir, 'project', 'consoleapp_tmp'), 
         os.path.join(project_dir, 'Program.cs')
     )
+
+    project_file = os.path.join(project_dir, 'consoleapp.csproj')
+
+    tree = ET.parse(project_file)
+    root = tree.getroot()
+    if config.configuration.sdk_version[0] == '3':
+        framework = 'netcoreapp' + config.configuration.sdk_version[:3]
+    else:
+        framework = 'net' + config.configuration.sdk_version[:3]
+    root.find('PropertyGroup').find('TargetFramework').text = framework
+    tree.write(project_file)
 
     if config.configuration.source_feed != '':
         rt_code = run_command_sync(
