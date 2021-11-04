@@ -42,22 +42,5 @@ def get_sdk_version():
             azure_conf.authorization
         )
         sdk_version[branch_name] = artifact_version
-    # for branch_name in test_conf.branch_list:
-    #     if '3.1' in branch_name:
-    #         url = (
-    #             'https://dotnetcli.blob.core.windows.net/'
-    #             f'dotnet/Sdk/{branch_name.lower()}/latest.version'
-    #         )
-    #     else:
-    #         url = (
-    #             f'https://aka.ms/dotnet/{branch_name.lower()}'
-    #             '/daily/Sdk/productCommit-win-x64.txt'
-    #         )
-    #     response = request.urlopen(url)
-    #     lines = response.readlines()
-    #     for line in lines:
-    #         content = line.decode('utf-8')
-    #         if '-' in content or '.' in content:
-    #             sdk_version[branch_name] = content.strip('\r\n')
 
     return sdk_version

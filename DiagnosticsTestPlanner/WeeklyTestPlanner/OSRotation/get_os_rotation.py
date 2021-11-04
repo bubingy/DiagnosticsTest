@@ -59,9 +59,7 @@ def get_required_os_status(date_str: str) -> dict:
     base_status = load_json(base_status_json)
 
     required_oses = list(base_status['requiredOS'].keys())
-    dotnet_major_versions = list()
-    for required_os in required_oses:
-        dotnet_major_versions.append(base_status['requiredOS'][required_os])
+    dotnet_major_versions = list(base_status['alternateOS'].keys())
     
     week_increment = calculate_week_increment(date_str)
     if week_increment > 0:
@@ -74,7 +72,7 @@ def get_required_os_status(date_str: str) -> dict:
             dotnet_major_versions.insert(0, poped_version)
     
     required_os_status = dict()
-    for os, version in zip(required_oses, dotnet_major_versions):
+    for os, version in zip(required_oses, dotnet_major_versions[:len(required_oses)]):
         required_os_status[os] = version
     return required_os_status
 

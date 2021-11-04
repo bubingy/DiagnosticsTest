@@ -1,14 +1,15 @@
 {
-    "monday": "2021-04-19",
-    "friday": "2021-04-23",
+    "monday": "2021-11-01",
+    "friday": "2021-11-05",
     "requiredOS": {
-        "Alpine3.9": "6.0",
-        "Windows10": "3.1",
-        "OSX10.15": "5.0"
+        "Alpine3.9": "3.1",
+        "Windows10": "5.0",
+        "OSX10.15": "6.0"
     },
     "alternateOS": {
-        "3.1": "Fedora30",
-        "5.0": "Ubuntu16.04",
-        "6.0": "Fedora31"
+        "3.1": "CentOS8",
+        "5.0": "Debian10",
+        "6.0": "LinuxCross",
+        "7.0": "LinuxCross64"
     }
 }

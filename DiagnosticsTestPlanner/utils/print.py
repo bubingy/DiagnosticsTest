@@ -8,16 +8,20 @@ from openpyxl.styles import Font, Alignment
 from utils.conf import ReleaseTestConf
 
 
-def init_sos_unit_content(os_name: str):
+def init_sos_unit_content(os_name: str, sys_ptrace_enabled=False):
     if 'alpine' in os_name.lower():
         return 'NA'
-    else:
-        return ''
-
-
-def init_dump_unit_content(os_name: str):
-    if 'osx' in os_name.lower():
+    if 'linuxcross64' in os_name.lower() and sys_ptrace_enabled is True:
         return 'NA'
+    return ''
+
+
+def init_dump_unit_content(os_name: str, sdk_version: str):
+    if 'osx' in os_name.lower():
+        if sdk_version[:3] == '7.0':
+            return ''
+        else:
+            return 'NA'
     else:
         return ''
 
@@ -55,18 +59,19 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     for idx, key in enumerate(required_oses.keys()):
         os_name = key
         sdk_version = required_oses[key]
-        if 'Alpine' in key and '6' in required_oses[key]:
+        if 'Alpine' in key and '6.0' == sdk_version or \
+            'Alpine' in key and '7.0' == sdk_version:
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
                 value=f'{os_name}/{sdk_version}'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
-                value=init_dump_unit_content(os_name)
+                value=init_dump_unit_content(os_name, sdk_version)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=5,
-                value=init_sos_unit_content(os_name)
+                value=init_sos_unit_content(os_name, False)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=7,
@@ -80,11 +85,11 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
-                value=init_dump_unit_content(os_name)
+                value=init_dump_unit_content(os_name, sdk_version)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=5,
-                value=init_sos_unit_content(os_name)
+                value=init_sos_unit_content(os_name, False)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=7,
@@ -98,11 +103,11 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
         ).font = Font(color="1F497D")
         test_matrix_sheet.cell(
             row=current_row+idx, column=3,
-            value=init_dump_unit_content(os_name)
+            value=init_dump_unit_content(os_name, sdk_version)
         ).font = Font(color="5B9BD5")
         test_matrix_sheet.cell(
             row=current_row+idx, column=5,
-            value=init_sos_unit_content(os_name)
+            value=init_sos_unit_content(os_name, False)
         ).font = Font(color="5B9BD5")
         test_matrix_sheet.cell(
             row=current_row+idx, column=7,
@@ -115,18 +120,18 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     for idx, key in enumerate(alternate_oses.keys()):
         os_name = alternate_oses[key]
         sdk_version = key
-        if '6' in key:
+        if '6' in key or '7' in key:
             test_matrix_sheet.cell(
                 row=current_row+idx, column=1,
                 value=f'{os_name}/{sdk_version}'
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
-                value=init_dump_unit_content(os_name)
+                value=init_dump_unit_content(os_name, sdk_version)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=5,
-                value=init_sos_unit_content(os_name)
+                value=init_sos_unit_content(os_name, False)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=7,
@@ -140,11 +145,11 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
             ).font = Font(color="1F497D")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=3,
-                value=init_dump_unit_content(os_name)
+                value=init_dump_unit_content(os_name, sdk_version)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=5,
-                value=init_sos_unit_content(os_name)
+                value=init_sos_unit_content(os_name, True)
             ).font = Font(color="5B9BD5")
             test_matrix_sheet.cell(
                 row=current_row+idx, column=7,
@@ -158,11 +163,11 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
         ).font = Font(color="1F497D")
         test_matrix_sheet.cell(
             row=current_row+idx, column=3,
-            value=init_dump_unit_content(os_name)
+            value=init_dump_unit_content(os_name, sdk_version)
         ).font = Font(color="5B9BD5")
         test_matrix_sheet.cell(
             row=current_row+idx, column=5,
-            value=init_sos_unit_content(os_name)
+            value=init_sos_unit_content(os_name, False)
         ).font = Font(color="5B9BD5")
         test_matrix_sheet.cell(
             row=current_row+idx, column=7,
