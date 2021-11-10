@@ -13,8 +13,9 @@ def test_dotnet_dump(log_path: os.PathLike=None):
     '''Run sample apps and perform tests.
 
     '''
-    if 'osx' in config.configuration.rid:
-        message = 'dotnet-dump doesn\'t support on osx.\n'
+    if 'osx' in config.configuration.rid and \
+        int(config.configuration.sdk_version[0]) < 7:
+        message = 'dotnet-dump on osx requires .net 7.0 or newer version.\n'
         print(message)
         with open(log_path, 'a+') as f:
             f.write(message)

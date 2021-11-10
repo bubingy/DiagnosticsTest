@@ -95,7 +95,11 @@ def test_dotnet_sos(log_path: os.PathLike=None):
                 stderr=fs
             ).communicate()
 
-    if 'linux' in config.configuration.rid:
+    if 'linux' in config.configuration.rid or \
+        (
+            'osx' in config.configuration.rid and \
+        int(config.configuration.sdk_version[0]) >= 7
+        ):
         dump_path = glob.glob(f'{config.configuration.test_bed}/core_*')[0]
         with open(analyze_output_path, 'w+') as f:
             proc = run_command_async(
