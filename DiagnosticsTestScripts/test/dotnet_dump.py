@@ -2,42 +2,39 @@
 
 import os
 import glob
+import logging
 
 import config
-from utils import run_command_async, run_command_sync, PIPE, test_logger
+from utils import run_command_async, run_command_sync, PIPE
 from project import projects
 
 
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def test_dotnet_dump(log_path: os.PathLike=None):
+def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
     '''Run sample apps and perform tests.
 
     '''
+    logger.info('****** test dotnet-dump ******')
     if 'osx' in config.configuration.rid and \
         int(config.configuration.sdk_version[0]) < 7:
-        message = 'dotnet-dump on osx requires .net 7.0 or newer version.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+        logger.info('dotnet-dump on osx requires .net 7.0 or newer version.')
+        logger.info('****** test dotnet-dump finished ******')
         return
     if config.configuration.run_webapp is False:
-        message = f'can\'t run webapp for dotnet-dump.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+        logger.info('can\'t run webapp for dotnet-dump.')
+        logger.info('****** test dotnet-dump finished ******')
         return
     webapp_dir = os.path.join(
         config.configuration.test_bed,
         'webapp'
     )
-    webapp = projects.run_webapp(webapp_dir)
+    webapp = projects.run_webapp(configuration, logger, webapp_dir)
     sync_commands_list = [
         'dotnet-dump --help',
         'dotnet-dump ps',
         f'dotnet-dump collect -p {webapp.pid}'
     ]
     for command in sync_commands_list:
-        run_command_sync(command, log_path, cwd=config.configuration.test_bed)
+        run_command_sync(command, logger, cwd=config.configuration.test_bed)
     webapp.terminate()
     webapp.communicate()
 
@@ -47,10 +44,8 @@ def test_dotnet_dump(log_path: os.PathLike=None):
         dump_paths = glob.glob(f'{config.configuration.test_bed}/core_*')
 
     if len(dump_paths) == 0:
-        message = f'no dump files available.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+        logger.error('no dump files available.')
+        logger.info('****** test dotnet-dump finished ******')
         return
 
     analyze_commands = [
@@ -79,3 +74,5 @@ def test_dotnet_dump(log_path: os.PathLike=None):
                 f.write(f'{exception}\n'.encode('utf-8'))
                 continue
         proc.communicate()
+
+    logger.info('****** test dotnet-dump finished ******')

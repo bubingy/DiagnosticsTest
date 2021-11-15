@@ -2,100 +2,84 @@
 
 import os
 import shutil
+import logging
 from xml.etree import ElementTree as ET
 
 import config
-from utils import run_command_sync, test_logger
+from utils import run_command_sync
 
 
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def download_diagnostics(log_path: os.PathLike=None):
+def download_diagnostics(configuration: config.TestConfig, logger: logging.Logger):
     '''Clone diagnostics from github
     '''
-    if config.configuration.run_benchmarks is False:
-        message = 'ignore benchmarks, so the repo won\'t be downloaded.\n'
-        print(message)
-        with open(log_path, 'a+') as log:
-            log.write(message)
+    logger.info('****** download diagnostics ******')
+    if configuration.run_benchmarks is False:
+        logger.info('ignore benchmarks, so the repo won\'t be downloaded.')
+        logger.info('****** download diagnostics finished ******')
         return
     rt_code = run_command_sync(
         'git clone https://github.com/dotnet/diagnostics.git',
-        log_path=log_path,
-        cwd=config.configuration.test_bed
+        logger,
+        cwd=configuration.test_bed
     )
     if rt_code != 0:
-        message = 'fail to download diagnostics!\n'
-        print(message)
-        with open(log_path, 'a+') as log:
-            log.write(message)
+        logger.error('fail to download diagnostics!')
+        logger.info('****** download diagnostics finished ******')
         return
 
     repo_dir = os.path.join(
-        config.configuration.test_bed, 'diagnostics'
+        configuration.test_bed, 'diagnostics'
     )
     rt_code = run_command_sync(
-        f'git reset --hard {config.configuration.tool_commit}',
-        log_path=log_path,
+        f'git reset --hard {configuration.tool_commit}',
+        logger,
         cwd=repo_dir
     )
     if rt_code != 0:
-        message = 'fail to reset commit id!\n'
-        print(message)
-        with open(log_path, 'a+') as log:
-            log.write(message)
+        logger.error('fail to reset commit id!')
+        logger.info('****** download diagnostics finished ******')
         return
 
     project_dir = os.path.join(
         repo_dir, 'src', 'tests', 'benchmarks'
     )
     project_file = os.path.join(project_dir, 'benchmarks.csproj')
-    try:
-        tree = ET.parse(project_file)
-        root = tree.getroot()
-        root.find('PropertyGroup').find('TargetFramework').text = \
-            f'netcoreapp{config.configuration.sdk_version[:3]}'
-        tree.write(project_file)
-        message = 'successfully config benchmark.\n'
-    except Exception as e:
-        message = f'fail to config benchmark: {e}.\n'
 
-    print(message)
-    with open(log_path, 'a+') as log:
-        log.write(message)
-    
+    tree = ET.parse(project_file)
+    root = tree.getroot()
+    root.find('PropertyGroup').find('TargetFramework').text = \
+        f'netcoreapp{configuration.sdk_version[:3]}'
+    tree.write(project_file)
 
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def run_benchmark(log_path: os.PathLike=None):
+    logger.info('****** download diagnostics finished ******')
+
+
+def run_benchmark(configuration: config.TestConfig, logger: logging.Logger):
     '''Run benchmark
 
     '''
-    if config.configuration.run_benchmarks is False:
-        message = 'ignore benchmarks.\n'
-        print(message)
-        with open(log_path, 'a+') as log:
-            log.write(message)
+    logger.info('****** run benchmark ******')
+    if configuration.run_benchmarks is False:
+        logger.info('ignore benchmarks.')
+        logger.info('****** run benchmark finished ******')
         return
     project_dir = os.path.join(
-        config.configuration.test_bed, 'diagnostics', 
+        configuration.test_bed, 'diagnostics', 
         'src', 'tests', 'benchmarks'
     )
-    try:
-        rt_code = run_command_sync(
-            'dotnet run -c release',
-            log_path=log_path,
-            cwd=project_dir
-        )
-        shutil.copytree(
-            os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
-            os.path.join(config.configuration.test_result, 'BenchmarkDotNet.Artifacts')
-        )
-        if rt_code == 0:
-            message = 'successfully run benchmark.\n'
-        else:
-            message = 'fail to run benchmark!\n'
-    except Exception as e:
-        message = f'fail to run benchmark: {e}.\n'
 
-    print(message)
-    with open(log_path, 'a+') as log:
-        log.write(message)
+    rt_code = run_command_sync(
+        'dotnet run -c release',
+        logger,
+        cwd=project_dir
+    )
+    shutil.copytree(
+        os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
+        os.path.join(configuration.test_result, 'BenchmarkDotNet.Artifacts')
+    )
+    if rt_code == 0:
+        logger.info('successfully run benchmark.')
+    else:
+        logger.error('fail to run benchmark!')
+
+    logger.info('****** run benchmark finished ******')

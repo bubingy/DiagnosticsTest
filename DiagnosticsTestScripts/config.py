@@ -55,6 +55,17 @@ class TestConfig:
         else:
             os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
 
+    def prepare_test_bed(self):
+        '''Create folders for TestBed and TestResult.
+        '''
+        try:
+            if not os.path.exists(configuration.test_bed):
+                os.makedirs(configuration.test_bed)
+            if not os.path.exists(configuration.test_result):
+                os.makedirs(configuration.test_result)
+        except Exception as e:
+            print(f'fail to create folders for TestBed and TestResult: {e}')
+            exit(-1)
 
     def __get_rid(self):
         '''Get `.Net RID` of current platform.

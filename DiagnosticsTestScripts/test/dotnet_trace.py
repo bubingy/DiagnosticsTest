@@ -1,28 +1,27 @@
 # coding=utf-8
 
 import os
+import logging
 
 import config
-from utils import run_command_async, run_command_sync, PIPE, test_logger
+from utils import run_command_sync
 from project import projects
 
 
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def test_dotnet_trace(log_path: os.PathLike=None):
+def test_dotnet_trace(configuration: config.TestConfig, logger: logging.Logger):
     '''Run sample apps and perform tests.
 
     '''
-    if config.configuration.run_webapp is False:
-        message = f'can\'t run webapp for dotnet-trace.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+    logger.info('****** test dotnet-trace ******')
+    if configuration.run_webapp is False:
+        logger.info('can\'t run webapp for dotnet-trace.')
+        logger.info('****** test dotnet-trace finished ******')
         return
     webapp_dir = os.path.join(
-        config.configuration.test_bed,
+        configuration.test_bed,
         'webapp'
     )
-    webapp = projects.run_webapp(webapp_dir)
+    webapp = projects.run_webapp(configuration, logger, webapp_dir)
     sync_commands_list = [
         'dotnet-trace --help',
         'dotnet-trace list-profiles',
@@ -31,39 +30,36 @@ def test_dotnet_trace(log_path: os.PathLike=None):
         'dotnet-trace convert --format speedscope webapp.nettrace'
     ]
     for command in sync_commands_list:
-        run_command_sync(command, log_path, cwd=config.configuration.test_result)
+        run_command_sync(command, logger, cwd=configuration.test_result)
 
     webapp.terminate()
     webapp.communicate()
 
-    if config.configuration.sdk_version[0] == '3':
-        message = 'dotnet-trace new feature isn\'t supported by .net core 3.x.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+    if configuration.sdk_version[0] == '3':
+        logger.info('dotnet-trace new feature isn\'t supported by .net core 3.x.')
+        logger.info('****** test dotnet-trace finished ******')
         return
 
-    if config.configuration.run_consoleapp is False:
-        message = f'can\'t run consoleapp for dotnet-trace.\n'
-        print(message)
-        with open(log_path, 'a+') as f:
-            f.write(message)
+    if configuration.run_consoleapp is False:
+        logger.info('can\'t run consoleapp for dotnet-trace.')
+        logger.info('****** test dotnet-trace finished ******')
         return
 
     consoleapp_dir = os.path.join(
-        config.configuration.test_bed,
+        configuration.test_bed,
         'consoleapp'
     )
     extend_name = ''
-    if 'win' in config.configuration.rid:
+    if 'win' in configuration.rid:
         extend_name = '.exe'
-    proc = run_command_async(
+    run_command_sync(
         (
             'dotnet-trace collect -o consoleapp.nettrace '
             '--providers Microsoft-Windows-DotNETRuntime '
             f'-- {consoleapp_dir}/out/consoleapp{extend_name}'
         ),
-        log_path,
-        cwd=config.configuration.test_result
+        logger,
+        cwd=configuration.test_result
     )
-    proc.communicate()
+
+    logger.info('****** test dotnet-trace finished ******')

@@ -3,31 +3,19 @@
 
 import os
 import sys
+import logging
 from urllib import request
 
 import config
-from utils import run_command_sync, test_logger
+from utils import run_command_sync
 
 
-def prepare_test_bed():
-    '''Create folders for TestBed and TestResult.
-    '''
-    try:
-        if not os.path.exists(config.configuration.test_bed):
-            os.makedirs(config.configuration.test_bed)
-        if not os.path.exists(config.configuration.test_result):
-            os.makedirs(config.configuration.test_result)
-    except Exception as e:
-        print(e)
-        exit(-1)
-
-
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def install_sdk(log_path: os.PathLike=None):
+def install_sdk(configuration: config.TestConfig, logger: logging.Logger):
     '''Install .net(core) sdk
     '''
+    logger.info(f'****** install .net sdk ******')
     sdk_dir = os.environ['DOTNET_ROOT']
-    if 'win' in config.configuration.rid:
+    if 'win' in configuration.rid:
         script_url = 'https://dot.net/v1/dotnet-install.ps1'
         shell_name = 'powershell.exe'
     else:
@@ -36,39 +24,34 @@ def install_sdk(log_path: os.PathLike=None):
 
     try:
         req = request.urlopen(script_url)
-        with open(f'{config.configuration.test_bed}/{os.path.basename(script_url)}', 'w+') as f:
+        with open(f'{configuration.test_bed}/{os.path.basename(script_url)}', 'w+') as f:
             f.write(req.read().decode())
     except Exception as e:
-        message = f'fail to download install script: {e}\n'
-        print(message)
-        with open(log_path, 'a+') as log:
-            log.write(message)
+        logger.error(f'fail to download install script: {e}.')
         sys.exit(-1)
-    rt_code = run_command_sync(
-        ' '.join(
-            [
-                f'{shell_name} {config.configuration.test_bed}/{os.path.basename(script_url)}',
-                f'-InstallDir {sdk_dir} -v {config.configuration.sdk_version}'
-            ]
-        ),
-        log_path=log_path
+
+    command = ' '.join(
+        [
+            f'{shell_name} {configuration.test_bed}/{os.path.basename(script_url)}',
+            f'-InstallDir {sdk_dir} -v {configuration.sdk_version}'
+        ]
     )
+
+    rt_code = run_command_sync(command, logger)
+
     if rt_code == 0:
-        message = 'successfully install sdk!\n'
+        logger.info('successfully install sdk!')
+        logger.info(f'****** install .net sdk finished ******')
     else:
-        message = 'fail to install sdk!\n'
-
-    print(message)
-    with open(log_path, 'a+') as log:
-        log.write(message)
-    
-    if rt_code != 0: sys.exit(-1)
+        logger.error('fail to install sdk!')
+        logger.info(f'****** install .net sdk finished ******')
+        sys.exit(-1)
 
 
-@test_logger(os.path.join(config.configuration.test_result, f'{__name__}.log'))
-def install_tools(log_path: os.PathLike=None):
+def install_tools(configuration: config.TestConfig, logger: logging.Logger):
     '''Install diagnostics
     '''
+    logger.info(f'****** install diagnostics tools ******')
     tools = [
         'dotnet-counters',
         'dotnet-dump',
@@ -77,21 +60,17 @@ def install_tools(log_path: os.PathLike=None):
         'dotnet-trace'
     ]
     for tool in tools:
-        rt_code = run_command_sync(
-            ' '.join(
-                [
-                    f'dotnet tool install {tool}',
-                    f'--tool-path {config.configuration.tool_root}',
-                    f'--version {config.configuration.tool_version}',
-                    f'--add-source {config.configuration.tool_feed}'
-                ]
-            ),
-            log_path=log_path
+        command = ' '.join(
+            [
+                f'dotnet tool install {tool}',
+                f'--tool-path {configuration.tool_root}',
+                f'--version {configuration.tool_version}',
+                f'--add-source {configuration.tool_feed}'
+            ]
         )
+        rt_code = run_command_sync(command, logger)
         if rt_code != 0:
-            message = f'fail to install tool: {tool}!\n'
-            print(message)
-            with open(log_path, 'a+') as log:
-                log.write(message)
+            logger.error(f'fail to install tool: {tool}!')
+            logger.info(f'****** install diagnostics tools finished ******')
             sys.exit(-1)
-
+    logger.info(f'****** install diagnostics tools finished ******')
