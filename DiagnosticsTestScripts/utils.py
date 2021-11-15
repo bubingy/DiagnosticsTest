@@ -5,6 +5,9 @@ import logging
 from subprocess import PIPE, Popen
 
 
+logging.root.setLevel(logging.NOTSET)
+
+
 def run_command_sync(command, logger, stdin=None, 
     stdout=PIPE, stderr=PIPE, cwd=None)->int:
     '''Run command and wait for return.
@@ -46,12 +49,12 @@ def create_logger(logger_name: str, logger_file_path: os.PathLike) -> logging.Lo
     """
     logger = logging.getLogger(logger_name)
 
-    FILE_LOG_FORMAT = '%(asctime)s %(module)s/%(filename)s/%(funcName)s - %(levelname)s - %(message)s'
+    FILE_LOG_FORMAT = '\n%(module)s/%(filename)s/%(funcName)s - %(levelname)s\n%(message)s'
     file_log_handler = logging.FileHandler(filename=logger_file_path)
     file_log_handler.setFormatter(logging.Formatter(FILE_LOG_FORMAT))
     file_log_handler.setLevel(logging.DEBUG)
 
-    CONSOLE_LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
+    CONSOLE_LOG_FORMAT = '\n%(message)s'
     console_log_handler = logging.StreamHandler()
     console_log_handler.setFormatter(logging.Formatter(CONSOLE_LOG_FORMAT))
     console_log_handler.setLevel(logging.INFO)

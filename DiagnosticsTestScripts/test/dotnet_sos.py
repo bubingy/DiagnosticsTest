@@ -101,6 +101,7 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
         with open(analyze_output_path, 'w+') as f:
             proc = run_command_async(
                 f'{configuration.debugger} -c {dump_path}',
+                logger,
                 cwd=configuration.test_result,
                 stdin=PIPE,
                 stdout=f,
@@ -132,6 +133,7 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
         with open(analyze_output_path, 'w+') as f:
             proc = run_command_async(
                 f'{configuration.debugger} -p {webapp.pid}',
+                logger,
                 cwd=configuration.test_result,
                 stdin=PIPE,
                 stdout=f,

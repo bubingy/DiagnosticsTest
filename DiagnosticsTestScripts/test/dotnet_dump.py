@@ -61,7 +61,8 @@ def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
     analyze_output_path = os.path.join(config.configuration.test_result, 'dotnet_analyze.log')
     with open(analyze_output_path, 'w+') as f:
         proc = run_command_async(
-            f'dotnet-dump analyze {dump_paths[0]}', 
+            f'dotnet-dump analyze {dump_paths[0]}',
+            logger,
             cwd=config.configuration.test_result,
             stdin=PIPE,
             stdout=f,

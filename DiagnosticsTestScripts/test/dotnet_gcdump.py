@@ -23,7 +23,11 @@ def test_dotnet_gcdump(configuration: config.TestConfig, logger: logging.Logger)
         configuration.test_bed,
         'GCDumpPlayground2'
     )
-    gcdumpplayground = projects.run_GCDumpPlayground(project_dir)
+    gcdumpplayground = projects.run_GCDumpPlayground(
+        project_dir,
+        configuration,
+        logger
+    )
     sync_commands_list = [
         'dotnet-gcdump --help',
         'dotnet-gcdump ps',
