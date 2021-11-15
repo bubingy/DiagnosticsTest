@@ -49,7 +49,7 @@ def create_logger(logger_name: str, logger_file_path: os.PathLike) -> logging.Lo
     """
     logger = logging.getLogger(logger_name)
 
-    FILE_LOG_FORMAT = '\n%(module)s/%(filename)s/%(funcName)s - %(levelname)s\n%(message)s'
+    FILE_LOG_FORMAT = '\n%(message)s'
     file_log_handler = logging.FileHandler(filename=logger_file_path)
     file_log_handler.setFormatter(logging.Formatter(FILE_LOG_FORMAT))
     file_log_handler.setLevel(logging.DEBUG)
