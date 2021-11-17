@@ -23,12 +23,17 @@ def get_latest_acceptable_build(definition_id: int,
     '''
     results = ['succeeded', 'partiallySucceeded']
     acceptable_builds = []
+    
+    if definition_id == 528: reason = 'schedule'
+    elif definition_id == 286: reason = 'batchedCI'
+    else: reason = 'all'
+
     for result in results:
         url = (
             'https://dev.azure.com/dnceng/internal/_apis/build/builds?'
             f'definitions={definition_id}'
             f'&branchName=refs/heads/{branch_name}'
-            '&reasonFilter=batchedCI/schedule'
+            f'&reasonFilter={reason}'
             f'&resultFilter={result}'
             '&queryOrder=finishTimeDescending'
             '&$top=1'
