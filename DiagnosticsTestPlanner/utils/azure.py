@@ -125,7 +125,7 @@ def get_artifact_version(artifact: dict, authorization: str) -> str:
                     os.path.join(tempdir, 'AssetManifests', file_name)
                 )
                 root = tree.getroot()
-                version = root.findall('Package')[-1].attrib['Version']
+                version = root.findall('''.//Package[@Id='dotnet-counters']''')[0].attrib['Version']
                 break
             # get sdk version
             if file_name == 'Windows_NT-Windows_NT Build_Release_x64.xml' or \
