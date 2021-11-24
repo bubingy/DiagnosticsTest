@@ -24,8 +24,8 @@ def get_latest_acceptable_build(definition_id: int,
     results = ['succeeded', 'partiallySucceeded']
     acceptable_builds = []
     
-    if definition_id == 528: reason = 'schedule'
-    elif definition_id == 286: reason = 'batchedCI'
+    if definition_id == '528': reason = 'schedule'
+    elif definition_id == '286': reason = 'batchedCI'
     else: reason = 'all'
 
     for result in results:
