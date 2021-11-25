@@ -41,7 +41,7 @@ def analyze(conf: TestConfig, dump_path: os.PathLike):
             process = run_command_async(
                 (
                     'dotnet '
-                    f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp2.1/any/dotnet-dump.dll '
+                    f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp3.1/any/dotnet-dump.dll '
                     f'analyze {dump_path}'
                 ),
                 stdin=PIPE,
