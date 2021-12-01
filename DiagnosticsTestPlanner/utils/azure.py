@@ -119,7 +119,6 @@ def get_artifact_version(artifact: dict, authorization: str) -> str:
 
         version = ''
         for file_name in os.listdir(os.path.join(tempdir, 'AssetManifests')):
-            # get tool version
             if file_name == 'Windows_NT-AnyCPU.xml':
                 tree = ET.parse(
                     os.path.join(tempdir, 'AssetManifests', file_name)
@@ -138,7 +137,16 @@ def get_artifact_version(artifact: dict, authorization: str) -> str:
                     )[0].attrib['Version']
                 except Exception:
                     pass
-                    
-                break
+
+            if file_name == 'Windows_NT-Windows_NT Build_Release_x64-AnyCPU.xml':
+                tree = ET.parse(
+                    os.path.join(tempdir, 'AssetManifests', file_name)
+                )
+                root = tree.getroot()
+                version = root.findall(
+                    '''.//Package[@Id='VS.Redist.Common.NetCore.SdkPlaceholder.x64']'''
+                )[0].attrib['Version']
+
+            if version != '': break
         return version
             
