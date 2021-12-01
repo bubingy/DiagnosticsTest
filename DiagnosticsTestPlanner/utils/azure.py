@@ -125,16 +125,20 @@ def get_artifact_version(artifact: dict, authorization: str) -> str:
                     os.path.join(tempdir, 'AssetManifests', file_name)
                 )
                 root = tree.getroot()
-                version = root.findall('''.//Package[@Id='dotnet-counters']''')[0].attrib['Version']
-                break
-            # get sdk version
-            if file_name == 'Windows_NT-Windows_NT Build_Release_x64.xml' or \
-                file_name == 'Windows_NT-Windows_NT Build_Release_x64-installers.xml':
-                tree = ET.parse(
-                    os.path.join(tempdir, 'AssetManifests', file_name)
-                )
-                root = tree.getroot()
-                version = root.find('Blob').attrib['Id'].split('/')[1]
+                try:
+                    version = root.findall(
+                        '''.//Package[@Id='dotnet-counters']'''
+                    )[0].attrib['Version']
+                except Exception:
+                    pass
+
+                try:
+                    version = root.findall(
+                        '''.//Package[@Id='VS.Redist.Common.NetCore.SdkPlaceholder.x64']'''
+                    )[0].attrib['Version']
+                except Exception:
+                    pass
+                    
                 break
         return version
             
