@@ -3,6 +3,7 @@
 import os
 import re
 import glob
+import base64
 import platform
 import configparser
 from typing import Union
@@ -29,7 +30,15 @@ class TestConfig:
     
         self.__get_rid()
         self.__get_debugger()
+
+        azure_pat = self.config['Azure']['PAT']
+        self.authorization = str(
+            base64.b64encode(bytes(f':{azure_pat}', 'ascii')),
+            'ascii'
+        )
+        
         self.sdk_version = self.config['SDK']['Version']
+        self.sdk_build_id = self.config['SDK']['BuildID']
         self.source_feed = self.config['SDK']['Feed']
         self.tool_version = self.config['Tool']['Version']
         self.tool_commit = self.config['Tool']['Commit']
