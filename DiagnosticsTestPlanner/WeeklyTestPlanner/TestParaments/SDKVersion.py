@@ -26,6 +26,7 @@ def get_sdk_version():
     )
 
     sdk_version = dict()
+    sdk_build_id = dict()
 
     for branch_name in test_conf.branch_list:
         build_info = get_latest_acceptable_build(
@@ -42,5 +43,6 @@ def get_sdk_version():
             azure_conf.authorization
         )
         sdk_version[branch_name] = artifact_version
+        sdk_build_id[branch_name] = build_info['id']
 
-    return sdk_version
+    return sdk_version, sdk_build_id

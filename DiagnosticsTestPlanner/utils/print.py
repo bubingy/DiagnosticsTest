@@ -177,7 +177,7 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     workbook.save(output_file)
 
 
-def print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, output_file) -> None:
+def print_weekly_test_plan(os_rotation, sdk_version, sdk_build_id, tool_version, pr_info, output_file) -> None:
     workbook = Workbook()
 
     # main sheet
@@ -198,11 +198,19 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, outp
     print('Full version of sdk:')
     sdk_version_sheet.cell(
         row=1, column=1,
-        value='Full version of sdk:'
+        value='Branch of sdk:'
+    )
+    sdk_version_sheet.cell(
+        row=1, column=2,
+        value='Version of sdk:'
+    )
+    sdk_version_sheet.cell(
+        row=1, column=3,
+        value='Build ID of sdk:'
     )
 
     for idx, branch in enumerate(sdk_version.keys()):
-        print(f'{branch}: {sdk_version[branch]}')
+        print(f'{branch}: {sdk_version[branch]} build id: {sdk_build_id[branch]}')
         sdk_version_sheet.cell(
             row=2+idx, column=1,
             value=f'{branch}:'
@@ -210,6 +218,10 @@ def print_weekly_test_plan(os_rotation, sdk_version, tool_version, pr_info, outp
         sdk_version_sheet.cell(
             row=2+idx, column=2,
             value=f'{sdk_version[branch]}'
+        )
+        sdk_version_sheet.cell(
+            row=2+idx, column=3,
+            value=f'{sdk_build_id[branch]}'
         )
 
     # tool info sheet
