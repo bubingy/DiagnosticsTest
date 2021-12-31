@@ -2,10 +2,13 @@
 '''
 
 import os
+import sys
+import gzip
+import json
 from urllib import request
 
 from config import TestConfig
-from utils import run_command_sync, Result
+from utils import run_command_sync
 
 
 def prepare_test_bed(conf: TestConfig):
@@ -32,46 +35,91 @@ def download_perfcollect(conf: TestConfig):
     run_command_sync(f'chmod +x {conf.test_bed}/perfcollect')
 
 
-def install_sdk(conf: TestConfig, arch: str='x64'):
+def get_sdk_download_link(configuration: TestConfig) -> str:
+    '''Get PackageArtifacts according to the given `build`.
+
+    :return: download link of sdk.
+    '''
+    url = (
+        'https://dev.azure.com/dnceng/internal/_apis/'
+        f'build/builds/{configuration.sdk_build_id}/artifacts?'
+        'artifactName=BlobArtifacts&api-version=6.1-preview.5'
+    )
+    response = request.urlopen(
+        request.Request(
+            url,
+            headers={
+                'Authorization': f'Basic {configuration.authorization}'
+            },
+        )
+    )
+    container_id = json.loads(response.read())['resource']['data'].split('/')[1]
+    if 'win' in configuration.rid: suffix = 'zip'
+    else: suffix = 'tar.gz'
+    return (
+        f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
+        f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{configuration.sdk_version}-{configuration.rid}.{suffix}'
+    )
+
+
+def install_sdk(configuration: TestConfig):
     '''Install .net(core) sdk
     '''
-    if 'win' in conf.rid:
-        req = request.urlopen('https://dot.net/v1/dotnet-install.ps1')
-        with open(f'{conf.test_bed}/dotnet-install.ps1', 'w+') as f:
-            f.write(req.read().decode())
-        rt_code = run_command_sync(
-            ' '.join(
-                [
-                    f'powershell.exe {conf.test_bed}/dotnet-install.ps1',
-                    f'-InstallDir {conf.dotnet_root} -v {conf.sdk_version} -Architecture {arch}'
-                ]
+    sdk_download_link = get_sdk_download_link(configuration)
+
+    compressed_file_path = os.path.join(
+        configuration.test_bed,
+        os.path.basename(sdk_download_link)
+    )
+
+    BUFFERSIZE = 64*1024*1024
+    try:
+        response = request.urlopen(
+            request.Request(
+                sdk_download_link,
+                headers={
+                    'Authorization': f'Basic {configuration.authorization}'
+                },
             )
         )
-    else:
-        req = request.urlopen(
-            'https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh'
-        )
-        with open(f'{conf.test_bed}/dotnet-install.sh', 'w+') as f:
-            f.write(req.read().decode())
-        run_command_sync(f'chmod +x {conf.test_bed}/dotnet-install.sh')
-        if conf.rid == 'linux-musl-arm64':
-            rt_code = run_command_sync(
-                (
-                    f'/bin/bash {conf.test_bed}/dotnet-install.sh '
-                    f'-InstallDir {conf.dotnet_root} '
-                    f'-v {conf.runtime_version} --runtime dotnet'
-                )
-            )
+        with open(compressed_file_path, 'wb+') as fs:
+            while True:
+                buffer = response.read(BUFFERSIZE)
+                if buffer == b'' or len(buffer) == 0: break
+                fs.write(buffer)
+    except Exception as e:
+        if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
+        sys.exit(-1)
+
+    decompressed_file_path = os.path.join(
+        configuration.test_bed,
+        os.path.splitext(compressed_file_path)[0]
+    )
+    try:
+        with gzip.open(compressed_file_path, 'rb') as comp_ref, \
+            open(decompressed_file_path, 'wb+') as decomp_ref:
+            while True:
+                buffer = comp_ref.read(BUFFERSIZE)
+                if buffer == b'' or len(buffer) == 0: break
+                decomp_ref.write(buffer)
+    except Exception as e:
+        if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
+        sys.exit(-1)
+    finally:
+        os.remove(compressed_file_path)
+
+    sdk_dir = os.environ['DOTNET_ROOT']
+    try:
+        if not os.path.exists(sdk_dir): os.makedirs(sdk_dir)
+        if 'win' in configuration.rid:
+            import zipfile
+            with zipfile.ZipFile(decompressed_file_path, 'r') as zip_ref:
+                zip_ref.extractall(sdk_dir)
         else:
-            rt_code = run_command_sync(
-                ' '.join(
-                    [
-                        f'/bin/bash {conf.test_bed}/dotnet-install.sh',
-                        f'-InstallDir {conf.dotnet_root} -v {conf.sdk_version}'
-                    ]
-                )
-            )
-    if rt_code == 0:
-        return Result(0, 'successfully install sdk', None)
-    else:
-        return Result(rt_code, 'fail to install sdk', None)
+            import tarfile
+            with tarfile.open(decompressed_file_path, 'r') as tar_ref:
+                tar_ref.extractall(sdk_dir)
+    except Exception as e:
+        sys.exit(-1)
+    finally:
+        os.remove(decompressed_file_path)
