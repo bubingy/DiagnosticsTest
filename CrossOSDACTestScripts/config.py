@@ -5,6 +5,7 @@
 
 import os
 import glob
+import base64
 import platform
 import configparser
 
@@ -14,7 +15,9 @@ class TestConfig:
 
     '''
     def __init__(self,
+                 authorization: str,
                  sdk_version: str,
+                 sdk_build_id: str,
                  runtime_version: str,
                  tool_version: str,
                  tool_feed: str,
@@ -22,7 +25,9 @@ class TestConfig:
                  arch: str):
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
         self.get_rid()
+        self.authorization = authorization
         self.sdk_version = sdk_version
+        self.sdk_build_id = sdk_build_id
         self.runtime_version = runtime_version
         self.tool_version = tool_version
         self.tool_feed = tool_feed
@@ -88,8 +93,18 @@ class GlobalConfig:
 
         self.sdk_version_list = self.config['SDK']['Version'].split('\n')
         self.sdk_version_list.remove('')
+
+        self.sdk_build_id_list = self.config['SDK']['BuildID'].split('\n')
+        self.sdk_build_id_list.remove('')
+
         self.runtime_version_list = self.config['Runtime']['Version'].split('\n')
         self.runtime_version_list.remove('')
+
+        azure_pat = self.config['Azure']['PAT']
+        self.authorization = str(
+            base64.b64encode(bytes(f':{azure_pat}', 'ascii')),
+            'ascii'
+        )
 
         self.tool_version = self.config['Tool']['Version']
         self.tool_feed = self.config['Tool']['Feed']
@@ -98,11 +113,13 @@ class GlobalConfig:
         self.origin_ev = os.environ.copy()
 
     def get(self, index: int, arch: str):
-        sdk_version, runtime_version = \
-            self.sdk_version_list[index], self.runtime_version_list[index]
+        sdk_version, sdk_build_id, runtime_version = \
+            self.sdk_version_list[index], self.sdk_build_id_list[index], self.runtime_version_list[index]
 
         test_conf = TestConfig(
+            self.authorization,
             sdk_version,
+            sdk_build_id,
             runtime_version,
             self.tool_version,
             self.tool_feed,

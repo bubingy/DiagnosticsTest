@@ -56,10 +56,18 @@ def get_sdk_download_link(configuration: TestConfig) -> str:
     container_id = json.loads(response.read())['resource']['data'].split('/')[1]
     if 'win' in configuration.rid: suffix = 'zip'
     else: suffix = 'tar.gz'
-    return (
-        f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
-        f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{configuration.sdk_version}-{configuration.rid}.{suffix}'
-    )
+    if 'servicing' in configuration.sdk_version:
+        version_number = configuration.sdk_version.split('-')[0]
+        sdk_download_link = (
+            f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
+            f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{version_number}-{configuration.rid}.{suffix}'
+        )
+    else:
+        sdk_download_link = (
+            f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
+            f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{configuration.sdk_version}-{configuration.rid}.{suffix}'
+        )
+    return sdk_download_link
 
 
 def install_sdk(configuration: TestConfig):
@@ -88,6 +96,7 @@ def install_sdk(configuration: TestConfig):
                 if buffer == b'' or len(buffer) == 0: break
                 fs.write(buffer)
     except Exception as e:
+        print(e)
         if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
         sys.exit(-1)
 
@@ -103,6 +112,7 @@ def install_sdk(configuration: TestConfig):
                 if buffer == b'' or len(buffer) == 0: break
                 decomp_ref.write(buffer)
     except Exception as e:
+        print(e)
         if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
         sys.exit(-1)
     finally:
@@ -120,6 +130,7 @@ def install_sdk(configuration: TestConfig):
             with tarfile.open(decompressed_file_path, 'r') as tar_ref:
                 tar_ref.extractall(sdk_dir)
     except Exception as e:
+        print(e)
         sys.exit(-1)
     finally:
         os.remove(decompressed_file_path)

@@ -5,6 +5,7 @@
 
 import os
 import glob
+import base64
 import platform
 import configparser
 
@@ -14,11 +15,15 @@ class TestConfig:
 
     '''
     def __init__(self,
+                 authorization: str,
                  sdk_version: str,
+                 sdk_build_id: str,
                  test_bed: os.PathLike):
         self.work_dir = os.path.dirname(os.path.abspath(__file__))
         self.get_rid()
+        self.authorization = authorization
         self.sdk_version = sdk_version
+        self.sdk_build_id = sdk_build_id
         self.test_bed = test_bed
         self.trace_directory = os.path.join(
             self.test_bed,
@@ -74,15 +79,27 @@ class GlobalConfig:
         self.sdk_version_list = self.config['SDK']['Version'].split('\n')
         self.sdk_version_list.remove('')
 
+        self.sdk_build_id_list = self.config['SDK']['BuildID'].split('\n')
+        self.sdk_build_id_list.remove('')
+
+        azure_pat = self.config['Azure']['PAT']
+        self.authorization = str(
+            base64.b64encode(bytes(f':{azure_pat}', 'ascii')),
+            'ascii'
+        )
+
         self.test_bed = self.config['Test']['TestBed']
 
         self.origin_ev = os.environ.copy()
 
     def get(self, index: int):
         sdk_version = self.sdk_version_list[index]
+        sdk_build_id = self.sdk_build_id_list[index]
 
         test_conf = TestConfig(
+            self.authorization,
             sdk_version,
+            sdk_build_id,
             self.test_bed
         )
 
