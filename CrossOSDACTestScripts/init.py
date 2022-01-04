@@ -2,9 +2,6 @@
 '''
 
 import os
-import sys
-import gzip
-import json
 from urllib import request
 
 from config import TestConfig
@@ -24,41 +21,6 @@ def prepare_test_bed(conf: TestConfig):
     except Exception as e:
         print(e)
         exit(-1)
-
-
-def get_sdk_download_link(configuration: TestConfig) -> str:
-    '''Get PackageArtifacts according to the given `build`.
-
-    :return: download link of sdk.
-    '''
-    url = (
-        'https://dev.azure.com/dnceng/internal/_apis/'
-        f'build/builds/{configuration.sdk_build_id}/artifacts?'
-        'artifactName=BlobArtifacts&api-version=6.1-preview.5'
-    )
-    response = request.urlopen(
-        request.Request(
-            url,
-            headers={
-                'Authorization': f'Basic {configuration.authorization}'
-            },
-        )
-    )
-    container_id = json.loads(response.read())['resource']['data'].split('/')[1]
-    if 'win' in configuration.rid: suffix = 'zip'
-    else: suffix = 'tar.gz'
-    if 'servicing' in configuration.sdk_version:
-        version_number = configuration.sdk_version.split('-')[0]
-        sdk_download_link = (
-            f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
-            f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{version_number}-{configuration.rid}.{suffix}'
-        )
-    else:
-        sdk_download_link = (
-            f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
-            f'BlobArtifacts?itemPath=BlobArtifacts/dotnet-sdk-{configuration.sdk_version}-{configuration.rid}.{suffix}'
-        )
-    return sdk_download_link
 
 
 def install_sdk(conf: TestConfig, arch: str='x64'):
@@ -104,74 +66,6 @@ def install_sdk(conf: TestConfig, arch: str='x64'):
         return Result(0, 'successfully install sdk', None)
     else:
         return Result(rt_code, 'fail to install sdk', None)
-
-
-def install_sdk(configuration: TestConfig, arch: str='x64'):
-    '''Install .net(core) sdk
-    '''
-    sdk_download_link = get_sdk_download_link(configuration)
-    if 'win' in configuration.rid: 
-        sdk_download_link = sdk_download_link.replace('x64', arch)
-
-    compressed_file_path = os.path.join(
-        configuration.test_bed,
-        os.path.basename(sdk_download_link)
-    )
-
-    BUFFERSIZE = 64*1024*1024
-    try:
-        response = request.urlopen(
-            request.Request(
-                sdk_download_link,
-                headers={
-                    'Authorization': f'Basic {configuration.authorization}'
-                },
-            )
-        )
-        with open(compressed_file_path, 'wb+') as fs:
-            while True:
-                buffer = response.read(BUFFERSIZE)
-                if buffer == b'' or len(buffer) == 0: break
-                fs.write(buffer)
-    except Exception as e:
-        print(e)
-        if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
-        sys.exit(-1)
-
-    decompressed_file_path = os.path.join(
-        configuration.test_bed,
-        os.path.splitext(compressed_file_path)[0]
-    )
-    try:
-        with gzip.open(compressed_file_path, 'rb') as comp_ref, \
-            open(decompressed_file_path, 'wb+') as decomp_ref:
-            while True:
-                buffer = comp_ref.read(BUFFERSIZE)
-                if buffer == b'' or len(buffer) == 0: break
-                decomp_ref.write(buffer)
-    except Exception as e:
-        print(e)
-        if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
-        sys.exit(-1)
-    finally:
-        os.remove(compressed_file_path)
-
-    sdk_dir = os.environ['DOTNET_ROOT']
-    try:
-        if not os.path.exists(sdk_dir): os.makedirs(sdk_dir)
-        if 'win' in configuration.rid:
-            import zipfile
-            with zipfile.ZipFile(decompressed_file_path, 'r') as zip_ref:
-                zip_ref.extractall(sdk_dir)
-        else:
-            import tarfile
-            with tarfile.open(decompressed_file_path, 'r') as tar_ref:
-                tar_ref.extractall(sdk_dir)
-    except Exception as e:
-        print(e)
-        sys.exit(-1)
-    finally:
-        os.remove(decompressed_file_path)
 
 
 def install_tools(conf: TestConfig):
