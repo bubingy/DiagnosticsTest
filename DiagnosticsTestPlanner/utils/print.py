@@ -33,13 +33,13 @@ def init_benchmarks_unit_content(sdk_version: str):
         return 'NA'
 
 
-def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> None:
+def print_weekly_test_tools_test_matrix(os_rotation: dict, output_file: os.PathLike) -> None:
     workbook = load_workbook(output_file)
-    if 'TestMatrix' not in workbook.sheetnames:
-        workbook.create_sheet('TestMatrix')
-    test_matrix_sheet = workbook['TestMatrix']
+    if 'ToolsTestMatrix' not in workbook.sheetnames:
+        workbook.create_sheet('ToolsTestMatrix')
+    test_matrix_sheet = workbook['ToolsTestMatrix']
     header = [
-        'OS',
+        '',
         'dotnet-counters',
         'dotnet-dump',
         'dotnet-gcdump',
@@ -177,6 +177,32 @@ def print_weekly_test_matrix(os_rotation: dict, output_file: os.PathLike) -> Non
     workbook.save(output_file)
 
 
+def print_weekly_test_lttng_test_matrix(sdk_version: dict, output_file: os.PathLike) -> None:
+    workbook = load_workbook(output_file)
+    if 'LTTngTestMatrix' not in workbook.sheetnames:
+        workbook.create_sheet('LTTngTestMatrix')
+    test_matrix_sheet = workbook['LTTngTestMatrix']
+    header = [
+        '',
+        'Debian10 x64',
+        'Ubuntu18.04 arm64',
+        'Debian10 arm32'
+    ]
+    for idx, title in enumerate(header):
+        test_matrix_sheet.cell(
+            row=1, column=1+idx,
+            value=title
+        ).font = Font(color="1F497D")
+
+    for idx, version in enumerate(sdk_version.values()):
+        test_matrix_sheet.cell(
+            row=2+idx, column=1,
+            value=version
+        ).font = Font(color="1F497D")
+
+    workbook.save(output_file)
+
+
 def print_weekly_test_plan(os_rotation, sdk_version, sdk_build_id, tool_version, pr_info, output_file) -> None:
     workbook = Workbook()
 
@@ -270,7 +296,8 @@ def print_weekly_test_plan(os_rotation, sdk_version, sdk_build_id, tool_version,
         row=4, column=2,
     ).font = Font(color="0563C1")
     workbook.save(output_file)
-    print_weekly_test_matrix(os_rotation, output_file)
+    print_weekly_test_tools_test_matrix(os_rotation, output_file)
+    print_weekly_test_lttng_test_matrix(sdk_version, output_file)
 
 
 def print_release_test_matrix(test_conf: ReleaseTestConf, output_file: os.PathLike) -> None:
