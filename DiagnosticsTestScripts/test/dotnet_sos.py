@@ -80,40 +80,45 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
     # load dump for debugging
     analyze_output_path = os.path.join(configuration.test_result, 'debug_dump.log')
     if 'win' in configuration.rid:
-        dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
-        with open(analyze_output_path, 'w+') as fs:
-            run_command_async(
-                (
-                    f'{configuration.debugger} -z {dump_path} '
-                    f'-cf {debug_script}'
-                ),
-                logger,
-                stdout=fs,
-                stderr=fs
-            ).communicate()
-
+        try:
+            dump_path = glob.glob(f'{configuration.test_bed}/dump*.dmp')[0]
+            with open(analyze_output_path, 'w+') as fs:
+                run_command_async(
+                    (
+                        f'{configuration.debugger} -z {dump_path} '
+                        f'-cf {debug_script}'
+                    ),
+                    logger,
+                    stdout=fs,
+                    stderr=fs
+                ).communicate()
+        except Exception as e:
+            logger.error(f'fail to debug dumpfile: {e}')
     if 'linux' in configuration.rid or \
         (
             'osx' in configuration.rid and \
         int(configuration.sdk_version[0]) >= 7
         ):
-        dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
-        with open(analyze_output_path, 'w+') as f:
-            proc = run_command_async(
-                f'{configuration.debugger} -c {dump_path}',
-                logger,
-                cwd=configuration.test_result,
-                stdin=PIPE,
-                stdout=f,
-                stderr=f
-            )
-            for command in analyze_commands:
-                try:
-                    proc.stdin.write(command)
-                except Exception as exception:
-                    f.write(f'{exception}\n'.encode('utf-8'))
-                    continue
-            proc.communicate()
+        try:
+            dump_path = glob.glob(f'{configuration.test_bed}/core_*')[0]
+            with open(analyze_output_path, 'w+') as f:
+                proc = run_command_async(
+                    f'{configuration.debugger} -c {dump_path}',
+                    logger,
+                    cwd=configuration.test_result,
+                    stdin=PIPE,
+                    stdout=f,
+                    stderr=f
+                )
+                for command in analyze_commands:
+                    try:
+                        proc.stdin.write(command)
+                    except Exception as exception:
+                        f.write(f'{exception}\n'.encode('utf-8'))
+                        continue
+                proc.communicate()
+        except Exception as e:
+            logger.error(f'fail to debug dumpfile: {e}')
 
     # attach process for debugging
     webapp = projects.run_webapp(configuration, logger, webapp_dir)
