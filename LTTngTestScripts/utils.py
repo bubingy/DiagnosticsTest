@@ -47,12 +47,3 @@ def run_command_async(command, log_path=None, env=None,
             log.write(f'{command}\n')
     return Popen(args, stdin=stdin, env=env,
         stdout=stdout, stderr=stderr, cwd=cwd)
-
-
-class Result:
-    '''This class is used to store result.
-    '''
-    def __init__(self, code, message, data):
-        self.code = code
-        self.message = message
-        self.data = data

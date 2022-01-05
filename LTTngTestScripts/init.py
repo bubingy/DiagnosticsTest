@@ -14,19 +14,21 @@ from utils import run_command_sync
 def prepare_test_bed(conf: TestConfig):
     '''Create folders for TestBed.
     '''
+    print(f'****** create folders ******')
     try:
         if not os.path.exists(conf.test_bed):
             os.makedirs(conf.test_bed)
         if not os.path.exists(conf.trace_directory):
             os.makedirs(conf.trace_directory)
     except Exception as e:
-        print(e)
+        print(f'fail to create folders: {e}')
         exit(-1)
 
 
 def download_perfcollect(conf: TestConfig):
     '''Download perfcollect script.
     '''
+    print(f'****** download perfcollect script ******')
     req = request.urlopen(
         'https://raw.githubusercontent.com/microsoft/perfview/main/src/perfcollect/perfcollect'
     )
@@ -81,6 +83,7 @@ def install_sdk(configuration: TestConfig):
     )
 
     BUFFERSIZE = 64*1024*1024
+    print(f'****** download sdk: {configuration.sdk_version} from Azure ******')
     try:
         response = request.urlopen(
             request.Request(
@@ -96,10 +99,11 @@ def install_sdk(configuration: TestConfig):
                 if buffer == b'' or len(buffer) == 0: break
                 fs.write(buffer)
     except Exception as e:
-        print(e)
+        print(f'fail to download package from Azure: {e}')
         if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
         sys.exit(-1)
 
+    print(f'****** decompress downloaded sdk package ******')
     decompressed_file_path = os.path.join(
         configuration.test_bed,
         os.path.splitext(compressed_file_path)[0]
@@ -112,12 +116,13 @@ def install_sdk(configuration: TestConfig):
                 if buffer == b'' or len(buffer) == 0: break
                 decomp_ref.write(buffer)
     except Exception as e:
-        print(e)
+        print(f'fail to decompress downloaded package: {e}')
         if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
         sys.exit(-1)
     finally:
         os.remove(compressed_file_path)
 
+    print(f'****** extract decompressed package ******')
     sdk_dir = os.environ['DOTNET_ROOT']
     try:
         if not os.path.exists(sdk_dir): os.makedirs(sdk_dir)
@@ -130,7 +135,7 @@ def install_sdk(configuration: TestConfig):
             with tarfile.open(decompressed_file_path, 'r') as tar_ref:
                 tar_ref.extractall(sdk_dir)
     except Exception as e:
-        print(e)
+        print(f'fail to extract file: {e}')
         sys.exit(-1)
     finally:
         os.remove(decompressed_file_path)
