@@ -75,67 +75,99 @@ def get_sdk_download_link(configuration: TestConfig) -> str:
 def install_sdk(configuration: TestConfig):
     '''Install .net(core) sdk
     '''
-    sdk_download_link = get_sdk_download_link(configuration)
-
-    compressed_file_path = os.path.join(
-        configuration.test_bed,
-        os.path.basename(sdk_download_link)
-    )
-
-    BUFFERSIZE = 64*1024*1024
-    print(f'****** download sdk: {configuration.sdk_version} from Azure ******')
-    try:
-        response = request.urlopen(
-            request.Request(
-                sdk_download_link,
-                headers={
-                    'Authorization': f'Basic {configuration.authorization}'
-                },
-            )
-        )
-        with open(compressed_file_path, 'wb+') as fs:
-            while True:
-                buffer = response.read(BUFFERSIZE)
-                if buffer == b'' or len(buffer) == 0: break
-                fs.write(buffer)
-    except Exception as e:
-        print(f'fail to download package from Azure: {e}')
-        if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
-        sys.exit(-1)
-
-    print(f'****** decompress downloaded sdk package ******')
-    decompressed_file_path = os.path.join(
-        configuration.test_bed,
-        os.path.splitext(compressed_file_path)[0]
-    )
-    try:
-        with gzip.open(compressed_file_path, 'rb') as comp_ref, \
-            open(decompressed_file_path, 'wb+') as decomp_ref:
-            while True:
-                buffer = comp_ref.read(BUFFERSIZE)
-                if buffer == b'' or len(buffer) == 0: break
-                decomp_ref.write(buffer)
-    except Exception as e:
-        print(f'fail to decompress downloaded package: {e}')
-        if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
-        sys.exit(-1)
-    finally:
-        os.remove(compressed_file_path)
-
-    print(f'****** extract decompressed package ******')
     sdk_dir = os.environ['DOTNET_ROOT']
-    try:
-        if not os.path.exists(sdk_dir): os.makedirs(sdk_dir)
+    if configuration.sdk_version[0] == '3':
         if 'win' in configuration.rid:
-            import zipfile
-            with zipfile.ZipFile(decompressed_file_path, 'r') as zip_ref:
-                zip_ref.extractall(sdk_dir)
+            req = request.urlopen('https://dot.net/v1/dotnet-install.ps1')
+            with open(f'{configuration.test_bed}/dotnet-install.ps1', 'w+') as f:
+                f.write(req.read().decode())
+            rt_code = run_command_sync(
+                ' '.join(
+                    [
+                        f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
+                        f'-InstallDir {sdk_dir} -v {configuration.sdk_version}'
+                    ]
+                )
+            )
         else:
-            import tarfile
-            with tarfile.open(decompressed_file_path, 'r') as tar_ref:
-                tar_ref.extractall(sdk_dir)
-    except Exception as e:
-        print(f'fail to extract file: {e}')
-        sys.exit(-1)
-    finally:
-        os.remove(decompressed_file_path)
+            req = request.urlopen(
+                'https://dotnet.microsoft.com/download/dotnet-core/scripts/v1/dotnet-install.sh'
+            )
+            with open(f'{configuration.test_bed}/dotnet-install.sh', 'w+') as f:
+                f.write(req.read().decode())
+            run_command_sync(f'chmod +x {configuration.test_bed}/dotnet-install.sh')
+            rt_code = run_command_sync(
+                ' '.join(
+                    [
+                        f'/bin/bash {configuration.test_bed}/dotnet-install.sh',
+                        f'-InstallDir {sdk_dir} -v {configuration.sdk_version}'
+                    ]
+                )
+            )
+        if rt_code != 0:
+            print(f'fail to install .net SDK {configuration.sdk_version}')
+            exit(-1)
+    else:
+        sdk_download_link = get_sdk_download_link(configuration)
+
+        compressed_file_path = os.path.join(
+            configuration.test_bed,
+            os.path.basename(sdk_download_link)
+        )
+
+        BUFFERSIZE = 64*1024*1024
+        print(f'****** download sdk: {configuration.sdk_version} from Azure ******')
+        try:
+            response = request.urlopen(
+                request.Request(
+                    sdk_download_link,
+                    headers={
+                        'Authorization': f'Basic {configuration.authorization}'
+                    },
+                )
+            )
+            with open(compressed_file_path, 'wb+') as fs:
+                while True:
+                    buffer = response.read(BUFFERSIZE)
+                    if buffer == b'' or len(buffer) == 0: break
+                    fs.write(buffer)
+        except Exception as e:
+            print(f'fail to download package from Azure: {e}')
+            if os.path.exists(compressed_file_path): os.remove(compressed_file_path)
+            sys.exit(-1)
+
+        print(f'****** decompress downloaded sdk package ******')
+        decompressed_file_path = os.path.join(
+            configuration.test_bed,
+            os.path.splitext(compressed_file_path)[0]
+        )
+        try:
+            with gzip.open(compressed_file_path, 'rb') as comp_ref, \
+                open(decompressed_file_path, 'wb+') as decomp_ref:
+                while True:
+                    buffer = comp_ref.read(BUFFERSIZE)
+                    if buffer == b'' or len(buffer) == 0: break
+                    decomp_ref.write(buffer)
+        except Exception as e:
+            print(f'fail to decompress downloaded package: {e}')
+            if os.path.exists(decompressed_file_path): os.remove(decompressed_file_path)
+            sys.exit(-1)
+        finally:
+            os.remove(compressed_file_path)
+
+        print(f'****** extract decompressed package ******')
+        try:
+            if not os.path.exists(sdk_dir): os.makedirs(sdk_dir)
+            if 'win' in configuration.rid:
+                import zipfile
+                with zipfile.ZipFile(decompressed_file_path, 'r') as zip_ref:
+                    zip_ref.extractall(sdk_dir)
+            else:
+                import tarfile
+                with tarfile.open(decompressed_file_path, 'r') as tar_ref:
+                    tar_ref.extractall(sdk_dir)
+        except Exception as e:
+            print(f'fail to extract file: {e}')
+            sys.exit(-1)
+        finally:
+            os.remove(decompressed_file_path)
