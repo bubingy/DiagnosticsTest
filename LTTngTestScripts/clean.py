@@ -22,7 +22,7 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
             }
         )
         for f in os.listdir(conf.trace_directory):
-            f_path = os.path.join(conf.trace_directory, f),
+            f_path = os.path.join(conf.trace_directory, f)
             if os.path.isdir(f_path): to_be_removed.add(f_path)
 
     to_be_removed = to_be_removed.union(
