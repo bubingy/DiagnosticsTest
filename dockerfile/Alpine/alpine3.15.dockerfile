@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:3.15
 
 RUN sed -i 's/http/https/g' /etc/apk/repositories && \
     apk update && \
