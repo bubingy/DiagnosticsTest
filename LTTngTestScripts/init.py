@@ -58,7 +58,7 @@ def get_sdk_download_link(configuration: TestConfig) -> str:
     container_id = json.loads(response.read())['resource']['data'].split('/')[1]
     if 'win' in configuration.rid: suffix = 'zip'
     else: suffix = 'tar.gz'
-    if 'servicing' in configuration.sdk_version:
+    if 'servicing' in configuration.sdk_version or 'rtm' in configuration.sdk_version:
         version_number = configuration.sdk_version.split('-')[0]
         sdk_download_link = (
             f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'
