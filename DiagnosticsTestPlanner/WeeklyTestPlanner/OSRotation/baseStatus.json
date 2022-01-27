@@ -2,7 +2,7 @@
     "monday": "2021-11-01",
     "friday": "2021-11-05",
     "requiredOS": {
-        "Alpine3.9": "3.1",
+        "Alpine3.15": "3.1",
         "Windows10": "5.0",
         "OSX10.15": "6.0"
     },
