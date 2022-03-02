@@ -63,7 +63,8 @@ def install_sdk(configuration: config.TestConfig, logger: logging.Logger):
                         f'powershell.exe {configuration.test_bed}/dotnet-install.ps1',
                         f'-InstallDir {dotnet_root} -v {configuration.sdk_version}'
                     ]
-                )
+                ),
+                logger
             )
         else:
             req = request.urlopen(
@@ -71,14 +72,15 @@ def install_sdk(configuration: config.TestConfig, logger: logging.Logger):
             )
             with open(f'{configuration.test_bed}/dotnet-install.sh', 'w+') as f:
                 f.write(req.read().decode())
-            run_command_sync(f'chmod +x {configuration.test_bed}/dotnet-install.sh')
+            run_command_sync(f'chmod +x {configuration.test_bed}/dotnet-install.sh', logger)
             rt_code = run_command_sync(
                 ' '.join(
                     [
                         f'/bin/bash {configuration.test_bed}/dotnet-install.sh',
                         f'-InstallDir {dotnet_root} -v {configuration.sdk_version}'
                     ]
-                )
+                ),
+                logger
             )
         if rt_code != 0:
             logger.error(f'fail to install .net SDK {configuration.sdk_version}')
