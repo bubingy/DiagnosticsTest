@@ -69,7 +69,7 @@ def run_benchmark(configuration: config.TestConfig, logger: logging.Logger):
     )
 
     rt_code = run_command_sync(
-        'dotnet run -c release',
+        f'{configuration.dotnet} run -c release',
         logger,
         cwd=project_dir
     )

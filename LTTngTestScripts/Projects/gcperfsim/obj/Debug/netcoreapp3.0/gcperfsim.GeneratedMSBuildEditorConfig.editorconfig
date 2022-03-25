@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = gcperfsim
+build_property.ProjectDir = f:\Workspace\DiagnosticsTest\LTTngTestScripts\Projects\gcperfsim\

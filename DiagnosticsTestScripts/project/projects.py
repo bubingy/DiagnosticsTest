@@ -22,7 +22,7 @@ def create_publish_webapp(configuration: config.TestConfig, logger: logging.Logg
         'webapp'
     )
     rt_code = run_command_sync(
-        f'dotnet new webapp -o {project_dir}',
+        f'{configuration.dotnet} new webapp -o {project_dir}',
         logger,
         cwd=configuration.test_bed,
     )
@@ -45,7 +45,7 @@ def create_publish_webapp(configuration: config.TestConfig, logger: logging.Logg
 
     if configuration.source_feed != '':
         rt_code = run_command_sync(
-            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            f'{configuration.dotnet} build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
             logger,
             cwd=project_dir,
         )
@@ -56,13 +56,13 @@ def create_publish_webapp(configuration: config.TestConfig, logger: logging.Logg
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'{configuration.dotnet} publish -o out -r {configuration.rid}',
         logger,
         cwd=project_dir
     )
     if rt_code != 0:
         rt_code = run_command_sync(
-            f'dotnet publish -o out',
+            f'{configuration.dotnet} publish -o out',
             logger,
             cwd=project_dir
         )
@@ -100,7 +100,7 @@ def run_webapp(configuration, logger, project_dir: str) -> Popen:
         )
     else:
         proc = run_command_async(
-            f'dotnet {project_dir}/out/webapp.dll',
+            f'{configuration.dotnet} {project_dir}/out/webapp.dll',
             logger,
             stdout=tmp_write
         )
@@ -135,7 +135,7 @@ def create_publish_consoleapp(configuration: config.TestConfig, logger: logging.
         'consoleapp'
     )
     rt_code = run_command_sync(
-        f'dotnet new console -o {project_dir}',
+        f'{configuration.dotnet} new console -o {project_dir}',
         logger,
         cwd=configuration.test_bed,
     )
@@ -163,7 +163,7 @@ def create_publish_consoleapp(configuration: config.TestConfig, logger: logging.
 
     if configuration.source_feed != '':
         rt_code = run_command_sync(
-            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            f'{configuration.dotnet} build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
             logger,
             cwd=project_dir
         )
@@ -174,13 +174,13 @@ def create_publish_consoleapp(configuration: config.TestConfig, logger: logging.
         
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'{configuration.dotnet} publish -o out -r {configuration.rid}',
         logger,
         cwd=project_dir
     )
     if rt_code != 0:
         rt_code = run_command_sync(
-            f'dotnet publish -o out',
+            f'{configuration.dotnet} publish -o out',
             logger,
             cwd=project_dir,
         )
@@ -221,7 +221,7 @@ def create_publish_GCDumpPlayground(configuration: config.TestConfig, logger: lo
 
     if configuration.source_feed != '':
         rt_code = run_command_sync(
-            f'dotnet build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
+            f'{configuration.dotnet} build -o out -r {configuration.rid} --self-contained --source {configuration.source_feed}',
             logger,
             cwd=project_dir
         )
@@ -232,13 +232,13 @@ def create_publish_GCDumpPlayground(configuration: config.TestConfig, logger: lo
     
     # if given runtime isn't available, try to publish without specifying rid.
     rt_code = run_command_sync(
-        f'dotnet publish -o out -r {configuration.rid}',
+        f'{configuration.dotnet} publish -o out -r {configuration.rid}',
         logger,
         cwd=project_dir,
     )
     if rt_code != 0:
         rt_code = run_command_sync(
-            f'dotnet publish -o out',
+            f'{configuration.dotnet} publish -o out',
             logger,
             cwd=project_dir,
         )
@@ -275,7 +275,7 @@ def run_GCDumpPlayground(configuration: config.TestConfig, logger, project_dir: 
         )
     else:
         proc = run_command_async(
-            f'dotnet {project_dir}/out/GCDumpPlayground2.dll 0.1',
+            f'{configuration.dotnet} {project_dir}/out/GCDumpPlayground2.dll 0.1',
             logger,
             stdout=tmp_write
         )

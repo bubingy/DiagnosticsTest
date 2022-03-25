@@ -61,8 +61,10 @@ class TestConfig:
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
             os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
+            self.dotnet = os.path.join(dotnet_root, 'dotnet.exe')
         else:
             os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
+            self.dotnet = os.path.join(dotnet_root, 'dotnet')
 
     def prepare_test_bed(self):
         '''Create folders for TestBed and TestResult.
