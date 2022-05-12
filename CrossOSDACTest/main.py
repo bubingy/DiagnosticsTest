@@ -150,5 +150,7 @@ def run_test(global_conf: GlobalConfig, action: str):
                     logger.info(f'start analyze {dump_path}')
                     if arch == 'x86': validate.validate_32bit(conf, dump_path, output_path)
                     else: validate.validate(dump_path, output_path)
+
+                clean(global_conf)
     else:
         raise Exception(f'unknown action: {action}')
