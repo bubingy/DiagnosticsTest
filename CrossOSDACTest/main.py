@@ -7,6 +7,7 @@ import shutil
 
 from infrastructure import sdk, tools
 from utils.logger import ScriptLogger
+from utils.sysinfo import get_cpu_arch
 from project import project_oom, project_uhe
 from CrossOSDACTest.config import GlobalConfig, TestConfig
 from CrossOSDACTest import analyze, validate
@@ -85,7 +86,7 @@ def clean(global_conf: GlobalConfig):
 
 def run_test(global_conf: GlobalConfig, action: str):
     global_conf = GlobalConfig()
-
+    cpu_arch = get_cpu_arch()
     if action == 'analyze':
         '''Analyze dump on linux
         '''
@@ -101,7 +102,7 @@ def run_test(global_conf: GlobalConfig, action: str):
                 )
             )
 
-            sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, logger)
+            sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, logger, arch=cpu_arch)
             if conf.rid != 'linux-musl-arm64':
                 tools.install_tool('dotnet-dump', conf.tool_root, conf.tool_version, conf.tool_feed, logger)
                 project_oom.create_build_oom(conf, logger)
