@@ -79,6 +79,12 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
             b'y\n'
         ]
     
+    # eestack and dumpstack commands are not reliable
+    if configuration.rid == 'linux-arm':
+        analyze_commands.remove(b'eestack\n')
+        analyze_commands.remove(b'dumpstack\n')
+        analyze_commands.insert(0, b'clrstack -f\n')
+
     # load dump for debugging
     analyze_output_path = os.path.join(configuration.test_result, 'debug_dump.log')
     if 'win' in configuration.rid:
