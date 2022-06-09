@@ -29,9 +29,9 @@ def get_cpu_arch():
     machine_type = platform.machine().lower()
     if machine_type in ['x86_64', 'amd64']:
         cpu_arch = 'x64'
-    elif machine_type in ['aarch64']:
+    elif machine_type in ['aarch64', 'arm64']:
         cpu_arch = 'arm64'
-    elif machine_type in ['armv7l']:
+    elif machine_type in ['armv7l', 'arm']:
         cpu_arch = 'arm'
     else:
         raise Exception(f'unsupported machine type: {machine_type}')
