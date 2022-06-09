@@ -13,25 +13,31 @@ def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
     '''Run sample apps and perform tests.
 
     '''
-    logger.info('test dotnet-dump')
+    tool_name = 'dotnet-dump'
+    tool_path_pattern = f'{configuration.tool_root}/.store/{tool_name}/{configuration.tool_version}/{tool_name}/{configuration.tool_version}/tools/*/any/{tool_name}.dll'
+    tool_path = glob.glob(tool_path_pattern)[0]
+    tool_bin = f'{configuration.dotnet} {tool_path}'
+
+    logger.info(f'test {tool_name}')
     if 'osx' in configuration.rid and \
         int(configuration.sdk_version[0]) < 7:
-        logger.info('dotnet-dump on osx requires .net 7.0 or newer version.')
-        logger.info('test dotnet-dump finished')
+        logger.info(f'{tool_name} on osx requires .net 7.0 or newer version.')
+        logger.info(f'test {tool_name} finished')
         return
     if configuration.run_webapp is False:
-        logger.info('can\'t run webapp for dotnet-dump.')
-        logger.info('test dotnet-dump finished')
+        logger.info(f'can\'t run webapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
     )
     webapp = project_webapp.run_webapp(configuration, webapp_dir)
+
     sync_commands_list = [
-        'dotnet-dump --help',
-        'dotnet-dump ps',
-        f'dotnet-dump collect -p {webapp.pid}'
+        f'{tool_bin} --help',
+        f'{tool_bin} ps',
+        f'{tool_bin} collect -p {webapp.pid}'
     ]
     for command in sync_commands_list:
         outs, errs = run_command_sync(command, cwd=configuration.test_bed)
@@ -48,7 +54,7 @@ def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
 
     if len(dump_paths) == 0:
         logger.error('no dump files available.')
-        logger.info('test dotnet-dump finished')
+        logger.info(f'test {tool_name} finished')
         return
 
     analyze_commands = [
@@ -63,7 +69,7 @@ def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
     ]
     analyze_output_path = os.path.join(configuration.test_result, 'dotnet_analyze.log')
     with open(analyze_output_path, 'w+') as f:
-        command = f'dotnet-dump analyze {dump_paths[0]}'
+        command = f'{tool_bin} analyze {dump_paths[0]}'
         logger.info(f'run command:\n{command}')
         proc = run_command_async(
             command,
@@ -80,4 +86,4 @@ def test_dotnet_dump(configuration: config.TestConfig, logger: logging.Logger):
                 continue
         proc.communicate()
 
-    logger.info('test dotnet-dump finished')
+    logger.info(f'test {tool_name} finished')

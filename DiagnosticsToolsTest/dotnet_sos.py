@@ -13,26 +13,32 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
     '''Run sample apps and perform tests.
 
     '''
-    logger.info('test dotnet-sos')
+    tool_name = 'dotnet-sos'
+    tool_path_pattern = f'{configuration.tool_root}/.store/{tool_name}/{configuration.tool_version}/{tool_name}/{configuration.tool_version}/tools/*/any/{tool_name}.dll'
+    tool_path = glob.glob(tool_path_pattern)[0]
+    tool_bin = f'{configuration.dotnet} {tool_path}'
+
+    logger.info(f'test {tool_name}')
     if 'musl' in configuration.rid:
         logger.warning('lldb isn\'t available for alpine.')
-        logger.info('test dotnet-sos finished')
+        logger.info(f'test {tool_name} finished')
         return
     
     if configuration.run_webapp is False:
-        logger.warning('can\'t run webapp for dotnet-sos.')
-        logger.info('test dotnet-sos finished')
+        logger.warning(f'can\'t run webapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
 
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
     )
+
     sync_commands_list = [
-        'dotnet-sos --help',
-        'dotnet-sos install',
-        'dotnet-sos uninstall',
-        'dotnet-sos install',
+        f'{tool_bin} --help',
+        f'{tool_bin} install',
+        f'{tool_bin} uninstall',
+        f'{tool_bin} install',
     ]
     for command in sync_commands_list:
         outs, errs = run_command_sync(command, cwd=configuration.test_bed)
@@ -160,4 +166,4 @@ def test_dotnet_sos(configuration: config.TestConfig, logger: logging.Logger):
     webapp.terminate()
     webapp.communicate()
 
-    logger.info('test dotnet-sos finished')
+    logger.info(f'test {tool_name} finished')

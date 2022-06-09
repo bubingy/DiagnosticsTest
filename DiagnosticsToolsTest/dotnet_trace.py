@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import glob
 import logging
 
 from DiagnosticsToolsTest import config
@@ -12,22 +13,28 @@ def test_dotnet_trace(configuration: config.TestConfig, logger: logging.Logger):
     '''Run sample apps and perform tests.
 
     '''
-    logger.info('test dotnet-trace')
+    tool_name = 'dotnet-trace'
+    tool_path_pattern = f'{configuration.tool_root}/.store/{tool_name}/{configuration.tool_version}/{tool_name}/{configuration.tool_version}/tools/*/any/{tool_name}.dll'
+    tool_path = glob.glob(tool_path_pattern)[0]
+    tool_bin = f'{configuration.dotnet} {tool_path}'
+
+    logger.info(f'test {tool_name}')
     if configuration.run_webapp is False:
-        logger.info('can\'t run webapp for dotnet-trace.')
-        logger.info('test dotnet-trace finished')
+        logger.info(f'can\'t run webapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
     )
     webapp = project_webapp.run_webapp(configuration, webapp_dir)
+
     sync_commands_list = [
-        'dotnet-trace --help',
-        'dotnet-trace list-profiles',
-        'dotnet-trace ps',
-        f'dotnet-trace collect -p {webapp.pid} -o webapp.nettrace --duration 00:00:10',
-        'dotnet-trace convert --format speedscope webapp.nettrace'
+        f'{tool_bin} --help',
+        f'{tool_bin} list-profiles',
+        f'{tool_bin} ps',
+        f'{tool_bin} collect -p {webapp.pid} -o webapp.nettrace --duration 00:00:10',
+        f'{tool_bin} convert --format speedscope webapp.nettrace'
     ]
     for command in sync_commands_list:
         outs, errs = run_command_sync(command, cwd=configuration.test_result)
@@ -38,13 +45,13 @@ def test_dotnet_trace(configuration: config.TestConfig, logger: logging.Logger):
     webapp.communicate()
 
     if configuration.sdk_version[0] == '3':
-        logger.info('dotnet-trace new feature isn\'t supported by .net core 3.x.')
-        logger.info('test dotnet-trace finished')
+        logger.info(f'{tool_name} new feature isn\'t supported by .net core 3.x.')
+        logger.info(f'test {tool_name} finished')
         return
 
     if configuration.run_consoleapp is False:
-        logger.info('can\'t run consoleapp for dotnet-trace.')
-        logger.info('test dotnet-trace finished')
+        logger.info(f'can\'t run consoleapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
 
     consoleapp_dir = os.path.join(
@@ -56,7 +63,7 @@ def test_dotnet_trace(configuration: config.TestConfig, logger: logging.Logger):
         extend_name = '.exe'
 
     command = (
-        'dotnet-trace collect -o consoleapp.nettrace '
+        f'{tool_bin} collect -o consoleapp.nettrace '
         '--providers Microsoft-Windows-DotNETRuntime '
         f'-- {consoleapp_dir}/out/consoleapp{extend_name}'
     )
@@ -68,4 +75,4 @@ def test_dotnet_trace(configuration: config.TestConfig, logger: logging.Logger):
     logger.info(f'run command:\n{command}\n{outs}')
     if errs != '': logger.error(errs)
 
-    logger.info('test dotnet-trace finished')
+    logger.info(f'test {tool_name} finished')

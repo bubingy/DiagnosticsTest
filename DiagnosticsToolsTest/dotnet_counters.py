@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import os
+import glob
 import time
 import logging
 
@@ -13,21 +14,28 @@ def test_dotnet_counters(configuration: config.TestConfig, logger: logging.Logge
     '''Run sample apps and perform tests.
 
     '''
-    logger.info('test dotnet-counters')
+    tool_name = 'dotnet-counters'
+    tool_path_pattern = f'{configuration.tool_root}/.store/{tool_name}/{configuration.tool_version}/{tool_name}/{configuration.tool_version}/tools/*/any/{tool_name}.dll'
+    tool_path = glob.glob(tool_path_pattern)[0]
+    tool_bin = f'{configuration.dotnet} {tool_path}'
+    
+    logger.info(f'test {tool_name}')
     if configuration.run_webapp is False:
-        logger.info('can\'t run webapp for dotnet-counters.')
-        logger.info('test dotnet-counters finished')
+        logger.info(f'can\'t run webapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
     webapp_dir = os.path.join(
         configuration.test_bed,
         'webapp'
     )
     webapp = project_webapp.run_webapp(configuration, webapp_dir)
+
     sync_commands_list = [
-        'dotnet-counters --help',
-        'dotnet-counters list',
-        'dotnet-counters ps'
+        f'{tool_bin} --help',
+        f'{tool_bin}  list',
+        f'{tool_bin}  ps'
     ]
+
     for command in sync_commands_list:
         outs, errs = run_command_sync(command)
         logger.info(f'run command:\n{command}\n{outs}')
@@ -35,8 +43,8 @@ def test_dotnet_counters(configuration: config.TestConfig, logger: logging.Logge
         if errs != '': logger.error(errs)
 
     async_commands_list = [
-        f'dotnet-counters collect -p {webapp.pid}',
-        f'dotnet-counters monitor -p {webapp.pid}'
+        f'{tool_bin} collect -p {webapp.pid}',
+        f'{tool_bin} monitor -p {webapp.pid}'
     ]
     for command in async_commands_list:
         logger.info(f'run command:\n{command}')
@@ -51,13 +59,13 @@ def test_dotnet_counters(configuration: config.TestConfig, logger: logging.Logge
     webapp.communicate()
 
     if configuration.sdk_version[0] == '3':
-        logger.info('dotnet-counters new feature isn\'t supported by .net core 3.x.')
-        logger.info('test dotnet-counters finished')
+        logger.info(f'{tool_name} new feature isn\'t supported by .net core 3.x.')
+        logger.info(f'test {tool_name} finished')
         return
     
     if configuration.run_consoleapp is False:
-        logger.info('can\'t run consoleapp for dotnet-counters.')
-        logger.info('test dotnet-counters finished')
+        logger.info(f'can\'t run consoleapp for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
 
     consoleapp_dir = os.path.join(
@@ -68,7 +76,7 @@ def test_dotnet_counters(configuration: config.TestConfig, logger: logging.Logge
     if 'win' in configuration.rid:
         extend_name = '.exe'
 
-    command = f'dotnet-counters monitor -- {consoleapp_dir}/out/consoleapp{extend_name}'
+    command = f'{tool_bin} monitor -- {consoleapp_dir}/out/consoleapp{extend_name}'
     outs, errs = run_command_sync(command)
     logger.info(f'run command:\n{command}')
-    logger.info('test dotnet-counters finished')
+    logger.info(f'test {tool_name} finished')

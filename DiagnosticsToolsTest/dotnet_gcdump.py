@@ -14,10 +14,15 @@ def test_dotnet_gcdump(configuration: config.TestConfig, logger: logging.Logger)
     '''Run sample apps and perform tests.
 
     '''
-    logger.info('test dotnet-gcdump')
+    tool_name = 'dotnet-gcdump'
+    tool_path_pattern = f'{configuration.tool_root}/.store/{tool_name}/{configuration.tool_version}/{tool_name}/{configuration.tool_version}/tools/*/any/{tool_name}.dll'
+    tool_path = glob.glob(tool_path_pattern)[0]
+    tool_bin = f'{configuration.dotnet} {tool_path}'
+    
+    logger.info(f'test {tool_name}')
     if configuration.run_gcplayground is False:
-        logger.info('can\'t run gcdumpplayground for dotnet-gcdump.')
-        logger.info('test dotnet-gcdump finished')
+        logger.info(f'can\'t run gcdumpplayground for {tool_name}.')
+        logger.info(f'test {tool_name} finished')
         return
     project_dir = os.path.join(
         configuration.test_bed,
@@ -27,10 +32,11 @@ def test_dotnet_gcdump(configuration: config.TestConfig, logger: logging.Logger)
         configuration,
         project_dir
     )
+    
     sync_commands_list = [
-        'dotnet-gcdump --help',
-        'dotnet-gcdump ps',
-        f'dotnet-gcdump collect -p {gcdumpplayground.pid} -v'
+        f'{tool_bin} --help',
+        f'{tool_bin} ps',
+        f'{tool_bin} collect -p {gcdumpplayground.pid} -v'
     ]
     for command in sync_commands_list:
         outs, errs = run_command_sync(command, cwd=configuration.test_result)
@@ -45,4 +51,4 @@ def test_dotnet_gcdump(configuration: config.TestConfig, logger: logging.Logger)
     if len(gcdump) == 0 or gcdump is None:
         logger.error('fail to generate gcdump!')
 
-    logger.info('test dotnet-gcdump finished')
+    logger.info(f'test {tool_name} finished')
