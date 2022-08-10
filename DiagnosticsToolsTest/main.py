@@ -47,7 +47,8 @@ def run_test(configuration: config.TestConfig):
         configuration.tool_root,
         configuration.tool_version,
         configuration.tool_feed,
-        logger
+        logger,
+        configuration.dotnet
     )
     logger = ScriptLogger(
         'projects',

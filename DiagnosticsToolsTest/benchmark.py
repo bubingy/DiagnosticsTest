@@ -65,13 +65,18 @@ def run_benchmark(configuration: config.TestConfig, logger: logging.Logger):
     outs, errs = run_command_sync(command, cwd=project_dir)
     logger.info(f'run command:\n{command}\n{outs}')
 
-    shutil.copytree(
-        os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
-        os.path.join(configuration.test_result, 'BenchmarkDotNet.Artifacts')
-    )
+
     if errs == '':
         logger.info('successfully run benchmark.')
     else:
         logger.error(f'fail to run benchmark!\n{errs}')
+
+    try:
+        shutil.copytree(
+            os.path.join(project_dir, 'BenchmarkDotNet.Artifacts'),
+            os.path.join(configuration.test_result, 'BenchmarkDotNet.Artifacts')
+        )
+    except Exception as e:
+        logger.error(f'fail to copy Artifacts!\n{e}')
 
     logger.info('run benchmark finished')

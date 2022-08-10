@@ -3,7 +3,7 @@
 import os
 import base64
 import configparser
-from typing import Union
+from typing import Any, Union
 
 from utils.sysinfo import get_debugger, get_rid
 
@@ -60,7 +60,7 @@ class TestConfig:
         os.environ['DOTNET_ROOT'] = dotnet_root
         if 'win' in self.rid:
             os.environ['PATH'] = f'{dotnet_root};{self.tool_root};' + os.environ['PATH'] 
-            self.dotnet = os.path.join(dotnet_root, 'dotnet.exe')
+            self.dotnet = 'dotnet'
         else:
             os.environ['PATH'] = f'{dotnet_root}:{self.tool_root}:' + os.environ['PATH']
             self.dotnet = os.path.join(dotnet_root, 'dotnet')

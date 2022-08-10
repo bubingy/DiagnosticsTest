@@ -5,12 +5,11 @@ from utils.terminal import run_command_sync
 from utils.logger import ScriptLogger
 
 
-def install_tool(tool: str, tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger):
+def install_tool(tool: str, tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger, dotnet_path: str='dotnet'):
     logger.info(f'install dotnet tool: {tool}')
-    dotnet = os.path.join(os.environ['DOTNET_ROOT'], 'dotnet')
     command = ' '.join(
         [
-            f'{dotnet} tool install {tool}',
+            f'{dotnet_path} tool install {tool}',
             f'--tool-path {tool_root}',
             f'--version {tool_version}',
             f'--add-source {tool_feed}'
@@ -26,7 +25,7 @@ def install_tool(tool: str, tool_root: os.PathLike, tool_version: str, tool_feed
     logger.info(f'install diagnostics tools finished')
 
 
-def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger):
+def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger, dotnet_path: str='dotnet'):
     '''Install diagnostics
     '''
     logger.info(f'install diagnostics tools')
@@ -38,7 +37,7 @@ def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_fe
         'dotnet-trace'
     ]
     for tool in tools:
-        install_tool(tool, tool_root, tool_version, tool_feed, logger)
+        install_tool(tool, tool_root, tool_version, tool_feed, logger, dotnet_path)
     logger.info(f'install diagnostics tools finished')
 
 
