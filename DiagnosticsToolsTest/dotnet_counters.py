@@ -32,8 +32,8 @@ def test_dotnet_counters(configuration: config.TestConfig, logger: logging.Logge
 
     sync_commands_list = [
         f'{tool_bin} --help',
-        f'{tool_bin}  list',
-        f'{tool_bin}  ps'
+        f'{tool_bin} list',
+        f'{tool_bin} ps'
     ]
 
     for command in sync_commands_list:
