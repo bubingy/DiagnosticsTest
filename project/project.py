@@ -28,6 +28,11 @@ def change_framework(project_dir: os.PathLike, sdk_version: str):
         framework = 'netcoreapp' + sdk_version[:3]
     else:
         framework = 'net' + sdk_version[:3]
+
+    lang_version_element = ET.Element("LangVersion")
+    lang_version_element.text = "latest"
+
+    root.find('PropertyGroup').append(lang_version_element)
     root.find('PropertyGroup').find('TargetFramework').text = framework
     tree.write(project_file)
 

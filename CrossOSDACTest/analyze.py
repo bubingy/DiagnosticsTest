@@ -38,26 +38,24 @@ def analyze(conf: TestConfig, dump_path: os.PathLike):
     with open(analyze_output_path, 'w+') as stream:
         if conf.rid == 'linux-musl-arm64':
             tool_version = conf.tool_version
-            process = run_command_async(
-                (
-                    f'{conf.dotnet} '
-                    f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp3.1/any/dotnet-dump.dll '
-                    f'analyze {dump_path}'
-                ),
-                stdin=PIPE,
-                stdout=stream,
-                stderr=stream
+            command = (
+                f'{conf.dotnet} '
+                f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp3.1/any/dotnet-dump.dll '
+                f'analyze {dump_path}'
             )
         else:
-            process = run_command_async(
-                f'dotnet-dump analyze {dump_path}',
-                stdin=PIPE,
-                stdout=stream,
-                stderr=stream
-            )
-        for command in COMMANDS:
+            dotnet_dump_path = os.path.join(conf.tool_root, 'dotnet-dump')
+            command = f'{dotnet_dump_path} analyze {dump_path}'
+
+        process = run_command_async(
+            command,
+            stdin=PIPE,
+            stdout=stream,
+            stderr=stream
+        )
+        for analyze_command in COMMANDS:
             try:
-                process.stdin.write(command)
+                process.stdin.write(analyze_command)
             except Exception as exception:
                 stream.write(f'{exception}\n'.encode('utf-8'))
                 continue

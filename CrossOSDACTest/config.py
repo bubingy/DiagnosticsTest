@@ -14,6 +14,7 @@ class TestConfig:
     def __init__(self,
                  sdk_version: str,
                  runtime_version: str,
+                 arch: str,
                  tool_version: str,
                  tool_feed: str,
                  test_bed: os.PathLike):
@@ -34,11 +35,11 @@ class TestConfig:
         )
         self.tool_root = os.path.join(
             self.test_bed,
-            f'tools-dotnet{self.sdk_version}'
+            f'tools-dotnet{self.sdk_version}-{arch}'
         )
         self.dotnet_root = os.path.join(
             self.test_bed,
-            f'.dotnet-test{self.sdk_version}-{self.rid}'
+            f'.dotnet-test{self.sdk_version}-{arch}'
         )
         self.dotnet = os.path.join(self.dotnet_root, 'dotnet')
 
@@ -63,13 +64,14 @@ class GlobalConfig:
 
         self.origin_ev = os.environ.copy()
 
-    def get(self, index: int):
+    def get(self, index: int, arch: str):
         sdk_version, runtime_version = \
             self.sdk_version_list[index], self.runtime_version_list[index]
 
         test_conf = TestConfig(
             sdk_version,
             runtime_version,
+            arch,
             self.tool_version,
             self.tool_feed,
             self.test_bed

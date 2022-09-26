@@ -49,26 +49,27 @@ def prepare_test_bed(conf: TestConfig):
 def get_remove_candidate(global_conf: GlobalConfig) -> set:
     to_be_removed = set()
     for idx, _ in enumerate(global_conf.sdk_version_list):
-        conf = global_conf.get(idx)
-        if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
-        else: home_path = os.environ['HOME']
-        to_be_removed = to_be_removed.union(
-            {
-                os.path.join(home_path, '.aspnet'),
-                os.path.join(home_path, '.dotnet'),
-                os.path.join(home_path, '.nuget'),
-                os.path.join(home_path, '.templateengine'),
-                os.path.join(home_path, '.lldb'),
-                os.path.join(home_path, '.lldbinit'),
-                os.path.join(home_path, '.local'),
-                os.path.join(conf.test_bed, f'uhe'),
-                os.path.join(conf.test_bed, f'oom'),
-                os.path.join(conf.test_bed, f'dotnet-install.sh'),
-                os.path.join(conf.test_bed, f'dotnet-install.ps1'),
-                conf.dotnet_root,
-                conf.tool_root
-            }
-        )
+        for arch in ['x86', 'x64']:
+            conf = global_conf.get(idx, arch)
+            if 'win' in conf.rid: home_path = os.environ['USERPROFILE']
+            else: home_path = os.environ['HOME']
+            to_be_removed = to_be_removed.union(
+                {
+                    os.path.join(home_path, '.aspnet'),
+                    os.path.join(home_path, '.dotnet'),
+                    os.path.join(home_path, '.nuget'),
+                    os.path.join(home_path, '.templateengine'),
+                    os.path.join(home_path, '.lldb'),
+                    os.path.join(home_path, '.lldbinit'),
+                    os.path.join(home_path, '.local'),
+                    os.path.join(conf.test_bed, f'uhe'),
+                    os.path.join(conf.test_bed, f'oom'),
+                    os.path.join(conf.test_bed, f'dotnet-install.sh'),
+                    os.path.join(conf.test_bed, f'dotnet-install.ps1'),
+                    conf.dotnet_root,
+                    conf.tool_root
+                }
+            )
     return to_be_removed
 
 
@@ -91,7 +92,7 @@ def run_test(global_conf: GlobalConfig, action: str):
         '''Analyze dump on linux
         '''
         for idx, _ in enumerate(global_conf.sdk_version_list):
-            conf = global_conf.get(idx)
+            conf = global_conf.get(idx, cpu_arch)
             prepare_test_bed(conf)
 
             logger = ScriptLogger(
@@ -124,7 +125,7 @@ def run_test(global_conf: GlobalConfig, action: str):
         for idx, _ in enumerate(global_conf.sdk_version_list):
             for arch in ['x86', 'x64']:
                 # must put `global_conf.get` in the inner loop
-                conf = global_conf.get(idx)
+                conf = global_conf.get(idx, arch)
                 prepare_test_bed(conf)
 
                 logger = ScriptLogger(

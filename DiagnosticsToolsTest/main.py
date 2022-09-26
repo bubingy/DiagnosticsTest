@@ -90,15 +90,6 @@ def run_test(configuration: config.TestConfig):
     dotnet_dump.test_dotnet_dump(configuration, logger)
     
     logger = ScriptLogger(
-        'dotnet_gcdump',
-        os.path.join(
-            configuration.test_result,
-            'dotnet_gcdump.log'
-        )
-    )
-    dotnet_gcdump.test_dotnet_gcdump(configuration, logger)
-    
-    logger = ScriptLogger(
         'dotnet_sos',
         os.path.join(
             configuration.test_result,
@@ -115,6 +106,15 @@ def run_test(configuration: config.TestConfig):
         )
     )
     dotnet_trace.test_dotnet_trace(configuration, logger)
+    
+    logger = ScriptLogger(
+        'dotnet_gcdump',
+        os.path.join(
+            configuration.test_result,
+            'dotnet_gcdump.log'
+        )
+    )
+    dotnet_gcdump.test_dotnet_gcdump(configuration, logger)
 
 
 def clean(configuration: config.TestConfig):

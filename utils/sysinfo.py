@@ -31,7 +31,7 @@ def get_cpu_arch():
         cpu_arch = 'x64'
     elif machine_type in ['aarch64', 'arm64']:
         cpu_arch = 'arm64'
-    elif machine_type in ['armv7l', 'arm']:
+    elif machine_type in ['armv7l']:
         cpu_arch = 'arm'
     else:
         raise Exception(f'unsupported machine type: {machine_type}')
