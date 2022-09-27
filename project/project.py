@@ -1,4 +1,5 @@
 import os
+import glob
 from xml.etree import ElementTree as ET
 
 from utils.logger import ScriptLogger
@@ -20,8 +21,9 @@ def create_project(project_type: str, project_dir: os.PathLike, dotnet: os.PathL
 
 
 def change_framework(project_dir: os.PathLike, sdk_version: str):
-    project_name = os.path.basename(project_dir)
-    project_file = os.path.join(project_dir, f'{project_name}.csproj')
+    # project_name = os.path.basename(project_dir)
+    print(project_dir)
+    project_file = glob.glob(f'{project_dir}/*.csproj')[0]
     tree = ET.parse(project_file)
     root = tree.getroot()
     if sdk_version[0] == '3':
@@ -49,12 +51,12 @@ def build_project(project_dir: os.PathLike, dotnet: os.PathLike, rid: str, logge
             logger.info(f'successfully build {project_name}.')
             return True
     
-    command = f'{dotnet} build -o out -r {rid}'
-    outs, errs = run_command_sync(command, cwd=project_dir)
-    logger.info(f'run command:\n{command}\n{outs}')
-    if errs == ''  and 'Build FAILED' not in outs:
-        logger.info(f'successfully build {project_name}.')
-        return True
+    # command = f'{dotnet} build -o out -r {rid}'
+    # outs, errs = run_command_sync(command, cwd=project_dir)
+    # logger.info(f'run command:\n{command}\n{outs}')
+    # if errs == ''  and 'Build FAILED' not in outs:
+    #     logger.info(f'successfully build {project_name}.')
+    #     return True
     
     # if given runtime isn't available, try to publish without specifying rid.
     command = f'{dotnet} build -o out'

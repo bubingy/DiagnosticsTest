@@ -18,7 +18,7 @@ def create_build_uhe(conf: TestConfig, logger: ScriptLogger):
     )
     project_dir = os.path.join(
         conf.test_bed,
-        f'uhe'
+        f'uhe-net{conf.sdk_version}-{conf.rid}'
     )
     
     shutil.copytree(template_project_dir, project_dir)
@@ -37,7 +37,7 @@ def run_uhe(conf: TestConfig, logger: ScriptLogger) -> Popen:
     logger.info('run uhe')
     project_dir = os.path.join(
         conf.test_bed,
-        f'uhe'
+        f'uhe-net{conf.sdk_version}-{conf.rid}'
     )
     env = os.environ.copy()
     env['COMPlus_DbgEnableMiniDump'] = '1'
