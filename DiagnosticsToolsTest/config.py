@@ -40,7 +40,6 @@ class TestConfig:
         self.sdk_build_id = self.config['SDK']['BuildID']
         self.source_feed = self.config['SDK']['Feed']
         self.tool_version = self.config['Tool']['Version']
-        self.tool_commit = self.config['Tool']['Commit']
         self.tool_feed = self.config['Tool']['Feed']
 
         self.test_bed = self.config['Test']['TestBed']

@@ -5,7 +5,6 @@ from DiagnosticsToolsTest import config
 from infrastructure import sdk, tools
 from utils.logger import ScriptLogger
 from project import project_consoleapp, project_gcdumpapp, project_webapp
-from DiagnosticsToolsTest import benchmark
 from DiagnosticsToolsTest import dotnet_counters
 from DiagnosticsToolsTest import dotnet_dump
 from DiagnosticsToolsTest import dotnet_gcdump
@@ -60,16 +59,6 @@ def run_test(configuration: config.TestConfig):
     project_consoleapp.create_build_consoleapp(configuration, logger)
     project_gcdumpapp.create_build_GCDumpPlayground(configuration, logger)
     project_webapp.create_build_webapp(configuration, logger)
-
-    logger = ScriptLogger(
-        'benchmark',
-        os.path.join(
-            configuration.test_result,
-            'benchmark.log'
-        )
-    )
-    benchmark.download_diagnostics(configuration, logger)
-    benchmark.run_benchmark(configuration, logger)
 
     logger = ScriptLogger(
         'dotnet_counters',
