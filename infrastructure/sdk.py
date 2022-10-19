@@ -23,7 +23,7 @@ def get_sdk_download_link(sdk_version: str, sdk_build_id: str, rid: str, authori
     container_id = artifact['resource']['data'].split('/')[1]
     if 'win' in rid: suffix = 'zip'
     else: suffix = 'tar.gz'
-    if 'servicing' in sdk_version:
+    if 'servicing' in sdk_version or 'rtm' in sdk_version:
         version_number = sdk_version.split('-')[0]
         sdk_download_link = (
             f'https://dev.azure.com/dnceng/_apis/resources/Containers/{container_id}/'

@@ -49,9 +49,6 @@ class TestConfig:
         self.run_webapp = True
         self.run_consoleapp = True
         self.run_gcplayground = True
-        if self.config['Test']['RunBenchmarks'] == 'true':
-            self.run_benchmarks = True
-        else: self.run_benchmarks = False
             
         # add environment variables
         dotnet_root = os.path.join(self.test_bed, '.dotnet-test')
