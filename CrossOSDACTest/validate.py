@@ -9,7 +9,7 @@ from utils.terminal import run_command_async, PIPE
 from CrossOSDACTest.config import TestConfig
 
 
-COMMANDS = [
+RAW_COMMANDS = [
     b'clrstack\n',
     b'clrstack -i\n',
     b'clrthreads\n',
@@ -23,7 +23,7 @@ COMMANDS = [
 ]
 
 
-def validate(dump_path: os.PathLike, output_path: os.PathLike):
+def validate(conf: TestConfig, dump_path: os.PathLike, output_path: os.PathLike):
     """ analyze dump file and redirect output to a file
 
     params
@@ -37,6 +37,10 @@ def validate(dump_path: os.PathLike, output_path: os.PathLike):
             stdout=stream,
             stderr=stream
         )
+        project_name = os.path.basename(dump_path)[5:]
+        project_bin_dir = os.path.join(conf.test_bed, project_name, 'out')
+        COMMANDS = RAW_COMMANDS.copy()
+        COMMANDS.insert(0, f'setsymbolserver -directory {project_bin_dir}\n'.encode())
         for command in COMMANDS:
             try:
                 process.stdin.write(command)
@@ -65,6 +69,10 @@ def validate_32bit(conf: TestConfig, dump_path: os.PathLike, output_path: os.Pat
             stdout=stream,
             stderr=stream
         )
+        project_name = os.path.basename(dump_path)[5:]
+        project_bin_dir = os.path.join(conf.test_bed, project_name, 'out')
+        COMMANDS = RAW_COMMANDS.copy()
+        COMMANDS.insert(0, f'setsymbolserver -directory {project_bin_dir}\n'.encode())
         for command in COMMANDS:
             try:
                 process.stdin.write(command)

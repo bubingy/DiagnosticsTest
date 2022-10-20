@@ -62,8 +62,6 @@ def get_remove_candidate(global_conf: GlobalConfig) -> set:
                     os.path.join(home_path, '.lldb'),
                     os.path.join(home_path, '.lldbinit'),
                     os.path.join(home_path, '.local'),
-                    # os.path.join(conf.test_bed, f'uhe'),
-                    # os.path.join(conf.test_bed, f'oom'),
                     os.path.join(conf.test_bed, f'dotnet-install.sh'),
                     os.path.join(conf.test_bed, f'dotnet-install.ps1'),
                     conf.dotnet_root,
@@ -150,7 +148,7 @@ def run_test(global_conf: GlobalConfig, action: str):
                     )
                     logger.info(f'start analyze {dump_path}')
                     if arch == 'x86': validate.validate_32bit(conf, dump_path, output_path)
-                    else: validate.validate(dump_path, output_path)
+                    else: validate.validate(conf, dump_path, output_path)
 
                 clean(global_conf)
     else:
