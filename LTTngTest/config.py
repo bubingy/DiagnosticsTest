@@ -62,8 +62,11 @@ class GlobalConfig:
 
     def get(self, index: int):
         sdk_version = self.sdk_version_list[index]
-        sdk_build_id = self.sdk_build_id_list[index]
-
+        if len(self.sdk_build_id_list) != 0:
+            sdk_build_id = self.sdk_build_id_list[index]
+        else:
+            sdk_build_id = ''
+            
         test_conf = TestConfig(
             self.authorization,
             sdk_version,
