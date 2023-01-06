@@ -101,7 +101,7 @@ def run_test(global_conf: GlobalConfig, action: str):
                 )
             )
 
-            sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, logger, arch=cpu_arch)
+            sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, cpu_arch, logger)
             if conf.rid != 'linux-musl-arm64':
                 tools.install_tool('dotnet-dump', conf.tool_root, conf.tool_version, conf.tool_feed, logger)
                 project_oom.create_build_oom(conf, logger)
@@ -134,7 +134,7 @@ def run_test(global_conf: GlobalConfig, action: str):
                     )
                 )
 
-                sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, logger, arch)
+                sdk.install_sdk_from_script(conf.sdk_version,conf.test_bed, conf.rid, arch, logger)
                 tools.install_tool('dotnet-dump', conf.tool_root, conf.tool_version, conf.tool_feed, logger)
 
                 if arch == 'x86': dump_name_list = filter_32bit_dump(conf.dump_directory)

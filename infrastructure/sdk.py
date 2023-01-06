@@ -7,6 +7,7 @@ from urllib import request
 from utils.terminal import run_command_sync
 from utils.logger import ScriptLogger
 from utils.azure import get_artifact
+from utils.sysinfo import get_cpu_arch
 
 
 def get_sdk_download_link(sdk_version: str, sdk_build_id: str, rid: str, authorization: str, logger: ScriptLogger) -> str:
@@ -39,7 +40,7 @@ def get_sdk_download_link(sdk_version: str, sdk_build_id: str, rid: str, authori
     return sdk_download_link
 
 
-def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, logger: ScriptLogger, arch: str='x64'):
+def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, arch: str, logger: ScriptLogger):
     logger.info(f'download dotnet install script')
     dotnet_root = os.environ['DOTNET_ROOT']
     if 'win' in rid:
@@ -165,7 +166,8 @@ def install_sdk_from_Azure(sdk_version: str, sdk_build_id: str, test_bed: os.Pat
 def install_sdk(sdk_version: str, sdk_build_id: str, test_bed: os.PathLike, rid: str, authorization: str, logger: ScriptLogger):
     logger.info('install .NET sdk')
     if sdk_build_id == '':
-        install_sdk_from_script(sdk_version, test_bed, rid, logger)
+        cpu_arch = get_cpu_arch()
+        install_sdk_from_script(sdk_version, test_bed, rid, cpu_arch, logger)
     else:
         install_sdk_from_Azure(sdk_version, sdk_build_id, test_bed, rid, authorization, logger)
     logger.info('install .NET sdk finished')
