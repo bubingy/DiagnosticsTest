@@ -4,6 +4,7 @@
 # coding=utf-8
 
 import os
+import glob
 
 from utils.terminal import run_command_async, PIPE
 from CrossOSDACTest.config import TestConfig
@@ -59,10 +60,17 @@ def validate_32bit(conf: TestConfig, dump_path: os.PathLike, output_path: os.Pat
     """
     with open(output_path, 'w+') as stream:
         tool_version = conf.tool_version
+        dotnet_dump_dll_path_pattern = os.path.join(
+            f'{conf.tool_root}', '.store', 'dotnet-dump', f'{tool_version}',
+            'dotnet-dump', f'{tool_version}', 'tools', 'net*', 'any',
+            'dotnet-dump.dll'
+        )
+        dotnet_dump_dll_path_candidates = glob.glob(dotnet_dump_dll_path_pattern)
+        dotnet_dump_dll_path = dotnet_dump_dll_path_candidates[0]
         process = run_command_async(
             (
                 f'{conf.dotnet} '
-                f'{conf.tool_root}/.store/dotnet-dump/{tool_version}/dotnet-dump/{tool_version}/tools/netcoreapp3.1/any/dotnet-dump.dll '
+                f'{dotnet_dump_dll_path} '
                 f'analyze {dump_path}'
             ),
             stdin=PIPE,

@@ -41,6 +41,8 @@ def run_oom(conf: TestConfig, logger: ScriptLogger) -> Popen:
     )
     env = os.environ.copy()
     env['COMPlus_DbgEnableMiniDump'] = '1'
+    env['COMPlus_DbgMiniDumpType'] = '4'
+    
     dump_path = os.path.join(
         conf.dump_directory,
         (
