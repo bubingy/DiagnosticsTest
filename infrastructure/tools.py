@@ -34,6 +34,7 @@ def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_fe
         'dotnet-dump',
         'dotnet-gcdump',
         'dotnet-sos',
+        'dotnet-stack',
         'dotnet-trace'
     ]
     for tool in tools:

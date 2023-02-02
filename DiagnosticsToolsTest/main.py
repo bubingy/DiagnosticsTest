@@ -9,6 +9,7 @@ from DiagnosticsToolsTest import dotnet_counters
 from DiagnosticsToolsTest import dotnet_dump
 from DiagnosticsToolsTest import dotnet_gcdump
 from DiagnosticsToolsTest import dotnet_sos
+from DiagnosticsToolsTest import dotnet_stack
 from DiagnosticsToolsTest import dotnet_trace
 
 
@@ -86,6 +87,15 @@ def run_test(configuration: config.TestConfig):
         )
     )
     dotnet_sos.test_dotnet_sos(configuration, logger)
+
+    logger = ScriptLogger(
+        'dotnet_stack',
+        os.path.join(
+            configuration.test_result,
+            'dotnet_stack.log'
+        )
+    )
+    dotnet_stack.test_dotnet_stack(configuration, logger)
 
     logger = ScriptLogger(
         'dotnet_trace',
