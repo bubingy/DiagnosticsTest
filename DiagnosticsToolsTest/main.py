@@ -2,7 +2,7 @@ import os
 import shutil
 
 from DiagnosticsToolsTest import config
-from infrastructure import sdk, tools
+from infrastructure.dotnet import sdk, tools
 from utils.logger import ScriptLogger
 from project import project_consoleapp, project_gcdumpapp, project_webapp
 from DiagnosticsToolsTest import dotnet_counters

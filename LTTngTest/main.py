@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from infrastructure import sdk, tools
+from infrastructure.dotnet import sdk, tools
 from utils.logger import ScriptLogger
 from project import project_gcperfsim
 from LTTngTest.config import GlobalConfig, TestConfig

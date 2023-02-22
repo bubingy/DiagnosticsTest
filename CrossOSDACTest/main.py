@@ -5,7 +5,7 @@
 import os
 import shutil
 
-from infrastructure import sdk, tools
+from infrastructure.dotnet import sdk, tools
 from utils.logger import ScriptLogger
 from utils.sysinfo import get_cpu_arch
 from project import project_oom, project_uhe
