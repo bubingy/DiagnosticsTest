@@ -1,21 +1,27 @@
 import os
 from urllib import request
 
-from utils.terminal import run_command_sync
-from utils.logger import ScriptLogger
+from types.logger import ScriptLogger
+from services.terminal import run_command_sync
 
 
-def install_tool(tool: str, tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger, dotnet_path: str='dotnet'):
+def install_tool(dotnet_bin_path: str, 
+                tool: str, 
+                tool_root: os.PathLike, 
+                tool_version: str, 
+                tool_feed: str,
+                env: dict,
+                logger: ScriptLogger):
     logger.info(f'install dotnet tool: {tool}')
     command = ' '.join(
         [
-            f'{dotnet_path} tool install {tool}',
+            f'{dotnet_bin_path} tool install {tool}',
             f'--tool-path {tool_root}',
             f'--version {tool_version}',
             f'--add-source {tool_feed}'
         ]
     )
-    outs, errs = run_command_sync(command)
+    outs, errs = run_command_sync(command, env=env)
     logger.info(f'run command:\n{command}\n{outs}')
 
     if errs != '':
@@ -25,7 +31,11 @@ def install_tool(tool: str, tool_root: os.PathLike, tool_version: str, tool_feed
     logger.info(f'install diagnostics tools finished')
 
 
-def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_feed: str, logger: ScriptLogger, dotnet_path: str='dotnet'):
+def install_diagnostic_tools(dotnet_bin_path: str, 
+                            tool_root: os.PathLike, 
+                            tool_version: str, 
+                            tool_feed: str, 
+                            logger: ScriptLogger):
     '''Install diagnostics
     '''
     logger.info(f'install diagnostics tools')
@@ -38,7 +48,7 @@ def install_diagnostics_tools(tool_root: os.PathLike, tool_version: str, tool_fe
         'dotnet-trace'
     ]
     for tool in tools:
-        install_tool(tool, tool_root, tool_version, tool_feed, logger, dotnet_path)
+        install_tool(dotnet_bin_path, tool, tool_root, tool_version, tool_feed, logger)
     logger.info(f'install diagnostics tools finished')
 
 

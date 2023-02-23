@@ -16,6 +16,7 @@ debugger: str = None
 test_name: str = None
 rid: str = None
 
+testbed_root: str = None
 testbed: str = None
 test_result_root: str = None
 
@@ -29,7 +30,5 @@ mount_dir: list = None
 security_opt: list = None
 cap_add: list = None
 privileged: bool = None
-
-logger = None
 
 env: dict = None

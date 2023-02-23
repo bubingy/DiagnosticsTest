@@ -5,14 +5,16 @@ import types.config.DiagnosticToolsTest as DiagToolTestConf
 from services.sysinfo import get_rid, get_debugger
 
 
-def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
+def load_diagtooltestconf(conf_file_path: os.PathLike=None, conf_dict: dict=None) -> None:
     '''Load diagnostic tools test configuration from conf file
 
     :param conf_file_path: absolute path of conf file
     :return: None
     '''
     config = configparser.ConfigParser()
-    config.read(conf_file_path)
+
+    if conf_file_path is None: config.read(conf_file_path)
+    else: config.read_dict(conf_dict)
 
     DiagToolTestConf.sdk_version = config['DotNet']['Version']
     DiagToolTestConf.sdk_buildid = config['DotNet']['BuildID']
@@ -21,7 +23,7 @@ def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
     DiagToolTestConf.tool_feed = config['DiagTool']['Feed']
 
     DiagToolTestConf.test_name = config['Test']['Name']
-    DiagToolTestConf.testbed = config['Test']['TestBed']
+    DiagToolTestConf.testbed_root = config['Test']['TestBedRoot']
     DiagToolTestConf.use_container = config['Test']['Container']
 
     DiagToolTestConf.docker_base_url = config['Container']['DockerBaseUrl']
@@ -31,12 +33,17 @@ def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
     DiagToolTestConf.cap_add = config['Container']['CapAdd']
     DiagToolTestConf.privileged = config['Container']['Privileged']
 
-    DiagToolTestConf.rid = get_rid()
-    DiagToolTestConf.debugger = get_debugger(DiagToolTestConf.rid)
+    DiagToolTestConf.testbed = os.path.join(
+        DiagToolTestConf.testbed_root,
+        f'TestBed-{DiagToolTestConf.test_name}'
+    )
     DiagToolTestConf.test_result_root = os.path.join(
         DiagToolTestConf.testbed,
         f'TestResult-{DiagToolTestConf.test_name}'
     )
+
+    DiagToolTestConf.rid = get_rid()
+    DiagToolTestConf.debugger = get_debugger(DiagToolTestConf.rid)
 
     DiagToolTestConf.tool_root = os.path.join(
         DiagToolTestConf.testbed,

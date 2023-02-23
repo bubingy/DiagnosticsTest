@@ -1,13 +1,13 @@
 '''Install .NET SDK'''
 
-from io import TextIOWrapper
 import os
 from urllib import request
 
 from services.terminal import run_command_sync
+from types.logger import ScriptLogger
 
 
-def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, arch: str, output: TextIOWrapper) -> None:
+def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, arch: str, logger: ScriptLogger) -> None:
     logger.info(f'download dotnet install script')
     
     dotnet_root = os.environ['DOTNET_ROOT']
