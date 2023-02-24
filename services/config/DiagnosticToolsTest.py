@@ -1,11 +1,11 @@
 import os
 import configparser
 
-import types.config.DiagnosticToolsTest as DiagToolTestConf
+import instances.config.DiagnosticToolsTest as DiagToolTestConf
 from services.sysinfo import get_rid, get_debugger
 
 
-def load_diagtooltestconf(conf_file_path: os.PathLike=None, conf_dict: dict=None) -> None:
+def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
     '''Load diagnostic tools test configuration from conf file
 
     :param conf_file_path: absolute path of conf file
@@ -13,8 +13,7 @@ def load_diagtooltestconf(conf_file_path: os.PathLike=None, conf_dict: dict=None
     '''
     config = configparser.ConfigParser()
 
-    if conf_file_path is None: config.read(conf_file_path)
-    else: config.read_dict(conf_dict)
+    config.read(conf_file_path)
 
     DiagToolTestConf.sdk_version = config['DotNet']['Version']
     DiagToolTestConf.sdk_buildid = config['DotNet']['BuildID']

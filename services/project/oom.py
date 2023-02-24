@@ -2,10 +2,10 @@ import os
 import shutil
 
 from services.project.project import change_framework, build_project
-from services.terminal import run_command_sync
-import types.constants as constants
-from types.logger import ScriptLogger
-from types.project import oom
+from services.terminal import run_command_sync, PIPE
+import instances.constants as constants
+from instances.logger import ScriptLogger
+from instances.project import oom
 
 
 def create_build_oom(test_bed: str, 
@@ -37,7 +37,7 @@ def create_build_oom(test_bed: str,
     oom.project_bin_path = os.path.join(oom.project_root, 'out', f'oom{ext}')
     
 
-def run_oom(env: dict, cwd: str, sdk_version: str, rid: str) -> str:
+def run_oom(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogger) -> str:
     '''Start project.
 
     Args:
@@ -56,6 +56,6 @@ def run_oom(env: dict, cwd: str, sdk_version: str, rid: str) -> str:
     )
     env['COMPlus_DbgMiniDumpName'] = dump_path
 
-    run_command_sync(oom.project_bin_path, env=env, cwd=cwd)
-    
+    outs, errs = run_command_sync(oom.project_bin_path, env=env, cwd=cwd, stdout=PIPE, stderr=PIPE)
+    logger.info(f'run command:\n{oom.project_bin_path}\n{outs}\n{errs}')
     return dump_path

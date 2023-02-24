@@ -1,19 +1,18 @@
 import os
 import shutil
 
-import types.constants as constants
+import instances.constants as constants
 from services.project.project import create_project, change_framework, build_project
-from types.logger import ScriptLogger
-from types.project import consoleapp
+from instances.logger import ScriptLogger
+from instances.project import consoleapp
 
 
-def create_build_consoleapp(test_bed: str, dotnet_bin_path: str, env: dict, sdk_version: str, logger: ScriptLogger):
+def create_build_consoleapp(test_bed: str, dotnet_bin_path: str, sdk_version: str, env: dict, logger: ScriptLogger):
     '''Create and publish a dotnet console app.
 
     The console app is used to test startup feature of
         dotnet-counters/dotnet-trace.
     '''
-    logger.info('create consoleapp')
     consoleapp.project_root = os.path.join(test_bed, 'consoleapp')
     consoleapp.runnable = create_project(
         'console',
@@ -37,3 +36,4 @@ def create_build_consoleapp(test_bed: str, dotnet_bin_path: str, env: dict, sdk_
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
     consoleapp.project_bin_path = os.path.join(consoleapp.project_root, 'out', f'consoleapp{ext}')
+    logger.info('create consoleapp finished')

@@ -5,9 +5,9 @@ from subprocess import Popen
 
 from services.project.project import change_framework, build_project
 from services.terminal import run_command_async
-import types.constants as constants
-from types.logger import ScriptLogger
-from types.project import gcdumpapp
+import instances.constants as constants
+from instances.logger import ScriptLogger
+from instances.project import gcdumpapp
 
 
 def create_build_GCDumpPlayground(test_bed: str,

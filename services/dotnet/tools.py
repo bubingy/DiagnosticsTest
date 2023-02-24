@@ -1,8 +1,8 @@
 import os
 from urllib import request
 
-from types.logger import ScriptLogger
-from services.terminal import run_command_sync
+from instances.logger import ScriptLogger
+from services.terminal import run_command_sync, PIPE
 
 
 def install_tool(dotnet_bin_path: str, 
@@ -21,20 +21,21 @@ def install_tool(dotnet_bin_path: str,
             f'--add-source {tool_feed}'
         ]
     )
-    outs, errs = run_command_sync(command, env=env)
+    outs, errs = run_command_sync(command, env=env, stdout=PIPE, stderr=PIPE)
     logger.info(f'run command:\n{command}\n{outs}')
 
     if errs != '':
         logger.error(f'fail to install {tool}!\n{errs}')
         raise Exception(f'fail to install tool: {tool}!')
     
-    logger.info(f'install diagnostics tools finished')
+    logger.info(f'install {tool} finished')
 
 
 def install_diagnostic_tools(dotnet_bin_path: str, 
                             tool_root: os.PathLike, 
                             tool_version: str, 
-                            tool_feed: str, 
+                            tool_feed: str,
+                            env: dict,
                             logger: ScriptLogger):
     '''Install diagnostics
     '''
@@ -48,7 +49,7 @@ def install_diagnostic_tools(dotnet_bin_path: str,
         'dotnet-trace'
     ]
     for tool in tools:
-        install_tool(dotnet_bin_path, tool, tool_root, tool_version, tool_feed, logger)
+        install_tool(dotnet_bin_path, tool, tool_root, tool_version, tool_feed, env, logger)
     logger.info(f'install diagnostics tools finished')
 
 
@@ -62,7 +63,7 @@ def download_perfcollect(test_bed: os.PathLike, logger: ScriptLogger):
     with open(f'{test_bed}/perfcollect', 'w+') as f:
         f.write(req.read().decode())
     command = f'chmod +x {test_bed}/perfcollect'
-    outs, errs = run_command_sync(command)
+    outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
     logger.info(f'run command:\n{command}\n{outs}')
     if errs != '':
         logger.error(f'fail to make perfcollect runable!\n{errs}')

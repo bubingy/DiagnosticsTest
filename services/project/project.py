@@ -2,8 +2,8 @@ import os
 import glob
 from xml.etree import ElementTree as ET
 
-from types.logger import ScriptLogger
-from services.terminal import run_command_sync
+from instances.logger import ScriptLogger
+from services.terminal import run_command_sync, PIPE
 
 
 def create_project(project_type: str, 
@@ -17,7 +17,9 @@ def create_project(project_type: str,
     command = f'{dotnet_bin_path} new {project_type} -o {project_dir}'
     outs, errs = run_command_sync(
         command,
-        env=env
+        env=env,
+        stdout=PIPE,
+        stderr=PIPE
     )
     logger.info(f'run command:\n{command}\n{outs}')
     if errs != '':
@@ -25,6 +27,7 @@ def create_project(project_type: str,
         return False
     else:
         logger.info(f'successfully create {project_name}')
+        return True
 
 
 def change_framework(project_dir: os.PathLike, sdk_version: str):
@@ -56,7 +59,13 @@ def build_project(project_dir: os.PathLike,
     logger.info(f'build {project_name}')
     if source_feed != None:
         command = f'{dotnet_bin_path} build -o out --source {source_feed}'
-        outs, errs = run_command_sync(command, env=env, cwd=project_dir)
+        outs, errs = run_command_sync(
+            command,
+            env=env,
+            cwd=project_dir,
+            stdout=PIPE,
+            stderr=PIPE
+        )
         logger.info(f'run command:\n{command}\n{outs}')
         if errs == '' and 'Build FAILED' not in outs:
             logger.info(f'successfully build {project_name}.')
@@ -64,7 +73,13 @@ def build_project(project_dir: os.PathLike,
     
     # if given runtime isn't available, try to publish without specifying rid.
     command = f'{dotnet_bin_path} build -o out'
-    outs, errs = run_command_sync(command, env=env, cwd=project_dir)
+    outs, errs = run_command_sync(
+        command,
+        env=env,
+        cwd=project_dir,
+        stdout=PIPE,
+        stderr=PIPE
+    )
     logger.info(f'run command:\n{command}\n{outs}')
     if errs == ''  and 'Build FAILED' not in outs:
         logger.info(f'successfully build {project_name}.')

@@ -4,15 +4,14 @@ from subprocess import Popen
 
 from services.project.project import create_project, change_framework, build_project
 from services.terminal import run_command_async
-from types.logger import ScriptLogger
-from types.project import webapp
+from instances.logger import ScriptLogger
+from instances.project import webapp
 
 
-def create_build_webapp(test_bed: str, dotnet_bin_path: str, env: dict, sdk_version: str, logger: ScriptLogger):
+def create_build_webapp(test_bed: str, dotnet_bin_path: str, sdk_version: str, env: dict, logger: ScriptLogger):
     '''Create and publish a dotnet webapp
 
     '''
-    logger.info(f'create webapp')
     webapp.project_root = os.path.join(test_bed, 'webapp')
     webapp.runnable = create_project(
         'webapp', 
@@ -31,6 +30,7 @@ def create_build_webapp(test_bed: str, dotnet_bin_path: str, env: dict, sdk_vers
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
     webapp.project_bin_path = os.path.join(webapp.project_root, 'out', f'webapp{ext}')
+    logger.info(f'create webapp finished')
 
 
 def run_webapp(env: dict, cwd: str) -> Popen:

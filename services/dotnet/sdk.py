@@ -3,14 +3,18 @@
 import os
 from urllib import request
 
-from services.terminal import run_command_sync
-from types.logger import ScriptLogger
+from services.terminal import run_command_sync, PIPE
+from instances.logger import ScriptLogger
 
 
-def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, arch: str, logger: ScriptLogger) -> None:
+def install_sdk_from_script(sdk_version: str, 
+                            test_bed: os.PathLike,
+                            dotnet_root: os.PathLike,
+                            rid: str,
+                            arch: str=None,
+                            logger: ScriptLogger=None) -> None:
     logger.info(f'download dotnet install script')
     
-    dotnet_root = os.environ['DOTNET_ROOT']
     if 'win' in rid:
         script_download_link = 'https://dot.net/v1/dotnet-install.ps1'
         script_engine = 'powershell.exe'
@@ -27,8 +31,12 @@ def install_sdk_from_script(sdk_version: str, test_bed: os.PathLike, rid: str, a
     if 'win' not in rid:
         run_command_sync(f'chmod +x {script_path}')
 
-    command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {sdk_version} -Architecture {arch}'
-    outs, errs = run_command_sync(command)
+    if arch is not None:
+        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {sdk_version} -Architecture {arch}'
+    else:
+        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {sdk_version}'
+    
+    outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
     logger.info(f'run command:\n{command}\n{outs}')
     
     if errs != '':
@@ -56,7 +64,7 @@ def install_runtime_from_script(runtime_version: str, test_bed: os.PathLike, rid
         run_command_sync(f'chmod +x {script_path}')
 
     command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime dotnet'
-    outs, errs = run_command_sync(command)
+    outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
     logger.info(f'run command:\n{command}\n{outs}')
     
     if errs != '':

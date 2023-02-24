@@ -1,4 +1,4 @@
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 
 def run_command_sync(command, **kwargs)->tuple:
