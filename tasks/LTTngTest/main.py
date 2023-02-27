@@ -4,7 +4,7 @@ import shutil
 import instances.constants as constants
 import instances.config.LTTngTest as lttng_test_conf
 from instances.logger import ScriptLogger
-from services.terminal import run_command_sync
+from services.terminal import run_command_sync, PIPE
 from services.project import gcperfsim as gcperfsim_service
 from services.dotnet import sdk as sdk_service, tools as tools_service
 from services.config.LTTngTest import load_lttngtestconf
@@ -77,7 +77,7 @@ def run_test():
         )
 
         command = f'/bin/bash {perfcollect_path} collect {trace_path} -collectsec 30'
-        outs, errs = run_command_sync(command, env=env)
+        outs, errs = run_command_sync(command, env=env, stdout=PIPE, stderr=PIPE)
         logger.info(f'run command:\n{command}\n{outs}')
         if errs != '':
             logger.error(f'fail to collect trace!\n{errs}')
