@@ -1,12 +1,13 @@
 import os
-import shutil
 
 import instances.constants as constants
 import instances.config.LTTngTest as lttng_test_conf
 from instances.logger import ScriptLogger
 from services.terminal import run_command_sync, PIPE
 from services.project import gcperfsim as gcperfsim_service
-from services.dotnet import sdk as sdk_service, tools as tools_service
+from services.dotnet import sdk as sdk_service
+from services.dotnet import cleaner as cleaner_service
+from services.dotnet import tools as tools_service
 from services.config.LTTngTest import load_lttngtestconf
 
 
@@ -83,25 +84,6 @@ def run_test():
             logger.error(f'fail to collect trace!\n{errs}')
         logger.info(f'collection finished')
 
-        clean()
-
-
-def clean() -> None:
-    home_path = os.environ['HOME']
-    to_be_removed = [
-        os.path.join(home_path, '.debug'),
-        os.path.join(home_path, '.dotnet'),
-        os.path.join(home_path, '.nuget'),
-        os.path.join(home_path, 'lttng-traces'),
-        os.path.join(home_path, '.local')
-    ]
-    
-    for f in to_be_removed:
-        if not os.path.exists(f): continue
-        try:
-            if os.path.isdir(f): shutil.rmtree(f)
-            else: os.remove(f)
-        except Exception as e:
-            print(f'fail to remove {f}: {e}')
+        cleaner_service.remove_test_temp_directory(lttng_test_conf.rid, logger)
 
     

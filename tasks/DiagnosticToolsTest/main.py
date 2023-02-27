@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import instances.constants as constants
 from instances.config import DiagnosticToolsTest as diag_tools_test_conf
@@ -8,6 +7,7 @@ from services.project import consoleapp as consoleapp_service
 from services.project import gcdumpapp as gcdumpapp_service
 from services.project import webapp as webapp_service
 from services.dotnet import sdk as sdk_service
+from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
 from services.config.DiagnosticToolsTest import load_diagtooltestconf
 from tasks.DiagnosticToolsTest import dotnet_counters
@@ -47,7 +47,7 @@ def run_test():
     )
     prepare_test_bed()
 
-    logger = ScriptLogger(
+    dotnet_logger = ScriptLogger(
         'dotnet',
         os.path.join(diag_tools_test_conf.test_result_root, 'dotnet.log')
     )
@@ -57,7 +57,7 @@ def run_test():
         diag_tools_test_conf.env['DOTNET_ROOT'],
         diag_tools_test_conf.rid,
         None,
-        logger
+        dotnet_logger
     )
     tools_service.install_diagnostic_tools(
         diag_tools_test_conf.dotnet_bin_path,
@@ -65,7 +65,7 @@ def run_test():
         diag_tools_test_conf.tool_version,
         diag_tools_test_conf.tool_feed,
         diag_tools_test_conf.env,
-        logger,
+        dotnet_logger,
     )
 
     logger = ScriptLogger(
@@ -130,23 +130,5 @@ def run_test():
     )
     dotnet_trace.test_dotnet_trace(logger)
 
-
-def clean():
-    if 'win' in diag_tools_test_conf.rid: home_path = os.environ['USERPROFILE']
-    else: home_path = os.environ['HOME']
-
-    to_be_removed = [
-        os.path.join(home_path, '.aspnet'),
-        os.path.join(home_path, '.dotnet'),
-        os.path.join(home_path, '.nuget'),
-        os.path.join(home_path, '.templateengine'),
-        os.path.join(home_path, '.lldb'),
-        os.path.join(home_path, '.lldbinit'),
-        os.path.join(home_path, '.local')
-    ]
-
-    for f in to_be_removed:
-        if not os.path.exists(f): continue
-        if os.path.isdir(f): shutil.rmtree(f)
-        else: os.remove(f)
+    cleaner_service.remove_test_temp_directory(diag_tools_test_conf.rid, dotnet_logger)
     
