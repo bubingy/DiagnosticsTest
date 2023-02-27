@@ -16,11 +16,12 @@ def create_build_uhe(test_bed: str,
                     logger: ScriptLogger):
     '''Copy project to testbed then publish.
     '''
+    project_name = 'uhe'
     logger.info(f'create uhe')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
-        'uhe'
+        project_name
     )
     uhe.project_root = os.path.join(
         test_bed,
@@ -34,7 +35,7 @@ def create_build_uhe(test_bed: str,
     uhe.runnable = build_project(uhe.project_root, dotnet_bin_path, env, logger)
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
-    uhe.project_bin_path = os.path.join(uhe.project_root, 'out', f'uhe{ext}')
+    uhe.project_bin_path = os.path.join(uhe.project_root, 'out', f'{project_name}{ext}')
     
 
 def run_uhe(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogger) -> str:

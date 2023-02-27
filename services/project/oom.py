@@ -16,11 +16,12 @@ def create_build_oom(test_bed: str,
                     logger: ScriptLogger):
     '''Copy project to testbed then publish.
     '''
+    project_name = 'oom'
     logger.info(f'create oom')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
-        'oom'
+        project_name
     )
     oom.project_root = os.path.join(
         test_bed,
@@ -34,7 +35,7 @@ def create_build_oom(test_bed: str,
     oom.runnable = build_project(oom.project_root, dotnet_bin_path, env, logger)
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
-    oom.project_bin_path = os.path.join(oom.project_root, 'out', f'oom{ext}')
+    oom.project_bin_path = os.path.join(oom.project_root, 'out', f'{project_name}{ext}')
     
 
 def run_oom(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogger) -> str:

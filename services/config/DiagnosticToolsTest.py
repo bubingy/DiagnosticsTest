@@ -46,11 +46,12 @@ def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
 
     DiagToolTestConf.tool_root = os.path.join(
         DiagToolTestConf.testbed,
-        'diag-tools'
+        f'diag-tools-{DiagToolTestConf.tool_version}'
     )
 
     DiagToolTestConf.sdk_root = os.path.join(
-        DiagToolTestConf.testbed, 'dotnet'
+        DiagToolTestConf.testbed,
+        f'dotnet-sdk-{DiagToolTestConf.sdk_version}'
     )
 
     if 'win' in DiagToolTestConf.rid:

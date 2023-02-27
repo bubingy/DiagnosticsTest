@@ -6,15 +6,15 @@ from instances.logger import ScriptLogger
 from services.terminal import run_command_sync, PIPE
 
 
-def create_project(project_type: str, 
+def create_project(project_name: str,
+                    project_type: str,
                     project_dir: os.PathLike, 
                     dotnet_bin_path: os.PathLike,
                     env: dict,
                     logger: ScriptLogger) -> bool:
-    project_name = os.path.basename(project_dir)
-    logger.info(f'create {project_name}')
+    logger.info(f'create {project_name} in {project_dir}')
 
-    command = f'{dotnet_bin_path} new {project_type} -o {project_dir}'
+    command = f'{dotnet_bin_path} new {project_type} -n {project_name} -o {project_dir}'
     outs, errs = run_command_sync(
         command,
         env=env,

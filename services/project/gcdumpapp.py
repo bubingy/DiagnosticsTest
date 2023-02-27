@@ -18,15 +18,16 @@ def create_build_GCDumpPlayground(test_bed: str,
     '''Copy GCDumpPlayground to testbed then publish.
 
     '''
+    project_name = 'GCDumpPlayground2'
     logger.info('create GCDumpPlayground')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
-        'GCDumpPlayground2'
+        project_name
     )
     gcdumpapp.project_root = os.path.join(
         test_bed,
-        'GCDumpPlayground2'
+        f'GCDumpPlayground2-net{sdk_version}'
     )
 
     shutil.copytree(template_project_dir, gcdumpapp.project_root)
@@ -41,7 +42,7 @@ def create_build_GCDumpPlayground(test_bed: str,
     )
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
-    gcdumpapp.project_bin_path = os.path.join(gcdumpapp.project_root, 'out', f'GCDumpPlayground2{ext}')
+    gcdumpapp.project_bin_path = os.path.join(gcdumpapp.project_root, 'out', f'{project_name}{ext}')
 
 
 def run_GCDumpPlayground(env: dict, cwd: str) -> Popen:
