@@ -16,7 +16,6 @@ analyze_testbed: str = None
 use_container: bool = None
 
 # Validate config
-validate_testbed_root: str = None
 validate_testbed: str = None
 
 # Container

@@ -41,25 +41,25 @@ def analyze():
     load_crossosdactestconf(
         os.path.join(
             constants.configuration_root,
-            'LTTngTest.conf'
+            'CrossOSDACTest.conf'
         )
     )
     prepare_analyze_test_bed()
 
-    logger = ScriptLogger(
-        'CrossOSDAC-Analyze',
-        os.path.join(crossosdac_test_conf.analyze_testbed, 'CrossOSDAC-Analyze.log')
-    )
-
     for sdk_version in crossosdac_test_conf.sdk_version_list:
+        logger = ScriptLogger(
+            'CrossOSDAC-Analyze',
+            os.path.join(crossosdac_test_conf.analyze_testbed, f'CrossOSDAC-Analyze-net{sdk_version}.log')
+        )
+
         env = os.environ.copy()
         dotnet_root = os.path.join(
             crossosdac_test_conf.analyze_testbed,
-            f'dotnet-sdk-net{sdk_version}'
+            f'dotnet-sdk-net{sdk_version}-{crossosdac_test_conf.rid}'
         )
         tool_root = os.path.join(
             crossosdac_test_conf.analyze_testbed,
-            f'diag-tool-net{sdk_version}-ver{crossosdac_test_conf.tool_version}'
+            f'diag-tool-net{sdk_version}-ver{crossosdac_test_conf.tool_version}-{crossosdac_test_conf.rid}'
         )
 
         env['DOTNET_ROOT'] = dotnet_root
@@ -169,4 +169,5 @@ def analyze():
                     stream.write(f'{exception}\n'.encode('utf-8'))
                     continue
             process.communicate()
-            
+
+        cleaner_service.remove_test_temp_directory(crossosdac_test_conf.rid, logger)   

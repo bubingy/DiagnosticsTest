@@ -28,7 +28,7 @@ def load_crossosdactestconf(conf_file_path: os.PathLike=None) -> None:
     CrossOSDACTestConf.analyze_testbed_root = config['Analyze']['TestBedRoot']
     CrossOSDACTestConf.use_container = config['Analyze']['Container']
 
-    CrossOSDACTestConf.validate_testbed_root = config['Validate']['TestBedRoot']
+    CrossOSDACTestConf.validate_testbed = config['Validate']['TestBed']
 
     CrossOSDACTestConf.docker_base_url = config['Container']['DockerBaseUrl']
     CrossOSDACTestConf.dockerfile_url = config['Container']['DockerfileUrl']
@@ -39,11 +39,6 @@ def load_crossosdactestconf(conf_file_path: os.PathLike=None) -> None:
 
     CrossOSDACTestConf.analyze_testbed = os.path.join(
         CrossOSDACTestConf.analyze_testbed_root,
-        f'TestBed-{CrossOSDACTestConf.test_name}'
-    )
-
-    CrossOSDACTestConf.validate_testbed = os.path.join(
-        CrossOSDACTestConf.validate_testbed_root,
         f'TestBed-{CrossOSDACTestConf.test_name}'
     )
 
