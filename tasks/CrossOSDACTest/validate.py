@@ -131,11 +131,12 @@ def validate():
                         stdout=stream,
                         stderr=stream
                     )
-                    
-                    if 'oom' in oom_conf.project_root:
-                        project_bin_dir = os.path.join(oom_conf.project_root, 'out')
-                    if 'uhe' in oom_conf.project_root:
-                        project_bin_dir = os.path.join(uhe_conf.project_root, 'out')
+
+                    project_bin_dir = os.path.join(
+                        crossosdac_test_conf.validate_testbed,
+                        dump_name.replace('dump_', ''),
+                        'out'
+                    )
 
                     COMMANDS = RAW_COMMANDS.copy()
                     COMMANDS.insert(0, f'setsymbolserver -directory {project_bin_dir}\n'.encode())
