@@ -1,4 +1,5 @@
 import os
+import glob
 
 import instances.constants as constants
 import instances.config.CrossOSDACTest as crossosdac_test_conf
@@ -57,6 +58,8 @@ def analyze():
             crossosdac_test_conf.analyze_testbed,
             f'dotnet-sdk-net{sdk_version}-{crossosdac_test_conf.rid}'
         )
+        dotnet_bin_path = os.path.join(dotnet_root, 'dotnet')
+
         tool_root = os.path.join(
             crossosdac_test_conf.analyze_testbed,
             f'diag-tool-net{sdk_version}-ver{crossosdac_test_conf.tool_version}-{crossosdac_test_conf.rid}'
@@ -75,7 +78,7 @@ def analyze():
         )
 
         tools_service.install_tool(
-            os.path.join(dotnet_root, 'dotnet'),
+            dotnet_bin_path,
             'dotnet-dump',
             tool_root,
             crossosdac_test_conf.tool_version,
@@ -88,13 +91,25 @@ def analyze():
             crossosdac_test_conf.analyze_testbed,
             f'dumpfiles-net{sdk_version}'
         )
+        if not os.path.exists(dump_path_dir):
+            os.makedirs(dump_path_dir)
 
         analyze_output_dir = os.path.join(
             crossosdac_test_conf.analyze_testbed,
             f'analyzeoutput-net{sdk_version}'
         )
+        if not os.path.exists(analyze_output_dir):
+            os.makedirs(analyze_output_dir)
 
-        dotnet_dump_path = os.path.join(tool_root, 'dotnet-dump')
+        # dotnet_dump_path = os.path.join(tool_root, 'dotnet-dump')
+        dotnet_dump_dll_path_pattern = os.path.join(
+            f'{tool_root}', '.store', 'dotnet-dump', f'{crossosdac_test_conf.tool_version}',
+            'dotnet-dump', f'{crossosdac_test_conf.tool_version}', 'tools', 'net*', 'any',
+            'dotnet-dump.dll'
+        )
+        dotnet_dump_dll_path_candidates = glob.glob(dotnet_dump_dll_path_pattern)
+        dotnet_dump_dll_path = dotnet_dump_dll_path_candidates[0]
+        dotnet_dump_bin = f'{dotnet_bin_path} {dotnet_dump_dll_path}'
 
         # create and run oom
         oom_service.create_build_oom(
@@ -112,7 +127,9 @@ def analyze():
             crossosdac_test_conf.rid,
             logger
         )
-        command = f'{dotnet_dump_path} analyze {dump_path}'
+
+        logger.info(f'start analyze {dump_path}')
+        command = f'{dotnet_dump_bin} analyze {dump_path}'
         dump_name = os.path.basename(dump_path)
         analyze_output_path = os.path.join(
             analyze_output_dir,
@@ -149,7 +166,9 @@ def analyze():
             crossosdac_test_conf.rid,
             logger
         )
-        command = f'{dotnet_dump_path} analyze {dump_path}'
+        
+        logger.info(f'start analyze {dump_path}')
+        command = f'{dotnet_dump_bin} analyze {dump_path}'
         dump_name = os.path.basename(dump_path)
         analyze_output_path = os.path.join(
             analyze_output_dir,

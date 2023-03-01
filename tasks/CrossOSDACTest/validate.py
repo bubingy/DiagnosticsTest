@@ -104,17 +104,17 @@ def validate():
             )
             if arch == 'x86': 
                 dump_name_list = filter_32bit_dump(dump_dir)
-                dotnet_dump_dll_path_pattern = os.path.join(
-                    f'{tool_root}', '.store', 'dotnet-dump', f'{crossosdac_test_conf.tool_version}',
-                    'dotnet-dump', f'{crossosdac_test_conf.tool_version}', 'tools', 'net*', 'any',
-                    'dotnet-dump.dll'
-                )
-                dotnet_dump_dll_path_candidates = glob.glob(dotnet_dump_dll_path_pattern)
-                dotnet_dump_dll_path = dotnet_dump_dll_path_candidates[0]
-                dotnet_dump_bin = f'{dotnet_bin_path} {dotnet_dump_dll_path}'
             if arch == 'x64': 
                 dump_name_list = filter_64bit_dump(dump_dir)
-                dotnet_dump_bin = os.path.join(tool_root, 'dotnet-dump')
+            
+            dotnet_dump_dll_path_pattern = os.path.join(
+                f'{tool_root}', '.store', 'dotnet-dump', f'{crossosdac_test_conf.tool_version}',
+                'dotnet-dump', f'{crossosdac_test_conf.tool_version}', 'tools', 'net*', 'any',
+                'dotnet-dump.dll'
+            )
+            dotnet_dump_dll_path_candidates = glob.glob(dotnet_dump_dll_path_pattern)
+            dotnet_dump_dll_path = dotnet_dump_dll_path_candidates[0]
+            dotnet_dump_bin = f'{dotnet_bin_path} {dotnet_dump_dll_path}'
 
             for dump_name in dump_name_list:
                 dump_path = os.path.join(dump_dir, dump_name)

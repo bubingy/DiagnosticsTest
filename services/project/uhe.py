@@ -34,8 +34,7 @@ def create_build_uhe(test_bed: str,
 
     uhe.runnable = build_project(uhe.project_root, dotnet_bin_path, env, logger)
 
-    ext = os.path.splitext(dotnet_bin_path)[-1]
-    uhe.project_bin_path = os.path.join(uhe.project_root, 'out', f'{project_name}{ext}')
+    uhe.project_dll_path = os.path.join(uhe.project_root, 'out', f'{project_name}.dll')
     
 
 def run_uhe(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogger) -> str:
@@ -57,6 +56,15 @@ def run_uhe(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogge
     )
     env['COMPlus_DbgMiniDumpName'] = dump_path
 
-    outs, errs = run_command_sync(uhe.project_bin_path, env=env, cwd=cwd, stdout=PIPE, stderr=PIPE)
-    logger.info(f'run command:\n{uhe.project_bin_path}\n{outs}\n{errs}')
+    if 'win' in rid: ext = '.exe'
+    else: ext = ''
+    dotnet_bin_path = os.path.join(
+        env['DOTNET_ROOT'],
+        f'dotnet{ext}'
+    )
+
+    command = f'{dotnet_bin_path} {uhe.project_dll_path}'
+
+    outs, errs = run_command_sync(command, env=env, cwd=cwd, stdout=PIPE, stderr=PIPE)
+    logger.info(f'run command:\n{command}\n{outs}\n{errs}')
     return dump_path

@@ -34,8 +34,7 @@ def create_build_oom(test_bed: str,
 
     oom.runnable = build_project(oom.project_root, dotnet_bin_path, env, logger)
 
-    ext = os.path.splitext(dotnet_bin_path)[-1]
-    oom.project_bin_path = os.path.join(oom.project_root, 'out', f'{project_name}{ext}')
+    oom.project_dll_path = os.path.join(oom.project_root, 'out', f'{project_name}.dll')
     
 
 def run_oom(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogger) -> str:
@@ -57,6 +56,14 @@ def run_oom(env: dict, cwd: str, sdk_version: str, rid: str, logger: ScriptLogge
     )
     env['COMPlus_DbgMiniDumpName'] = dump_path
 
-    outs, errs = run_command_sync(oom.project_bin_path, env=env, cwd=cwd, stdout=PIPE, stderr=PIPE)
-    logger.info(f'run command:\n{oom.project_bin_path}\n{outs}\n{errs}')
+    if 'win' in rid: ext = '.exe'
+    else: ext = ''
+    dotnet_bin_path = os.path.join(
+        env['DOTNET_ROOT'],
+        f'dotnet{ext}'
+    )
+
+    command = f'{dotnet_bin_path} {oom.project_dll_path}'
+    outs, errs = run_command_sync(command, env=env, cwd=cwd, stdout=PIPE, stderr=PIPE)
+    logger.info(f'run command:\n{command}\n{outs}\n{errs}')
     return dump_path
