@@ -1,5 +1,7 @@
 import os
 
+import instances.constants as constants
+from services.config.DiagnosticToolsTest import load_diagtooltestconf
 from instances.config import DiagnosticToolsTest as diag_tools_test_conf
 from instances.logger import ScriptLogger
 from services.project import consoleapp as consoleapp_service
@@ -37,6 +39,13 @@ def prepare_test_bed():
 
 
 def run_test():
+    load_diagtooltestconf(
+        os.path.join(
+            constants.configuration_root,
+            'DiagnosticToolsTest.conf'
+        )
+    )
+
     prepare_test_bed()
 
     dotnet_logger = ScriptLogger(
