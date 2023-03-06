@@ -23,14 +23,17 @@ def load_diagtooltestconf(conf_file_path: os.PathLike=None) -> None:
 
     DiagToolTestConf.test_name = config['Test']['Name']
     DiagToolTestConf.testbed_root = config['Test']['TestBedRoot']
-    DiagToolTestConf.use_container = config['Test']['Container']
 
     DiagToolTestConf.docker_base_url = config['Container']['DockerBaseUrl']
     DiagToolTestConf.dockerfile_url = config['Container']['DockerfileUrl']
-    DiagToolTestConf.mount_dir = config['Container']['MountDir']
-    DiagToolTestConf.security_opt = config['Container']['SecurityOpt']
-    DiagToolTestConf.cap_add = config['Container']['CapAdd']
-    DiagToolTestConf.privileged = config['Container']['Privileged']
+    DiagToolTestConf.full_tag = config['Container']['FullTag']
+    DiagToolTestConf.mount_dir = config['Container']['MountDir'].split('\n')
+    DiagToolTestConf.mount_dir.remove('')
+    DiagToolTestConf.security_opt = config['Container']['SecurityOpt'].split('\n')
+    DiagToolTestConf.security_opt.remove('')
+    DiagToolTestConf.cap_add = config['Container']['CapAdd'].split('\n')
+    DiagToolTestConf.cap_add.remove('')
+    DiagToolTestConf.privileged = config.getboolean('Container', 'Privileged')
 
     DiagToolTestConf.testbed = os.path.join(
         DiagToolTestConf.testbed_root,
