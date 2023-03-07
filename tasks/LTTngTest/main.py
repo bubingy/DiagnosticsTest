@@ -1,6 +1,5 @@
 import os
 
-import instances.constants as constants
 import instances.config.LTTngTest as lttng_test_conf
 from instances.logger import ScriptLogger
 from services.terminal import run_command_sync, PIPE
@@ -8,7 +7,6 @@ from services.project import gcperfsim as gcperfsim_service
 from services.dotnet import sdk as sdk_service
 from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
-from services.config.LTTngTest import load_lttngtestconf
 
 
 def prepare_test_bed():
@@ -25,12 +23,6 @@ def prepare_test_bed():
 
 
 def run_test():
-    load_lttngtestconf(
-        os.path.join(
-            constants.configuration_root,
-            'LTTngTest.conf'
-        )
-    )
     prepare_test_bed()
 
     logger = ScriptLogger(

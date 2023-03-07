@@ -12,11 +12,10 @@ testbed_root: str = None
 testbed: str = None
 test_result_root: str = None
 
-use_container: bool = None
-
 # Container
 docker_base_url: str = None
 dockerfile_url: str = None
+full_tag: str = None
 # MountDir is a directory on the host which will be mounted to TestBed
 mount_dir: list = None
 security_opt: list = None

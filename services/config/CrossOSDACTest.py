@@ -26,16 +26,19 @@ def load_crossosdactestconf(conf_file_path: os.PathLike=None) -> None:
     CrossOSDACTestConf.test_name = config['Test']['Name']
 
     CrossOSDACTestConf.analyze_testbed_root = config['Analyze']['TestBedRoot']
-    CrossOSDACTestConf.use_container = config['Analyze']['Container']
 
     CrossOSDACTestConf.validate_testbed = config['Validate']['TestBed']
 
     CrossOSDACTestConf.docker_base_url = config['Container']['DockerBaseUrl']
     CrossOSDACTestConf.dockerfile_url = config['Container']['DockerfileUrl']
-    CrossOSDACTestConf.mount_dir = config['Container']['MountDir']
-    CrossOSDACTestConf.security_opt = config['Container']['SecurityOpt']
-    CrossOSDACTestConf.cap_add = config['Container']['CapAdd']
-    CrossOSDACTestConf.privileged = config['Container']['Privileged']
+    CrossOSDACTestConf.full_tag = config['Container']['FullTag']
+    CrossOSDACTestConf.mount_dir = config['Container']['MountDir'].split('\n')
+    CrossOSDACTestConf.mount_dir.remove('')
+    CrossOSDACTestConf.security_opt = config['Container']['SecurityOpt'].split('\n')
+    CrossOSDACTestConf.security_opt.remove('')
+    CrossOSDACTestConf.cap_add = config['Container']['CapAdd'].split('\n')
+    CrossOSDACTestConf.cap_add.remove('')
+    CrossOSDACTestConf.privileged = config.getboolean('Container', 'Privileged')
 
     CrossOSDACTestConf.analyze_testbed = os.path.join(
         CrossOSDACTestConf.analyze_testbed_root,

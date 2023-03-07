@@ -22,14 +22,17 @@ def load_lttngtestconf(conf_file_path: os.PathLike=None) -> None:
 
     LTTngTestConf.test_name = config['Test']['Name']
     LTTngTestConf.testbed_root = config['Test']['TestBedRoot']
-    LTTngTestConf.use_container = config['Test']['Container']
 
     LTTngTestConf.docker_base_url = config['Container']['DockerBaseUrl']
     LTTngTestConf.dockerfile_url = config['Container']['DockerfileUrl']
-    LTTngTestConf.mount_dir = config['Container']['MountDir']
-    LTTngTestConf.security_opt = config['Container']['SecurityOpt']
-    LTTngTestConf.cap_add = config['Container']['CapAdd']
-    LTTngTestConf.privileged = config['Container']['Privileged']
+    LTTngTestConf.full_tag = config['Container']['FullTag']
+    LTTngTestConf.mount_dir = config['Container']['MountDir'].split('\n')
+    LTTngTestConf.mount_dir.remove('')
+    LTTngTestConf.security_opt = config['Container']['SecurityOpt'].split('\n')
+    LTTngTestConf.security_opt.remove('')
+    LTTngTestConf.cap_add = config['Container']['CapAdd'].split('\n')
+    LTTngTestConf.cap_add.remove('')
+    LTTngTestConf.privileged = config.getboolean('Container', 'Privileged')
 
     LTTngTestConf.testbed = os.path.join(
         LTTngTestConf.testbed_root,

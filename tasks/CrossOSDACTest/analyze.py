@@ -1,7 +1,6 @@
 import os
 import glob
 
-import instances.constants as constants
 import instances.config.CrossOSDACTest as crossosdac_test_conf
 from instances.logger import ScriptLogger
 from services.terminal import run_command_async, PIPE
@@ -10,7 +9,6 @@ from services.project import uhe as uhe_service
 from services.dotnet import sdk as sdk_service
 from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
-from services.config.CrossOSDACTest import load_crossosdactestconf
 
 
 COMMANDS = [
@@ -39,12 +37,6 @@ def prepare_analyze_test_bed():
 
 
 def analyze():
-    load_crossosdactestconf(
-        os.path.join(
-            constants.configuration_root,
-            'CrossOSDACTest.conf'
-        )
-    )
     prepare_analyze_test_bed()
 
     for sdk_version in crossosdac_test_conf.sdk_version_list:

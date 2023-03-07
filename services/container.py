@@ -2,16 +2,22 @@ import os
 import shutil
 
 import instances.constants as constants
-from instances.config import DiagnosticToolsTest as diag_tools_test_conf
 
 
 def extract_id(full_id: str):
     return full_id.split(':')[1]
 
 
-def run_in_container(run_command: str) -> None:
+def run_in_container(docker_base_url: str,
+                     dockerfile_url: str,
+                     full_tag: str,
+                     mount_dir: list,
+                     test_name: str,
+                     cap_add: list,
+                     security_opt: list,
+                     run_command: str) -> None:
     import docker
-    client = docker.DockerClient(base_url=f'tcp://{diag_tools_test_conf.docker_base_url}')
+    client = docker.DockerClient(base_url=f'tcp://{docker_base_url}')
 
     # build image
     image_id = None
@@ -19,8 +25,8 @@ def run_in_container(run_command: str) -> None:
     try:
         print('building image')
         image_info = client.images.build(
-            path=diag_tools_test_conf.dockerfile_url,
-            tag=diag_tools_test_conf.full_tag,
+            path=dockerfile_url,
+            tag=full_tag,
             pull=True,
             rm=True
         )
@@ -32,7 +38,7 @@ def run_in_container(run_command: str) -> None:
     
     try:
         # create mount directory
-        mount_map = diag_tools_test_conf.mount_dir[0]
+        mount_map = mount_dir[0]
         [host_dir, container_dir] = mount_map.split(':')
         if not os.path.exists(host_dir): os.makedirs(host_dir)
 
@@ -56,13 +62,13 @@ def run_in_container(run_command: str) -> None:
 
     try:
         container = client.containers.run(
-            diag_tools_test_conf.full_tag,
+            full_tag,
             command=['/bin/bash', '-c', command],
-            name=diag_tools_test_conf.test_name,
+            name=test_name,
             remove=True,
-            cap_add=diag_tools_test_conf.cap_add,
-            security_opt=diag_tools_test_conf.security_opt,
-            volumes=diag_tools_test_conf.mount_dir
+            cap_add=cap_add,
+            security_opt=security_opt,
+            volumes=mount_dir
         )
     except Exception as e:
         print(f'fail to create and run container: {e}')
