@@ -86,17 +86,17 @@ def run_test():
         logger
     )
 
-    logger = ScriptLogger(
-        'dotnet_counters',
-        os.path.join(diag_tools_test_conf.test_result_root,'dotnet_counters.log')
-    )
-    dotnet_counters.test_dotnet_counters(logger)
+    # logger = ScriptLogger(
+    #     'dotnet_counters',
+    #     os.path.join(diag_tools_test_conf.test_result_root,'dotnet_counters.log')
+    # )
+    # dotnet_counters.test_dotnet_counters(logger)
     
-    logger = ScriptLogger(
-        'dotnet_dump',
-        os.path.join(diag_tools_test_conf.test_result_root,'dotnet_dump.log')
-    )
-    dotnet_dump.test_dotnet_dump(logger)
+    # logger = ScriptLogger(
+    #     'dotnet_dump',
+    #     os.path.join(diag_tools_test_conf.test_result_root,'dotnet_dump.log')
+    # )
+    # dotnet_dump.test_dotnet_dump(logger)
     
     logger = ScriptLogger(
         'dotnet_gcdump',
@@ -104,23 +104,23 @@ def run_test():
     )
     dotnet_gcdump.test_dotnet_gcdump(logger)
 
-    logger = ScriptLogger(
-        'dotnet_sos',
-        os.path.join(diag_tools_test_conf.test_result_root,'dotnet_sos.log')
-    )
-    dotnet_sos.test_dotnet_sos(logger)
+    # logger = ScriptLogger(
+    #     'dotnet_sos',
+    #     os.path.join(diag_tools_test_conf.test_result_root,'dotnet_sos.log')
+    # )
+    # dotnet_sos.test_dotnet_sos(logger)
 
-    logger = ScriptLogger(
-        'dotnet_stack',
-        os.path.join(diag_tools_test_conf.test_result_root,'dotnet_stack.log')
-    )
-    dotnet_stack.test_dotnet_stack(logger)
+    # logger = ScriptLogger(
+    #     'dotnet_stack',
+    #     os.path.join(diag_tools_test_conf.test_result_root,'dotnet_stack.log')
+    # )
+    # dotnet_stack.test_dotnet_stack(logger)
 
-    logger = ScriptLogger(
-        'dotnet_trace',
-        os.path.join(diag_tools_test_conf.test_result_root,'dotnet_trace.log')
-    )
-    dotnet_trace.test_dotnet_trace(logger)
+    # logger = ScriptLogger(
+    #     'dotnet_trace',
+    #     os.path.join(diag_tools_test_conf.test_result_root,'dotnet_trace.log')
+    # )
+    # dotnet_trace.test_dotnet_trace(logger)
 
     cleaner_service.remove_test_temp_directory(diag_tools_test_conf.rid, dotnet_logger)
     

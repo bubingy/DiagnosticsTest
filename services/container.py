@@ -20,20 +20,20 @@ def run_in_container(docker_base_url: str,
     client = docker.DockerClient(base_url=f'tcp://{docker_base_url}')
 
     # build image
-    image_id = None
-    image_parent_id = None
-    try:
-        print('building image')
-        image_info = client.images.build(
-            path=dockerfile_url,
-            tag=full_tag,
-            pull=True,
-            rm=True
-        )
-        image_id = extract_id(image_info[0].attrs['Id'])
-        image_parent_id = extract_id(image_info[0].attrs['Parent'])
-    except Exception as e:
-        print(f'fail to build image: {e}')
+    # image_id = None
+    # image_parent_id = None
+    # try:
+    #     print('building image')
+    #     image_info = client.images.build(
+    #         path=dockerfile_url,
+    #         tag=full_tag,
+    #         pull=True,
+    #         rm=True
+    #     )
+    #     image_id = extract_id(image_info[0].attrs['Id'])
+    #     image_parent_id = extract_id(image_info[0].attrs['Parent'])
+    # except Exception as e:
+    #     print(f'fail to build image: {e}')
 
     
     try:
@@ -49,8 +49,8 @@ def run_in_container(docker_base_url: str,
         )
     except Exception as e:
         print(f'fail to create mount directory or copy script to container: {e}')
-        client.images.remove(image_id)
-        client.images.remove(image_parent_id)
+        # client.images.remove(image_id)
+        # client.images.remove(image_parent_id)
 
     # create container
     print('run container')
@@ -72,7 +72,7 @@ def run_in_container(docker_base_url: str,
         )
     except Exception as e:
         print(f'fail to create and run container: {e}')
-    finally:
-        # remove image
-        client.images.remove(image_id)
-        client.images.remove(image_parent_id)
+    # finally:
+    #     # remove image
+    #     client.images.remove(image_id)
+    #     client.images.remove(image_parent_id)

@@ -41,6 +41,7 @@ def test_dotnet_gcdump(logger: ScriptLogger):
         outs, errs = run_command_sync(
             command,
             cwd=diag_tools_test_conf.test_result_root,
+            env=diag_tools_test_conf.env,
             stdout=PIPE,
             stderr=PIPE
         )

@@ -13,7 +13,7 @@ def create_build_gcperfsim(test_bed: str, dotnet_bin_path: str, env: dict, sdk_v
     '''Copy project to testbed then publish.
     '''
     project_name = 'gcperfsim'
-    logger.info(f'create gcperfsim')
+    logger.info(f'create {project_name}')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
@@ -21,7 +21,7 @@ def create_build_gcperfsim(test_bed: str, dotnet_bin_path: str, env: dict, sdk_v
     )
     gcperfsim.project_root = os.path.join(
         test_bed,
-        f'gcperfsim-net{sdk_version}'
+        f'{project_name}-net{sdk_version}'
     )
     
     shutil.copytree(template_project_dir, gcperfsim.project_root)

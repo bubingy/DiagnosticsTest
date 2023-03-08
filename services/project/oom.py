@@ -17,7 +17,7 @@ def create_build_oom(test_bed: str,
     '''Copy project to testbed then publish.
     '''
     project_name = 'oom'
-    logger.info(f'create oom')
+    logger.info(f'create {project_name}')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
@@ -25,7 +25,7 @@ def create_build_oom(test_bed: str,
     )
     oom.project_root = os.path.join(
         test_bed,
-        f'oom_net{sdk_version}_{rid}'
+        f'{project_name}_net{sdk_version}_{rid}'
     )
     
     shutil.copytree(template_project_dir, oom.project_root)

@@ -17,7 +17,7 @@ def create_build_uhe(test_bed: str,
     '''Copy project to testbed then publish.
     '''
     project_name = 'uhe'
-    logger.info(f'create uhe')
+    logger.info(f'create {project_name}')
     template_project_dir = os.path.join(
         constants.script_root,
         'assets',
@@ -25,7 +25,7 @@ def create_build_uhe(test_bed: str,
     )
     uhe.project_root = os.path.join(
         test_bed,
-        f'uhe_net{sdk_version}_{rid}'
+        f'{project_name}_net{sdk_version}_{rid}'
     )
     
     shutil.copytree(template_project_dir, uhe.project_root)

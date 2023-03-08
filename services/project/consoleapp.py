@@ -14,9 +14,10 @@ def create_build_consoleapp(test_bed: str, dotnet_bin_path: str, sdk_version: st
         dotnet-counters/dotnet-trace.
     '''
     project_name = 'consoleapp'
+    logger.info(f'create {project_name}')
     consoleapp.project_root = os.path.join(
         test_bed,
-        f'consoleapp-net{sdk_version}'
+        f'{project_name}-net{sdk_version}'
     )
     consoleapp.runnable = create_project(
         project_name,
@@ -28,7 +29,7 @@ def create_build_consoleapp(test_bed: str, dotnet_bin_path: str, sdk_version: st
     )
     change_framework(consoleapp.project_root, sdk_version)
     shutil.copy(
-        os.path.join(constants.script_root, 'assets', 'Program.cs'), 
+        os.path.join(constants.script_root, 'assets', 'consoleapp', 'Program.cs'), 
         os.path.join(consoleapp.project_root, 'Program.cs')
     )
 

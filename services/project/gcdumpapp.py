@@ -3,7 +3,7 @@ import time
 import shutil
 from subprocess import Popen
 
-from services.project.project import change_framework, build_project
+from services.project.project import create_project, change_framework, build_project
 from services.terminal import run_command_async
 import instances.constants as constants
 from instances.logger import ScriptLogger
@@ -19,22 +19,26 @@ def create_build_GCDumpPlayground(test_bed: str,
 
     '''
     project_name = 'GCDumpPlayground2'
-    logger.info('create GCDumpPlayground')
-    template_project_dir = os.path.join(
-        constants.script_root,
-        'assets',
-        project_name
-    )
+    logger.info(f'create {project_name}')
     gcdumpapp.project_root = os.path.join(
         test_bed,
-        f'GCDumpPlayground2-net{sdk_version}'
+        f'{project_name}-net{sdk_version}'
+    )
+    gcdumpapp.runnable = create_project(
+        project_name,
+        'console',
+        gcdumpapp.project_root,
+        dotnet_bin_path,
+        env,
+        logger
+    )
+    change_framework(gcdumpapp.project_root, sdk_version)
+    shutil.copy(
+        os.path.join(constants.script_root, 'assets', 'GCDumpPlayground2', 'Program.cs'), 
+        os.path.join(gcdumpapp.project_root, 'Program.cs')
     )
 
-    shutil.copytree(template_project_dir, gcdumpapp.project_root)
-
-    change_framework(gcdumpapp.project_root, sdk_version)
-
-    gcdumpapp.runnable = build_project(
+    gcdumpapp.runnable = gcdumpapp.runnable and build_project(
         gcdumpapp.project_root,
         dotnet_bin_path,
         env,
@@ -43,6 +47,7 @@ def create_build_GCDumpPlayground(test_bed: str,
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
     gcdumpapp.project_bin_path = os.path.join(gcdumpapp.project_root, 'out', f'{project_name}{ext}')
+    logger.info(f'create {project_name} finished')
 
 
 def run_GCDumpPlayground(env: dict, cwd: str) -> Popen:
@@ -53,8 +58,9 @@ def run_GCDumpPlayground(env: dict, cwd: str) -> Popen:
     Return:
         GCDumpPlayground process instance
     '''
-    tmp_path = os.path.join(gcdumpapp.project_root, 'tmp.txt')
+    tmp_path = os.path.join(gcdumpapp.project_root, 'tmp')
     tmp_write = open(tmp_path, 'w+')
+    tmp_read = open(tmp_path, 'r')
 
     proc = run_command_async(
         f'{gcdumpapp.project_bin_path} 0.05',
@@ -64,11 +70,11 @@ def run_GCDumpPlayground(env: dict, cwd: str) -> Popen:
     )
 
     while True:
-        with open(tmp_path, 'r+') as f:
-            if 'Pause for gcdumps.' in f.read():
-                print('GCDumpPlayground2 is running!')
-                break
-            else:
-                time.sleep(2)
+        if 'Pause for gcdumps.' in tmp_read.read():
+            print('GCDumpPlayground2 is running!')
+            tmp_read.close()
+            break
+        else:
+            time.sleep(2)
     tmp_write.close()
     return proc

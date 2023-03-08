@@ -13,9 +13,10 @@ def create_build_webapp(test_bed: str, dotnet_bin_path: str, sdk_version: str, e
 
     '''
     project_name = 'webapp'
+    logger.info(f'create {project_name}')
     webapp.project_root = os.path.join(
         test_bed,
-        f'webapp-net{sdk_version}'
+        f'{project_name}-net{sdk_version}'
     )
     webapp.runnable = create_project(
         project_name,
@@ -35,7 +36,7 @@ def create_build_webapp(test_bed: str, dotnet_bin_path: str, sdk_version: str, e
 
     ext = os.path.splitext(dotnet_bin_path)[-1]
     webapp.project_bin_path = os.path.join(webapp.project_root, 'out', f'{project_name}{ext}')
-    logger.info(f'create webapp finished')
+    logger.info(f'create {project_name} finished')
 
 
 def run_webapp(env: dict, cwd: str) -> Popen:
