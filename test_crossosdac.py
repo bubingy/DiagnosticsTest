@@ -39,6 +39,7 @@ if __name__ == '__main__':
                 crossosdac_test_conf.test_name,
                 crossosdac_test_conf.cap_add,
                 crossosdac_test_conf.security_opt,
+                crossosdac_test_conf.privileged,
                 'python3 test_crossosdac.py analyze'
             )
         else:

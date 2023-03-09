@@ -36,6 +36,7 @@ if __name__ == '__main__':
             lttng_test_conf.test_name,
             lttng_test_conf.cap_add,
             lttng_test_conf.security_opt,
+            lttng_test_conf.privileged,
             'python3 test_lttng.py run'
         )
     if args.action == 'run':
