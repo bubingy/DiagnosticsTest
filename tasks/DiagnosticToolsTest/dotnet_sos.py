@@ -156,7 +156,7 @@ def test_dotnet_sos(logger: ScriptLogger):
             ).communicate()
     else:
         with open(analyze_output_path, 'w+') as f:
-            command =  f'{diag_tools_test_conf.debugger} -p {proc.pid}'
+            command =  f'{diag_tools_test_conf.debugger} -p {webapp_process.pid}'
             logger.info(f'run command:\n{command}')
             proc = run_command_async(
                 command,
