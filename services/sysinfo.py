@@ -60,6 +60,9 @@ def get_debugger(rid: str):
         debugger = 'cdb'
         return debugger
     else: # linux or osx
+        if rid[-3:] == 'arm':
+            debugger = '/root/lldb/bin/lldb'
+            return debugger
         candidate_debuggers = glob.glob('/usr/bin/lldb*')
         if '/usr/bin/lldb' in candidate_debuggers:
             debugger = 'lldb'
