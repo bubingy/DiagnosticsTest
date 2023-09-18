@@ -45,9 +45,14 @@ def install_sdk_from_script(sdk_version: str,
         exit(-1)
 
 
-def install_runtime_from_script(runtime_version: str, test_bed: os.PathLike, rid: str, logger: ScriptLogger):
+def install_runtime_from_script(runtime_type: str, 
+                                runtime_version: str, 
+                                test_bed: os.PathLike, 
+                                dotnet_root: os.PathLike, 
+                                rid: str, 
+                                arch: str=None,
+                                logger: ScriptLogger=None):
     logger.info(f'download dotnet install script')
-    dotnet_root = os.environ['DOTNET_ROOT']
     if 'win' in rid:
         script_download_link = 'https://dot.net/v1/dotnet-install.ps1'
         script_engine = 'powershell.exe'
@@ -64,7 +69,11 @@ def install_runtime_from_script(runtime_version: str, test_bed: os.PathLike, rid
     if 'win' not in rid:
         run_command_sync(f'chmod +x {script_path}')
 
-    command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime dotnet'
+    if arch is not None:
+        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type} -Architecture {arch}'
+    else:
+        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type}'
+    
     outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
     logger.info(f'run command:\n{command}\n{outs}')
     
