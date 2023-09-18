@@ -30,7 +30,7 @@ RAW_COMMANDS = [
 def filter_32bit_dump(dump_directory: os.PathLike) -> list:
     return list(
         filter(
-            lambda dump_name: 'linux-arm' in dump_name and '64' not in dump_name,
+            lambda dump_name: 'linux-arm' in dump_name and 'linux-arm64' not in dump_name,
             os.listdir(dump_directory)
         )
     )

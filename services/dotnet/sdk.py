@@ -17,7 +17,7 @@ def install_sdk_from_script(sdk_version: str,
     logger.info(f'download dotnet install script')
     
     if 'win' in rid:
-        script_download_link = 'https://dot.net/v1/dotnet-install.ps1'
+        script_download_link = 'https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.ps1'
         script_engine = 'powershell.exe'
 
     else:
@@ -26,8 +26,8 @@ def install_sdk_from_script(sdk_version: str,
 
     script_path = os.path.join(test_bed, os.path.basename(script_download_link))
     req = request.urlopen(script_download_link)
-    with open(script_path, 'w+') as f:
-        f.write(req.read().decode())
+    with open(script_path, 'wb+') as f:
+        f.write(req.read())
 
     if 'win' not in rid:
         run_command_sync(f'chmod +x {script_path}')

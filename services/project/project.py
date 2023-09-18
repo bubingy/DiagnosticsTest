@@ -33,6 +33,7 @@ def create_project(project_name: str,
 def change_framework(project_dir: os.PathLike, sdk_version: str):
     # project_name = os.path.basename(project_dir)
     print(project_dir)
+    sdk_version = '8.0'
     project_file = glob.glob(f'{project_dir}/*.csproj')[0]
     tree = ET.parse(project_file)
     root = tree.getroot()
