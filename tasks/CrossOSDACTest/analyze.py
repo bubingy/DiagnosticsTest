@@ -9,6 +9,7 @@ from services.project import uhe as uhe_service
 from services.dotnet import sdk as sdk_service
 from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
+from services.dotnet import env as env_service
 
 
 COMMANDS = [
@@ -77,6 +78,15 @@ def analyze():
             crossosdac_test_conf.tool_feed,
             env,
             logger
+        )
+
+        env_service.create_env_activation_script(
+            dotnet_root,
+            tool_root,
+            os.path.join(
+                crossosdac_test_conf.analyze_testbed,
+                f'env_activation-{sdk_version}'
+            )
         )
 
         dump_path_dir = os.path.join(

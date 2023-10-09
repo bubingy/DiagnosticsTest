@@ -3,13 +3,12 @@ import glob
 
 import instances.constants as constants
 import instances.config.CrossOSDACTest as crossosdac_test_conf
-import instances.project.oom as oom_conf
-import instances.project.uhe as uhe_conf
 from instances.logger import ScriptLogger
 from services.terminal import run_command_async, PIPE
 from services.dotnet import sdk as sdk_service
 from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
+from services.dotnet import env as env_service
 from services.config.CrossOSDACTest import load_crossosdactestconf
 
 
@@ -102,6 +101,16 @@ def validate():
                 env,
                 logger
             )
+
+            env_service.create_env_activation_script(
+                dotnet_root,
+                tool_root,
+                os.path.join(
+                    crossosdac_test_conf.validate_testbed,
+                    f'env_activation-{sdk_version}-{arch}'
+                )
+            )
+
             if arch == 'x86': 
                 dump_name_list = filter_32bit_dump(dump_dir)
             if arch == 'x64': 

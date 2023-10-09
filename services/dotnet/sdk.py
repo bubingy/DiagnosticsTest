@@ -1,7 +1,6 @@
 '''Install .NET SDK'''
 
 import os
-import shutil
 from urllib import request
 
 from services.terminal import run_command_sync, PIPE

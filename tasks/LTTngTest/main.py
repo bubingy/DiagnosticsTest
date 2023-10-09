@@ -5,6 +5,7 @@ from instances.logger import ScriptLogger
 from services.terminal import run_command_sync, PIPE
 from services.project import gcperfsim as gcperfsim_service
 from services.dotnet import sdk as sdk_service
+from services.dotnet import env as env_service
 from services.dotnet import cleaner as cleaner_service
 from services.dotnet import tools as tools_service
 
@@ -49,6 +50,15 @@ def run_test():
             lttng_test_conf.rid,
             arch=None,
             logger=logger
+        )
+
+        env_service.create_env_activation_script(
+            dotnet_root,
+            '',
+            os.path.join(
+                lttng_test_conf.testbed,
+                f'env_activation-{sdk_version}'
+            )
         )
 
         gcperfsim_service.create_build_gcperfsim(

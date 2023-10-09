@@ -7,6 +7,7 @@ from services.project import gcdumpapp as gcdumpapp_service
 from services.project import webapp as webapp_service
 from services.dotnet import sdk as sdk_service
 from services.dotnet import cleaner as cleaner_service
+from services.dotnet import env as env_service
 from services.dotnet import tools as tools_service
 from tasks.DiagnosticToolsTest import dotnet_counters
 from tasks.DiagnosticToolsTest import dotnet_dump
@@ -58,6 +59,15 @@ def run_test():
         diag_tools_test_conf.tool_feed,
         diag_tools_test_conf.env,
         dotnet_logger,
+    )
+
+    env_service.create_env_activation_script(
+        diag_tools_test_conf.sdk_root,
+        diag_tools_test_conf.tool_root,
+        os.path.join(
+            diag_tools_test_conf.testbed,
+            'env_activation'
+        )
     )
 
     logger = ScriptLogger(
