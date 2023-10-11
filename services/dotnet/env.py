@@ -8,15 +8,15 @@ def create_env_activation_script(dotnet_root: os.PathLike,
     os_name = get_os_name()
     if os_name == 'win':
         lines = [
-            f'$Env:DOTNET_ROOT={dotnet_root}',
-            f'$Env:Path+=;{dotnet_root}',
-            f'$Env:Path+=;{tool_root}'
+            f'$Env:DOTNET_ROOT={dotnet_root}\n',
+            f'$Env:Path+=;{dotnet_root}\n',
+            f'$Env:Path+=;{tool_root}\n'
         ]
     else:
         lines = [
-            f'export DOTNET_ROOT={dotnet_root}',
-            f'export PATH=$PATH:{dotnet_root}',
-            f'export PATH=$PATH:{tool_root}'
+            f'export DOTNET_ROOT={dotnet_root}\n',
+            f'export PATH=$PATH:{dotnet_root}\n',
+            f'export PATH=$PATH:{tool_root}\n'
         ]
     
     with open(output, 'w+') as fs:
