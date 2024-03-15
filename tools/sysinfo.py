@@ -1,10 +1,15 @@
+"""Provide system information"""
 
 import re
 import glob
 import platform
 
 
-def get_os_name():
+def get_os_name() -> str|Exception:
+    """get name of operation system
+    
+    :return: name of os or Exception if failed
+    """
     system = platform.system().lower()
     if system == 'windows':
         os = 'win'
@@ -21,11 +26,15 @@ def get_os_name():
     elif system== 'darwin':
         os = 'osx'
     else:
-        raise Exception(f'unsupported OS: {system}')
+        os = Exception('unknown os')
     return os
 
 
-def get_cpu_arch():
+def get_cpu_type() -> str|Exception:
+    """get type of CPU
+    
+    :return: type of cpu or Exception if failed
+    """
     machine_type = platform.machine().lower()
     if machine_type in ['x86_64', 'amd64']:
         cpu_arch = 'x64'
@@ -34,28 +43,33 @@ def get_cpu_arch():
     elif machine_type in ['armv7l']:
         cpu_arch = 'arm'
     else:
-        raise Exception(f'unsupported machine type: {machine_type}')
+        cpu_arch = Exception('unknown cpu')
     return cpu_arch
 
 
-def get_rid():
-    '''Get `.Net RID` of current platform.
-    '''
+def get_rid() -> str|Exception:
+    """Get .Net RID of current platform
+
+    :return: .Net RID of current platform or Exception if failed
+    """
     os_name = get_os_name()
-    cpu_arch = get_cpu_arch()
-    rid = f'{os_name}-{cpu_arch}'
-    return rid
+    cpu_arch = get_cpu_type()
+    if isinstance(os_name, Exception):
+        return os_name
+    if isinstance(cpu_arch, Exception):
+        return cpu_arch
+    else:
+        return f'{os_name}-{cpu_arch}'
 
 
-def get_debugger(rid: str):
-    '''Get full name of debugger.
+def get_debugger(rid: str) -> str|Exception:
+    '''Get full name of debugger
     
-    Args:
-        rid - `.Net RID` of current platform.
-    Return: full name of debugger.
+    :param rid: `.Net RID` of current platform
+    :Return: full name of debugger or Exception if failed
     '''
     if 'musl' in rid:
-        return ''
+        return None
     elif 'win' in rid:
         debugger = 'cdb'
         return debugger
@@ -73,4 +87,4 @@ def get_debugger(rid: str):
                 if pattern.match(candidate_debugger) is not None:
                     debugger = candidate_debugger.split('/')[-1]
                     return debugger
-
+    return Exception('debugger not found')
