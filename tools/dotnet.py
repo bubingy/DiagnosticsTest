@@ -3,10 +3,14 @@
 import os
 from urllib import request
 
-from tools import sysinfo
-from tools.terminal import run_command_sync, PIPE
+import app
+from tools.terminal import run_command_sync
 
 
+@app.check_function_input()
+@app.log_function(
+    pre_run_msg='start to download dotnet-install script',
+    post_run_msg='download dotnet-install script completed')
 def donwload_install_script(rid: str, script_path: str) -> str|Exception:
     """download dotnet-install script
     
@@ -29,6 +33,10 @@ def donwload_install_script(rid: str, script_path: str) -> str|Exception:
         return ex
 
 
+@app.check_function_input()
+@app.log_function(
+    pre_run_msg='start to make dotnet-install script runnable on non-windows platforms',
+    post_run_msg='making dotnet-install script runnable on non-windows platforms completed')
 def enable_runnable(rid: str, script_path: str) -> str|Exception:
     """make dotnet-install script runnable on non-windows platforms
     
@@ -37,14 +45,18 @@ def enable_runnable(rid: str, script_path: str) -> str|Exception:
     :return: path to dotnet-install script or Exception if fail
     """
     if 'win' in rid:
-        return
+        return script_path
     
-    stdout, stderr = run_command_sync(f'chmod +x {script_path}')
+    command, stdout, stderr = run_command_sync(['chmod', '+x', script_path])
     if stderr != '':
         return Exception(f'fail to make dotnet-install script runnable, see log for details')
     return script_path
 
 
+@app.check_function_input()
+@app.log_function(
+    pre_run_msg='start to install sdk with dotnet-install script',
+    post_run_msg='install sdk with dotnet-install script completed')
 def install_sdk_from_script(rid: str,
                             script_path: str,
                             sdk_version: str, 
@@ -65,48 +77,49 @@ def install_sdk_from_script(rid: str,
         script_engine = '/bin/bash'
 
     if arch is not None:
-        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {sdk_version} -Architecture {arch}'
+        args = [script_engine, script_path, '-InstallDir', dotnet_root, '-v', sdk_version, '-Architecture', arch]
     else:
-        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {sdk_version}'
+        args = [script_engine, script_path, '-InstallDir', dotnet_root, '-v', sdk_version]
     
-    stdout, stderr = run_command_sync(command)
+    command, stdout, stderr = run_command_sync(args)
     if stderr != '':
         return Exception(f'fail to make dotnet-install script runnable, see log for details')
     
 
 # TODO
-def install_runtime_from_script(runtime_type: str, 
-                                runtime_version: str, 
-                                test_bed: os.PathLike, 
-                                dotnet_root: os.PathLike, 
-                                rid: str, 
-                                arch: str=None,
-                                logger: ScriptLogger=None):
-    logger.info(f'download dotnet install script')
-    if 'win' in rid:
-        script_download_link = 'https://dot.net/v1/dotnet-install.ps1'
-        script_engine = 'powershell.exe'
+# @app.log_function()
+# def install_runtime_from_script(runtime_type: str, 
+#                                 runtime_version: str, 
+#                                 test_bed: os.PathLike, 
+#                                 dotnet_root: os.PathLike, 
+#                                 rid: str, 
+#                                 arch: str=None,
+#                                 logger: ScriptLogger=None):
+#     logger.info(f'download dotnet install script')
+#     if 'win' in rid:
+#         script_download_link = 'https://dot.net/v1/dotnet-install.ps1'
+#         script_engine = 'powershell.exe'
 
-    else:
-        script_download_link = 'https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh'
-        script_engine = '/bin/bash'
+#     else:
+#         script_download_link = 'https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh'
+#         script_engine = '/bin/bash'
 
-    script_path = os.path.join(test_bed, os.path.basename(script_download_link))
-    req = request.urlopen(script_download_link)
-    with open(script_path, 'w+') as f:
-        f.write(req.read().decode())
+#     script_path = os.path.join(test_bed, os.path.basename(script_download_link))
+#     req = request.urlopen(script_download_link)
+#     with open(script_path, 'w+') as f:
+#         f.write(req.read().decode())
 
-    if 'win' not in rid:
-        run_command_sync(f'chmod +x {script_path}')
+#     if 'win' not in rid:
+#         run_command_sync(f'chmod +x {script_path}')
 
-    if arch is not None:
-        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type} -Architecture {arch}'
-    else:
-        command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type}'
+#     if arch is not None:
+#         command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type} -Architecture {arch}'
+#     else:
+#         command = f'{script_engine} {script_path} -InstallDir {dotnet_root} -v {runtime_version} --runtime {runtime_type}'
     
-    outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
-    logger.info(f'run command:\n{command}\n{outs}')
+#     outs, errs = run_command_sync(command, stdout=PIPE, stderr=PIPE)
+#     logger.info(f'run command:\n{command}\n{outs}')
     
-    if errs != '':
-        logger.error(f'fail to install .net runtime {runtime_version}!\n{errs}')
-        exit(-1)
+#     if errs != '':
+#         logger.error(f'fail to install .net runtime {runtime_version}!\n{errs}')
+#         exit(-1)
