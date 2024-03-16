@@ -30,27 +30,28 @@ def donwload_install_script(rid: str, script_path: str) -> str|Exception:
             f.write(req.read())
         return script_path
     except Exception as ex:
-        return ex
+        return Exception(f'fail to download dotnet-install script: {ex}')
 
 
 @app.check_function_input()
 @app.log_function(
-    pre_run_msg='start to make dotnet-install script runnable on non-windows platforms',
-    post_run_msg='making dotnet-install script runnable on non-windows platforms completed')
+    pre_run_msg='start to make script runnable on non-windows platforms',
+    post_run_msg='making script runnable on non-windows platforms completed')
 def enable_runnable(rid: str, script_path: str) -> str|Exception:
-    """make dotnet-install script runnable on non-windows platforms
+    """make script runnable on non-windows platforms
     
     :param rid: .NET rid
-    :param script_path: path to dotnet-install script
-    :return: path to dotnet-install script or Exception if fail
+    :param script_path: path to script
+    :return: path to script or Exception if fail
     """
     if 'win' in rid:
         return script_path
     
     command, stdout, stderr = run_command_sync(['chmod', '+x', script_path])
     if stderr != '':
-        return Exception(f'fail to make dotnet-install script runnable, see log for details')
-    return script_path
+        return Exception(f'fail to make script runnable, see log for details')
+    else:
+        return script_path
 
 
 @app.check_function_input()
@@ -73,6 +74,8 @@ def install_sdk_from_script(rid: str,
     """
     if 'win' in rid:
         script_engine = 'powershell.exe'
+    elif 'osx' in rid:
+        script_engine = '/bin/zsh'
     else:
         script_engine = '/bin/bash'
 
@@ -83,8 +86,9 @@ def install_sdk_from_script(rid: str,
     
     command, stdout, stderr = run_command_sync(args)
     if stderr != '':
-        return Exception(f'fail to make dotnet-install script runnable, see log for details')
-    
+        return Exception(f'fail to install sdk {sdk_version}, see log for details')
+    else:
+        return dotnet_root
 
 # TODO
 # @app.log_function()
@@ -123,3 +127,54 @@ def install_sdk_from_script(rid: str,
 #     if errs != '':
 #         logger.error(f'fail to install .net runtime {runtime_version}!\n{errs}')
 #         exit(-1)
+    
+
+@app.check_function_input()
+@app.log_function()
+def install_tool(dotnet_bin_path: str, 
+                tool: str, 
+                tool_root: str, 
+                tool_version: str, 
+                tool_feed: str,
+                env: dict) -> str|Exception:
+    """Install dotnet tool
+    
+    :param dotnet_bin_path: path to dotnet executable
+    :param tool: name of tool
+    :param tool_root: parent dir of the tool
+    :param tool_version: version of tool
+    :param tool_feed: feed of tool
+    :param env: required environment variable
+    :return: parent dir of the tool or exception if fail to install
+    """
+    args = [
+        dotnet_bin_path, 'tool', 'install', tool,
+        '--tool-path', tool_root,
+        '--version', tool_version,
+        '--add-source', tool_feed
+    ]
+    command, stdout, stderr = run_command_sync(args, env=env)
+    if stderr != '':
+        return Exception(f'fail to install tool, see log for details')
+    else:
+        return tool_root
+
+
+@app.check_function_input(
+    pre_run_msg='start to download perfcollect script',
+    post_run_msg='download perfcollect script completed')
+@app.log_function()
+def download_perfcollect(perfcollect_path: str):
+    """Download perfcollect script
+
+    :param perfcollect_path: path to perfcollect script
+    """
+    try:
+        req = request.urlopen(
+            'https://raw.githubusercontent.com/microsoft/perfview/main/src/perfcollect/perfcollect'
+        )
+        with open(perfcollect_path, 'w+') as f:
+            f.write(req.read().decode())
+        return perfcollect_path
+    except Exception as ex:
+        return Exception(f'fail to download perfcollect script: {ex}')

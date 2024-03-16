@@ -23,17 +23,20 @@ def log_terminal_command():
                 command, stdout, stderr = func(*args, **kwargs)
                 logger.info(
                     '\n'.join(
-                        f'run command: {command}',
-                        stdout,
-                        stderr
+                        [
+                            f'run command: {command}',
+                            stdout,
+                            stderr
+                        ]
                     )
                 )
-                return stdout, stderr
+                return command, stdout, stderr
             elif func.__name__ == 'run_command_async':
                 command, p = func(*args, **kwargs)
                 logger.info(f'run command: {command}')
-                return p
-            
+                return command, p
+            else:
+                return Exception('not a valid command call')
         return wrapper
     return decorator
 

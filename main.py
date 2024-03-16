@@ -13,4 +13,8 @@ rid = 'win-x64'
 script_path = os.path.join(testbed, 'dotnet-install.ps1')
 script_path = dotnet.donwload_install_script(rid, script_path)
 script_path = dotnet.enable_runnable(rid, script_path)
+
+sdk_version = '6.0.420'
+dotnet_root = os.path.join(testbed, '.dotnet-test')
+dotnet_root = dotnet.install_sdk_from_script(rid, script_path, sdk_version, dotnet_root)
 print(script_path)
