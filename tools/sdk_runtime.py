@@ -1,4 +1,4 @@
-"""methods for dotnet runtime, sdk and tools installation"""
+"""methods for dotnet runtime, sdk installation"""
 
 import os
 from urllib import request
@@ -130,51 +130,39 @@ def install_sdk_from_script(rid: str,
     
 
 @app.check_function_input()
-@app.log_function()
-def install_tool(dotnet_bin_path: str, 
-                tool: str, 
-                tool_root: str, 
-                tool_version: str, 
-                tool_feed: str,
-                env: dict) -> str|Exception:
-    """Install dotnet tool
-    
-    :param dotnet_bin_path: path to dotnet executable
-    :param tool: name of tool
-    :param tool_root: parent dir of the tool
-    :param tool_version: version of tool
-    :param tool_feed: feed of tool
-    :param env: required environment variable
-    :return: parent dir of the tool or exception if fail to install
+@app.log_function(
+    pre_run_msg='start to create env activation script',
+    post_run_msg='create env activation script completed')
+def create_env_activation_script(rid: str, 
+                                 output: str,
+                                 dotnet_root: str,
+                                 tool_root: str = None) -> str|Exception:
+    """create env activation script
+
+    :param rid:
+    :param parameter:
+    :param tool_root:
+    :param output:
+    :return:
     """
-    args = [
-        dotnet_bin_path, 'tool', 'install', tool,
-        '--tool-path', tool_root,
-        '--version', tool_version,
-        '--add-source', tool_feed
-    ]
-    command, stdout, stderr = run_command_sync(args, env=env)
-    if stderr != '':
-        return Exception(f'fail to install tool, see log for details')
+    if 'win' in rid:
+        lines = [
+            f'$Env:DOTNET_ROOT={dotnet_root}\n',
+            f'$Env:Path+=;{dotnet_root}\n'
+        ]
+        if tool_root is not None:
+            lines.append(f'$Env:Path+=;{tool_root}\n')
     else:
-        return tool_root
-
-
-@app.check_function_input(
-    pre_run_msg='start to download perfcollect script',
-    post_run_msg='download perfcollect script completed')
-@app.log_function()
-def download_perfcollect(perfcollect_path: str):
-    """Download perfcollect script
-
-    :param perfcollect_path: path to perfcollect script
-    """
+        lines = [
+            f'export DOTNET_ROOT={dotnet_root}\n',
+            f'export PATH=$PATH:{dotnet_root}\n'
+        ]
+        if tool_root is not None:
+            lines.append(f'export PATH=$PATH:{tool_root}\n')
+    
     try:
-        req = request.urlopen(
-            'https://raw.githubusercontent.com/microsoft/perfview/main/src/perfcollect/perfcollect'
-        )
-        with open(perfcollect_path, 'w+') as f:
-            f.write(req.read().decode())
-        return perfcollect_path
+        with open(output, 'w+') as fs:
+            fs.writelines(lines)
+        return output
     except Exception as ex:
-        return Exception(f'fail to download perfcollect script: {ex}')
+        return ex

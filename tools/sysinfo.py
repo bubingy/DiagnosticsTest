@@ -4,10 +4,7 @@ import re
 import glob
 import platform
 
-import app
 
-
-@app.log_function(pre_run_msg='start to query os name', post_run_msg='query os name completed')
 def get_os_name() -> str|Exception:
     """get name of operation system
     
@@ -33,7 +30,6 @@ def get_os_name() -> str|Exception:
     return os
 
 
-@app.log_function(pre_run_msg='start to query cpu type', post_run_msg='query cpu type completed')
 def get_cpu_type() -> str|Exception:
     """get type of CPU
     
@@ -51,7 +47,6 @@ def get_cpu_type() -> str|Exception:
     return cpu_arch
 
 
-@app.log_function(pre_run_msg='start to query rid', post_run_msg='query rid completed')
 def get_rid() -> str|Exception:
     """Get .Net RID of current platform
 
@@ -67,8 +62,6 @@ def get_rid() -> str|Exception:
         return f'{os_name}-{cpu_arch}'
 
 
-@app.check_function_input()
-@app.log_function(pre_run_msg='start to query system debugger', post_run_msg='query system debugger completed')
 def get_debugger(rid: str) -> str|Exception:
     '''Get full name of debugger
     
