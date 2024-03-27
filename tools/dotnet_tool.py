@@ -32,7 +32,7 @@ def install_tool(dotnet_bin_path: str,
     ]
     command, stdout, stderr = run_command_sync(args, env=env)
     if stderr != '':
-        return Exception(f'fail to install tool, see log for details')
+        return Exception(f'fail to install {tool}, see log for details')
     else:
         return tool_root
 

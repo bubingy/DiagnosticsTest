@@ -45,75 +45,83 @@ class DiagToolsTestConfiguration:
         # environment variable
         self.env: dict = env
     
-def parse_conf_file(conf_file_path: str) -> list[DiagToolsTestConfiguration]:
-    config = configparser.ConfigParser()
-    config.read(conf_file_path)
+def parse_conf_file(conf_file_path: str) -> DiagToolsTestConfiguration|Exception:
+    """Parse configuration file 
     
-    # DotNet section
-    dotnet_sdk_version: str = config['DotNet']['Version']
-    app_to_create: list[str] = config['DotNet']['CreateApps'].splitlines()
-    app_to_create.remove('')
-    app_to_build: list[str] = config['DotNet']['BuildApps'].splitlines()
-    app_to_build.remove('')
+    :param conf_file_path: path to configuration file
+    :return: DiagToolsTestConfiguration instance or Exception
+    """
+    try:
+        config = configparser.ConfigParser()
+        config.read(conf_file_path)
+        
+        # DotNet section
+        dotnet_sdk_version: str = config['DotNet']['Version']
+        app_to_create: list[str] = config['DotNet']['CreateApps'].splitlines()
+        app_to_create.remove('')
+        app_to_build: list[str] = config['DotNet']['BuildApps'].splitlines()
+        app_to_build.remove('')
 
-    # DiagTool section
-    diag_tool_version: str = config['DiagTool']['Version']
-    diag_tool_to_install: list[str] = config['DiagTool']['InstallTools'].splitlines()
-    diag_tool_to_install.remove('')
-    diag_tool_to_test: list[str] = config['DiagTool']['TestTools'].splitlines()
-    diag_tool_to_install.remove('')
-    diag_tool_feed: str = config['DiagTool']['Feed']
+        # DiagTool section
+        diag_tool_version: str = config['DiagTool']['Version']
+        diag_tool_to_install: list[str] = config['DiagTool']['InstallTools'].splitlines()
+        diag_tool_to_install.remove('')
+        diag_tool_to_test: list[str] = config['DiagTool']['TestTools'].splitlines()
+        diag_tool_to_install.remove('')
+        diag_tool_feed: str = config['DiagTool']['Feed']
 
-    # Test section
-    os_name: str = config['Test']['OSName']
-    cpu_arch: str = config['Test']['CPUArchitecture']
-    testbed_root: str = config['Test']['TestBedRoot']
+        # Test section
+        os_name: str = config['Test']['OSName']
+        cpu_arch: str = config['Test']['CPUArchitecture']
+        testbed_root: str = config['Test']['TestBedRoot']
 
-    rid = sysinfo.get_rid()
-    debugger  = sysinfo.get_debugger(rid)
+        rid = sysinfo.get_rid()
+        debugger  = sysinfo.get_debugger(rid)
 
-    if 'win' in rid:
-        bin_ext = '.exe'
-        env_connector = ';'
-    else:
-        bin_ext = ''
-        env_connector = ':'
+        if 'win' in rid:
+            bin_ext = '.exe'
+            env_connector = ';'
+        else:
+            bin_ext = ''
+            env_connector = ':'
 
-    if config['Test']['OptionalFeatureContainer'].lower() in ['yes', 'y']:
-        optional_feature_container = True
-        optional_feature_container_flag = 'NO'
-    else:
-        optional_feature_container = False
-        optional_feature_container_flag = ''
+        if config['Test']['OptionalFeatureContainer'].lower() in ['yes', 'y']:
+            optional_feature_container = True
+            optional_feature_container_flag = 'NO'
+        else:
+            optional_feature_container = False
+            optional_feature_container_flag = ''
 
-    test_name = f'{os_name}-{cpu_arch}-.NET{dotnet_sdk_version}-Tool{diag_tool_version}'
-    test_bed = os.path.join(testbed_root, f'Testbed-{test_name}-{optional_feature_container_flag}')
-    test_result_folder = os.path.join(test_bed, f'TestResult-{test_name}-{optional_feature_container_flag}')
+        test_name = f'{os_name}-{cpu_arch}-.NET{dotnet_sdk_version}-Tool{diag_tool_version}'
+        test_bed = os.path.join(testbed_root, f'Testbed-{test_name}-{optional_feature_container_flag}')
+        test_result_folder = os.path.join(test_bed, f'TestResult-{test_name}-{optional_feature_container_flag}')
 
-    dotnet_root = os.path.join(test_bed, 'dotnet-sdk')
-    dotnet_bin_path = os.path.join(dotnet_root, f'dotnet{bin_ext}')
+        dotnet_root = os.path.join(test_bed, 'dotnet-sdk')
+        dotnet_bin_path = os.path.join(dotnet_root, f'dotnet{bin_ext}')
 
-    diag_tool_root = os.path.join(test_bed, f'diag-tool')
+        diag_tool_root = os.path.join(test_bed, f'diag-tool')
 
-    env = os.environ.copy()
-    env['DOTNET_ROOT'] = dotnet_root
-    env['PATH'] = f'{dotnet_root}{env_connector}{diag_tool_root}{env_connector}' + env['PATH']
+        env = os.environ.copy()
+        env['DOTNET_ROOT'] = dotnet_root
+        env['PATH'] = f'{dotnet_root}{env_connector}{diag_tool_root}{env_connector}' + env['PATH']
 
-    return DiagToolsTestConfiguration(
-        dotnet_sdk_version,
-        dotnet_root,
-        dotnet_bin_path,
-        app_to_create,
-        app_to_build,
-        diag_tool_version,
-        diag_tool_to_install,
-        diag_tool_to_test,
-        diag_tool_feed,
-        diag_tool_root,
-        test_bed,
-        test_result_folder,
-        debugger,
-        rid,
-        optional_feature_container,
-        env
-    )
+        return DiagToolsTestConfiguration(
+            dotnet_sdk_version,
+            dotnet_root,
+            dotnet_bin_path,
+            app_to_create,
+            app_to_build,
+            diag_tool_version,
+            diag_tool_to_install,
+            diag_tool_to_test,
+            diag_tool_feed,
+            diag_tool_root,
+            test_bed,
+            test_result_folder,
+            debugger,
+            rid,
+            optional_feature_container,
+            env
+        )
+    except Exception as ex:
+        return Exception(f'fail to parse configuration from {conf_file_path}: {ex}')

@@ -139,10 +139,10 @@ def create_env_activation_script(rid: str,
                                  tool_root: str = None) -> str|Exception:
     """create env activation script
 
-    :param rid:
-    :param parameter:
-    :param tool_root:
-    :param output:
+    :param rid: .NET RID
+    :param output: path to env activation script
+    :param dotnet_root: root of dotnet executable
+    :param tool_root: root of dotnet tools
     :return:
     """
     if 'win' in rid:
