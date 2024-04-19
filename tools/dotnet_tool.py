@@ -6,8 +6,7 @@ import app
 from tools.terminal import run_command_sync
 
 
-@app.check_function_input()
-@app.log_function()
+@app.function_monitor()
 def install_tool(dotnet_bin_path: str, 
                  tool: str, 
                  tool_root: str, 
@@ -37,8 +36,7 @@ def install_tool(dotnet_bin_path: str,
         return tool_root
 
 
-@app.check_function_input()
-@app.log_function(
+@app.function_monitor(
     pre_run_msg='start to download perfcollect script',
     post_run_msg='download perfcollect script completed')
 def download_perfcollect(perfcollect_path: str):

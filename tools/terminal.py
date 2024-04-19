@@ -1,26 +1,58 @@
 """wrappers for Popen"""
 
+from logging import Logger
 from subprocess import Popen, PIPE
 
 import app
 
 
-@app.log_terminal_command()
-def run_command_sync(args: list[str], stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
+def log_terminal_command(logger: Logger):
+    def decorator(func: callable):
+        def wrapper(*args, **kwargs):
+            if func.__name__ == 'run_command_sync':
+                command, stdout, stderr = func(*args, **kwargs)
+                if logger is not None:
+                    logger.info(
+                        '\n'.join(
+                            [
+                                f'run command: {command}',
+                                stdout,
+                                stderr
+                            ]
+                        )
+                    )
+                return command, stdout, stderr
+            elif func.__name__ == 'run_command_async':
+                command, p = func(*args, **kwargs)
+                if logger is not None:
+                    logger.info(f'run command: {command}')
+                return command, p
+            else:
+                return Exception('not a valid command call')
+        return wrapper
+    return decorator
+
+
+@log_terminal_command(app.logger)
+def run_command_sync(args: list[str] | str, stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
     """Run command and wait for the process to be terminated.
 
     :param command: sequence of program arguments
     :return: tuple of stdout and stderr
     """
+    # shell not set case
+    if 'shell' not in kwargs.keys():
+        assert isinstance(args, list[str])
+    # shell is set case
+    else:
+        if kwargs['shell'] is False:
+            assert isinstance(args, list[str])
+        else:
+            assert isinstance(args, True)
+        
     # ignore stdout and stderr
-    if 'stdout' in  kwargs.keys():
-        kwargs.pop('stdout')
-    if 'stderr' in  kwargs.keys():
-        kwargs.pop('stderr')
-
-    # shell must be False 
-    if 'shell' in  kwargs.keys():
-        kwargs.pop('shell')
+    kwargs['stdout'] = PIPE
+    kwargs['stderr'] = PIPE
 
     command = ' '.join(args)
     print(f'run command: {command}')
@@ -45,7 +77,7 @@ def run_command_sync(args: list[str], stdout=PIPE, stderr=PIPE, **kwargs) -> tup
     return command, stdout, stderr
 
 
-@app.log_terminal_command()
+@log_terminal_command(app.logger)
 def run_command_async(args: list[str], **kwargs) -> tuple[str, Popen]:
     """Run command and and return the process object without waiting for the process to be terminated.
 

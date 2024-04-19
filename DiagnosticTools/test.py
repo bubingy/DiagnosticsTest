@@ -5,8 +5,11 @@ from app import AppLogger
 from DiagnosticTools.configuration import DiagToolsTestConfiguration, parse_conf_file
 from tools import sdk_runtime, dotnet_tool
 
-def pre_run(test_conf: DiagToolsTestConfiguration) -> None|Exception:
-
+def pre_run(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
+    """Initialization of test
+    
+    :param test_conf: DiagToolsTestConfiguration instance
+    """
     # step 0. create testbed and test result folder 
     os.makedirs(test_conf.testbed, exist_ok=True)
     os.makedirs(test_conf.test_result_folder, exist_ok=True)

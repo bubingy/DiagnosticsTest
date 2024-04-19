@@ -8,8 +8,7 @@ import app
 from tools.terminal import run_command_sync
 
 
-@app.check_function_input()
-@app.log_function()
+@app.function_monitor()
 def create_new_app(dotnet_bin_path: str, 
                    app_type: str,
                    app_root: str,
@@ -33,8 +32,7 @@ def create_new_app(dotnet_bin_path: str,
         return app_root
     
 
-@app.check_function_input()
-@app.log_function()
+@app.function_monitor()
 def build_app(dotnet_bin_path: str, 
               app_root: str,
               env: dict) -> str|Exception:
@@ -46,7 +44,7 @@ def build_app(dotnet_bin_path: str,
     :return: path to the project or exception if fail to create
     """
     args = [
-        dotnet_bin_path, 'build', '-c', 'Release'
+        dotnet_bin_path, 'build'
     ]
     command, stdout, stderr = run_command_sync(args, env=env)
     if stderr != '':
@@ -55,8 +53,7 @@ def build_app(dotnet_bin_path: str,
         return app_root
     
 
-@app.check_function_input()
-@app.log_function()
+@app.function_monitor()
 def change_target_framework(app_root: str, sdk_version: str):
     """change target framework of app
 

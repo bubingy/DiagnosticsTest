@@ -7,8 +7,7 @@ import app
 from tools.terminal import run_command_sync
 
 
-@app.check_function_input()
-@app.log_function(
+@app.function_monitor(
     pre_run_msg='start to download dotnet-install script',
     post_run_msg='download dotnet-install script completed')
 def donwload_install_script(rid: str, script_path: str) -> str|Exception:
@@ -33,8 +32,7 @@ def donwload_install_script(rid: str, script_path: str) -> str|Exception:
         return Exception(f'fail to download dotnet-install script: {ex}')
 
 
-@app.check_function_input()
-@app.log_function(
+@app.function_monitor(
     pre_run_msg='start to make script runnable on non-windows platforms',
     post_run_msg='making script runnable on non-windows platforms completed')
 def enable_runnable(rid: str, script_path: str) -> str|Exception:
@@ -54,8 +52,7 @@ def enable_runnable(rid: str, script_path: str) -> str|Exception:
         return script_path
 
 
-@app.check_function_input()
-@app.log_function(
+@app.function_monitor(
     pre_run_msg='start to install sdk with dotnet-install script',
     post_run_msg='install sdk with dotnet-install script completed')
 def install_sdk_from_script(rid: str,
@@ -91,7 +88,7 @@ def install_sdk_from_script(rid: str,
         return dotnet_root
 
 # TODO
-# @app.log_function()
+# @app.function_monitor()
 # def install_runtime_from_script(runtime_type: str, 
 #                                 runtime_version: str, 
 #                                 test_bed: os.PathLike, 
@@ -129,8 +126,7 @@ def install_sdk_from_script(rid: str,
 #         exit(-1)
     
 
-@app.check_function_input()
-@app.log_function(
+@app.function_monitor(
     pre_run_msg='start to create env activation script',
     post_run_msg='create env activation script completed')
 def create_env_activation_script(rid: str, 

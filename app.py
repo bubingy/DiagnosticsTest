@@ -16,58 +16,41 @@ class AppLogger(logging.Logger):
         self.addHandler(file_log_handler)
 
 
-def log_terminal_command():
+def function_monitor(pre_run_msg: str=None, post_run_msg: str=None):
     def decorator(func: callable):
         def wrapper(*args, **kwargs):
-            if func.__name__ == 'run_command_sync':
-                command, stdout, stderr = func(*args, **kwargs)
-                logger.info(
-                    '\n'.join(
-                        [
-                            f'run command: {command}',
-                            stdout,
-                            stderr
-                        ]
-                    )
-                )
-                return command, stdout, stderr
-            elif func.__name__ == 'run_command_async':
-                command, p = func(*args, **kwargs)
-                logger.info(f'run command: {command}')
-                return command, p
-            else:
-                return Exception('not a valid command call')
-        return wrapper
-    return decorator
-
-
-def log_function(pre_run_msg: str=None, post_run_msg: str=None):
-    def decorator(func: callable):
-        def wrapper(*args, **kwargs):
-            # run the function
+            # if there is exception in args, return exception directly
+            for arg in args:
+                if isinstance(arg, Exception):
+                    return arg
+                
+            # print or log pre-run message
             if pre_run_msg is not None:
-                logger.info(pre_run_msg)
+                if logger is not None:
+                    logger.info(pre_run_msg)
+                else:
+                    print(pre_run_msg)
+
+            # run the function
             result = func(*args, **kwargs)
             if isinstance(result, Exception):
-                logger.error(f'fail to run function {func.__name__}: {result}')
+                if logger is not None:
+                    logger.error(f'fail to run function {func.__name__}: {result}')
+                else:
+                    print(f'fail to run function {func.__name__}: {result}')
+
+            # print or log post-run message
             if post_run_msg is not None:
-                logger.info(post_run_msg)
+                if logger is not None:
+                    logger.info(post_run_msg)
+                else:
+                    print(post_run_msg)
+                    
             return result
         return wrapper
     return decorator
 
 
-def check_function_input():
-    def decorator(func:callable):
-        def wrapper(*args, **kwargs):
-            for arg in args:
-                if isinstance(arg, Exception):
-                    return arg
-
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator 
-
-
 # global instances
+script_root = os.path.dirname(__file__)
 logger: AppLogger = None
