@@ -1,3 +1,3 @@
 import app
 
-print(app.__file__)
+print(__file__)

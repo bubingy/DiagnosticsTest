@@ -5,7 +5,8 @@ import glob
 import platform
 
 
-def get_os_name() -> str|Exception:
+
+def __get_os_name(self) -> str|Exception:
     """get name of operation system
     
     :return: name of os or Exception if failed
@@ -30,7 +31,7 @@ def get_os_name() -> str|Exception:
     return os
 
 
-def get_cpu_type() -> str|Exception:
+def __get_cpu_type(self) -> str|Exception:
     """get type of CPU
     
     :return: type of cpu or Exception if failed
@@ -47,13 +48,13 @@ def get_cpu_type() -> str|Exception:
     return cpu_arch
 
 
-def get_rid() -> str|Exception:
+def __get_rid(self) -> str|Exception:
     """Get .Net RID of current platform
 
     :return: .Net RID of current platform or Exception if failed
     """
-    os_name = get_os_name()
-    cpu_arch = get_cpu_type()
+    os_name = self.__get_os_name()
+    cpu_arch = self.__get_cpu_type()
     if isinstance(os_name, Exception):
         return os_name
     if isinstance(cpu_arch, Exception):
@@ -62,19 +63,19 @@ def get_rid() -> str|Exception:
         return f'{os_name}-{cpu_arch}'
 
 
-def get_debugger(rid: str) -> str|Exception:
+def __get_debugger(self) -> str|Exception:
     '''Get full name of debugger
     
     :param rid: `.Net RID` of current platform
     :Return: full name of debugger or Exception if failed
     '''
-    if 'musl' in rid:
+    if 'musl' in self.rid:
         return None
-    elif 'win' in rid:
+    elif 'win' in self.rid:
         debugger = 'cdb'
         return debugger
     else: # linux or osx
-        if rid[-3:] == 'arm':
+        if self.rid[-3:] == 'arm':
             debugger = '/root/lldb/bin/lldb'
             return debugger
         candidate_debuggers = glob.glob('/usr/bin/lldb*')
@@ -88,3 +89,17 @@ def get_debugger(rid: str) -> str|Exception:
                     debugger = candidate_debugger.split('/')[-1]
                     return debugger
     return Exception('debugger not found')
+
+
+class SysInfo:
+    os_name = __get_os_name()
+    cpu_arch = __get_cpu_type()
+    rid = __get_rid()
+    debugger = __get_debugger(rid)
+
+    if 'win' in rid:
+        bin_ext = '.exe'
+        env_connector = ';'
+    else:
+        bin_ext = ''
+        env_connector = ':'
