@@ -1,5 +1,6 @@
 """methods for dotnet tool installation"""
 
+import glob
 from urllib import request
 
 import app
@@ -54,3 +55,21 @@ def download_perfcollect(perfcollect_path: str):
     except Exception as ex:
         return Exception(f'fail to download perfcollect script: {ex}')
     
+
+def get_tool_dll(tool_name, tool_version, tool_root: str) -> str|Exception:
+    """Get path of executable file
+
+    :param tool_name: name of diag tool
+    :param tool_root: root of diag tools
+    :return: path of executable file or exception if fail to create
+    """
+    tool_dll_path_template = (
+        f'{tool_root}/.store/{tool_name}'
+        f'/{tool_version}/{tool_name}'
+        f'/{tool_version}/tools/*/any/{tool_name}.dll'
+    )
+    tool_dll_path_candidates = glob.glob(tool_dll_path_template)
+    
+    if len(tool_dll_path_candidates) < 1:
+        return Exception(f'no dll file availble for {tool_name}')
+    return tool_dll_path_candidates[0]
