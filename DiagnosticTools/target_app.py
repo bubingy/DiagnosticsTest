@@ -14,15 +14,16 @@ from DiagnosticTools.configuration import DiagToolsTestConfiguration
 
 
 def get_app_bin(app_name, app_root: str) -> str|Exception:
-    """Get path of executable file
+    '''Get path of executable file
 
     :param app_name: type of .NET app
     :param app_root: root of .NET app
     :return: path of executable file or exception if fail to create
-    """
+    '''
     project_bin_path_template = os.path.join(
         app_root,
         'bin',
+        '*',
         '*',
         f'{app_name}{SysInfo.bin_ext}'
     )
@@ -35,11 +36,11 @@ def get_app_bin(app_name, app_root: str) -> str|Exception:
 
 @app.function_monitor(pre_run_msg='create and build console app for diag tool test.')
 def create_build_console_app(test_conf: DiagToolsTestConfiguration) -> str|Exception:
-    """create and build console app
+    '''create and build console app
 
     :param test_conf: test configuration
     :return: path to the project or exception if fail to create
-    """
+    '''
     # create app
     app_root = os.path.join(test_conf.test_bed, 'console')
     app_root = dotnet_app.create_new_app(test_conf.dotnet_bin_path, 'console', app_root, test_conf.env)
@@ -67,11 +68,11 @@ def create_build_console_app(test_conf: DiagToolsTestConfiguration) -> str|Excep
 
 @app.function_monitor(pre_run_msg='create and build webapp for diag tool test.')
 def create_build_webapp(test_conf: DiagToolsTestConfiguration) -> str|Exception:
-    """create and build webapp
+    '''create and build webapp
 
     :param test_conf: test configuration
     :return: path to the project or exception if fail to create
-    """
+    '''
     # create app
     app_root = os.path.join(test_conf.test_bed, 'webapp')
     app_root = dotnet_app.create_new_app(test_conf.dotnet_bin_path, 'webapp', app_root, test_conf.env)
@@ -83,11 +84,11 @@ def create_build_webapp(test_conf: DiagToolsTestConfiguration) -> str|Exception:
 
 @app.function_monitor(pre_run_msg='run webapp for diag tool test.')
 def run_webapp(test_conf: DiagToolsTestConfiguration) -> Popen | Exception:
-    """Run webapp
+    '''Run webapp
 
     :param test_conf: test configuration
     :return: Popen instance or exception if fail to create
-    """
+    '''
     app_root = os.path.join(test_conf.test_bed, 'webapp')
     project_bin_path = get_app_bin('webapp', app_root)
     if isinstance(project_bin_path, Exception):
@@ -114,11 +115,11 @@ def run_webapp(test_conf: DiagToolsTestConfiguration) -> Popen | Exception:
 
 @app.function_monitor(pre_run_msg='create GCDumpPlayground2 for diag tool test.')
 def create_build_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> str | Exception:
-    """create and build GCDumpPlayground2
+    '''create and build GCDumpPlayground2
 
     :param test_conf: test configuration
     :return: path to the project or exception if fail to create
-    """
+    '''
     # create app
     app_root = os.path.join(test_conf.test_bed, 'GCDumpPlayground2')
     app_root = dotnet_app.create_new_app(test_conf.dotnet_bin_path, 'console', app_root, test_conf.env)
@@ -146,11 +147,11 @@ def create_build_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> s
 
 @app.function_monitor(pre_run_msg='run GCDumpPlayground2 for diag tool test.')
 def run_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Popen | Exception:
-    """Run GCDumpPlayground2
+    '''Run GCDumpPlayground2
 
     :param test_conf: test configuration
     :return: Popen instance or exception if fail to create
-    """
+    '''
     app_root = os.path.join(test_conf.test_bed, 'GCDumpPlayground2')
     project_bin_path = get_app_bin('GCDumpPlayground2', app_root)
     if isinstance(project_bin_path, Exception):

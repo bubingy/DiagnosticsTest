@@ -9,15 +9,15 @@ from DiagnosticTools import target_app
 
 
 @app.function_monitor(
-    pre_run_msg='------ start to test dotnet-counters ------',
-    post_run_msg='------ test dotnet-counters completed ------'
+    pre_run_msg='------ start to test dotnet-trace ------',
+    post_run_msg='------ test dotnet-trace completed ------'
 )
-def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
+def test_dotnet_trace(test_conf: DiagToolsTestConfiguration):
     '''Run sample apps and perform tests.
 
     '''
     tool_dll_path = dotnet_tool.get_tool_dll(
-        'dotnet-counters',
+        'dotnet-trace',
         test_conf.diag_tool_version,
         test_conf.diag_tool_root
     )
@@ -30,8 +30,11 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
 
     sync_args_list = [
         [test_conf.dotnet_bin_path, tool_dll_path, '--help'],
-        [test_conf.dotnet_bin_path, tool_dll_path, 'list'],
+        [test_conf.dotnet_bin_path, tool_dll_path, 'list-profiles'],
         [test_conf.dotnet_bin_path, tool_dll_path, 'ps'],
+        [test_conf.dotnet_bin_path, tool_dll_path, 
+         'collect', '-p', str(webapp_process.pid), '-o', 'webapp.nettrace', '--duration', '00:00:10'],
+        [test_conf.dotnet_bin_path, tool_dll_path, 'convert', '--format', 'speedscope', 'webapp.nettrace']
     ]
     for args in sync_args_list:
         _, outs, errs = terminal.run_command_sync(
@@ -39,19 +42,6 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
             cwd=test_conf.test_result_folder,
             env=test_conf.env,
         )
-
-    async_args_list = [
-        [test_conf.dotnet_bin_path, tool_dll_path, 'collect', '-p', str(webapp_process.pid)],
-        [test_conf.dotnet_bin_path, tool_dll_path, 'monitor', '-p', str(webapp_process.pid)],
-    ]
-    for args in async_args_list:
-        _, p = terminal.run_command_async(
-            args,
-            cwd=test_conf.test_result_folder,
-            env=test_conf.env
-        )
-        time.sleep(10)
-        p.terminate()
 
     webapp_process.terminate()
     while webapp_process.poll() is None:
@@ -62,8 +52,12 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
     if isinstance(console_app_bin, Exception):
         return console_app_bin
     
-    args = [test_conf.dotnet_bin_path, tool_dll_path, 'monitor', '--', console_app_bin]
+    args = [test_conf.dotnet_bin_path, tool_dll_path, 
+            'collect', '-o', 'consoleapp.nettrace', 
+            '--providers', 'Microsoft-Windows-DotNETRuntime',
+            '--', console_app_bin]
     command, outs, errs = terminal.run_command_sync(
         args,
+        cwd=test_conf.test_result_folder,
         env=test_conf.env,
     )

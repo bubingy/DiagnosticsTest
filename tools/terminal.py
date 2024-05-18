@@ -1,18 +1,19 @@
-"""wrappers for Popen"""
+'''wrappers for Popen'''
 
+import time
 from logging import Logger
 from subprocess import Popen, PIPE
 
 import app
 
 
-def log_terminal_command(logger: Logger):
+def log_terminal_command():
     def decorator(func: callable):
         def wrapper(*args, **kwargs):
             if func.__name__ == 'run_command_sync':
                 command, stdout, stderr = func(*args, **kwargs)
-                if logger is not None:
-                    logger.info(
+                if app.logger is not None:
+                    app.logger.info(
                         '\n'.join(
                             [
                                 f'run command: {command}',
@@ -24,8 +25,8 @@ def log_terminal_command(logger: Logger):
                 return command, stdout, stderr
             elif func.__name__ == 'run_command_async':
                 command, p = func(*args, **kwargs)
-                if logger is not None:
-                    logger.info(f'run command: {command}')
+                if app.logger is not None:
+                    app.logger.info(f'run command: {command}')
                 return command, p
             else:
                 return Exception('not a valid command call')
@@ -33,22 +34,22 @@ def log_terminal_command(logger: Logger):
     return decorator
 
 
-@log_terminal_command(app.logger)
+@log_terminal_command()
 def run_command_sync(args: list[str] | str, stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
-    """Run command and wait for the process to be terminated.
+    '''Run command and wait for the process to be terminated.
 
     :param command: sequence of program arguments
     :return: tuple of stdout and stderr
-    """
+    '''
     # shell not set case
     if 'shell' not in kwargs.keys():
-        assert isinstance(args, list[str])
+        assert isinstance(args, list)
     # shell is set case
     else:
         if kwargs['shell'] is False:
             assert isinstance(args, list[str])
         else:
-            assert isinstance(args, True)
+            assert isinstance(args, str)
         
     # ignore stdout and stderr
     kwargs['stdout'] = PIPE
@@ -57,10 +58,16 @@ def run_command_sync(args: list[str] | str, stdout=PIPE, stderr=PIPE, **kwargs) 
     command = ' '.join(args)
     print(f'run command: {command}')
     p = Popen(args, **kwargs)
-    stdout = ''
-    stderr = ''
+    stdout, stderr = p.communicate()
+    out = stdout.decode()
+    err = stderr.decode()
+    print(out)
+    print(err)
+    '''
+    # not safe
     while p.poll() is None:
         if p.stdout is None:
+            time.sleep(1)
             continue
         output = p.stdout.readline().decode().strip()
         if output != '':
@@ -68,22 +75,23 @@ def run_command_sync(args: list[str] | str, stdout=PIPE, stderr=PIPE, **kwargs) 
             stdout += f'{output}\n'
 
         if p.stderr is None:
+            time.sleep(1)
             continue
         error = p.stderr.readline().decode().strip()
         if error != '':
             print(error)
             stderr += f'{error}\n'
-      
-    return command, stdout, stderr
+    '''
+    return command, out, err
 
 
-@log_terminal_command(app.logger)
+@log_terminal_command()
 def run_command_async(args: list[str], **kwargs) -> tuple[str, Popen]:
-    """Run command and and return the process object without waiting for the process to be terminated.
+    '''Run command and and return the process object without waiting for the process to be terminated.
 
     :param command: sequence of program arguments
     :return: Popen object
-    """
+    '''
     command = ' '.join(args)
     # shell must be False 
     if 'shell' in  kwargs.keys():

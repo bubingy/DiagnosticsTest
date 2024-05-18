@@ -1,16 +1,15 @@
-"""Provide system information"""
+'''Provide system information'''
 
 import re
 import glob
 import platform
 
 
-
-def __get_os_name(self) -> str|Exception:
-    """get name of operation system
+def _get_os_type() -> str|Exception:
+    '''get name of operation system
     
     :return: name of os or Exception if failed
-    """
+    '''
     system = platform.system().lower()
     if system == 'windows':
         os = 'win'
@@ -31,11 +30,11 @@ def __get_os_name(self) -> str|Exception:
     return os
 
 
-def __get_cpu_type(self) -> str|Exception:
-    """get type of CPU
+def _get_cpu_type() -> str|Exception:
+    '''get type of CPU
     
     :return: type of cpu or Exception if failed
-    """
+    '''
     machine_type = platform.machine().lower()
     if machine_type in ['x86_64', 'amd64']:
         cpu_arch = 'x64'
@@ -48,34 +47,34 @@ def __get_cpu_type(self) -> str|Exception:
     return cpu_arch
 
 
-def __get_rid(self) -> str|Exception:
-    """Get .Net RID of current platform
+def _get_rid() -> str|Exception:
+    '''Get .Net RID of current platform
 
     :return: .Net RID of current platform or Exception if failed
-    """
-    os_name = self.__get_os_name()
-    cpu_arch = self.__get_cpu_type()
-    if isinstance(os_name, Exception):
-        return os_name
+    '''
+    os_type = _get_os_type()
+    cpu_arch = _get_cpu_type()
+    if isinstance(os_type, Exception):
+        return os_type
     if isinstance(cpu_arch, Exception):
         return cpu_arch
     else:
-        return f'{os_name}-{cpu_arch}'
+        return f'{os_type}-{cpu_arch}'
 
 
-def __get_debugger(self) -> str|Exception:
+def _get_debugger(rid: str) -> str|Exception:
     '''Get full name of debugger
     
     :param rid: `.Net RID` of current platform
     :Return: full name of debugger or Exception if failed
     '''
-    if 'musl' in self.rid:
+    if 'musl' in rid:
         return None
-    elif 'win' in self.rid:
+    elif 'win' in rid:
         debugger = 'cdb'
         return debugger
     else: # linux or osx
-        if self.rid[-3:] == 'arm':
+        if rid[-3:] == 'arm':
             debugger = '/root/lldb/bin/lldb'
             return debugger
         candidate_debuggers = glob.glob('/usr/bin/lldb*')
@@ -92,14 +91,16 @@ def __get_debugger(self) -> str|Exception:
 
 
 class SysInfo:
-    os_name = __get_os_name()
-    cpu_arch = __get_cpu_type()
-    rid = __get_rid()
-    debugger = __get_debugger(rid)
+    rid: str = _get_rid()
+    debugger: str = _get_debugger(rid)
+    bin_ext: str = None
+    env_connector: str = None
 
     if 'win' in rid:
-        bin_ext = '.exe'
-        env_connector = ';'
+        bin_ext: str = '.exe'
+        env_connector: str = ';'
     else:
-        bin_ext = ''
-        env_connector = ':'
+        bin_ext: str = ''
+        env_connector: str = ':'
+
+    

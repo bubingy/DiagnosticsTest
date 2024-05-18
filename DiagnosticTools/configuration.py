@@ -8,8 +8,8 @@ class DiagToolsTestConfiguration:
     def __init__(self, conf_file_path: str):
         self.__parse_conf_file(conf_file_path)
 
-        self.test_name = f'{SysInfo.os_name}-{SysInfo.cpu_arch}-.NET{self.dotnet_sdk_version}-Tool{self.diag_tool_version}'
-        self.test_bed = os.path.join(self.testbed_root, f'Testbed-{self.test_name}{self.optional_feature_container_flag}')
+        self.test_name = f'{self.os_name}-{self.cpu_arch}-.SDK{self.dotnet_sdk_version}-Tool{self.diag_tool_version}'
+        self.test_bed = os.path.join(self.testbed_root, f'DiagToolsTestbed-{self.test_name}{self.optional_feature_container_flag}')
         self.test_result_folder = os.path.join(self.test_bed, f'TestResult-{self.test_name}{self.optional_feature_container_flag}')
 
         self.dotnet_root = os.path.join(self.test_bed, 'dotnet-sdk')
@@ -25,25 +25,29 @@ class DiagToolsTestConfiguration:
         self.env: dict = env
     
     def __parse_conf_file(self, conf_file_path: str) -> None:
-        """Parse configuration file 
+        '''Parse configuration file 
         
         :param conf_file_path: path to configuration file
         :return: DiagToolsTestConfiguration instance or Exception
-        """
+        '''
         try:
             config = configparser.ConfigParser()
             config.read(conf_file_path)
             # DotNet section
             self.dotnet_sdk_version: str = config['DotNet']['Version']
             self.app_to_create: list[str] = config['DotNet']['CreateApps'].splitlines()
-            self.app_to_create.remove('')
+            if '' in self.app_to_create:
+                self.app_to_create.remove('')
 
             # DiagTool section
             self.diag_tool_version: str = config['DiagTool']['Version']
             self.diag_tool_to_install: list[str] = config['DiagTool']['InstallTools'].splitlines()
-            self.diag_tool_to_install.remove('')
+            if '' in self.diag_tool_to_install:
+                self.diag_tool_to_install.remove('')
+
             self.diag_tool_to_test: list[str] = config['DiagTool']['TestTools'].splitlines()
-            self.diag_tool_to_install.remove('')
+            if '' in self.diag_tool_to_test:
+                self.diag_tool_to_test.remove('')
             self.diag_tool_feed: str = config['DiagTool']['Feed']
 
             # Test section

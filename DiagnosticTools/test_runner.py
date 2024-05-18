@@ -1,19 +1,26 @@
 import os
+import shutil
 
 import app
 from app import AppLogger
-from DiagnosticTools import target_app
-from DiagnosticTools.configuration import DiagToolsTestConfiguration
 from tools import sdk_runtime
 from tools import dotnet_tool
 from tools.sysinfo import SysInfo
+from DiagnosticTools import target_app
+from DiagnosticTools.configuration import DiagToolsTestConfiguration
+from DiagnosticTools import dotnet_counters
+from DiagnosticTools import dotnet_dump
+from DiagnosticTools import dotnet_gcdump
+from DiagnosticTools import dotnet_sos
+from DiagnosticTools import dotnet_stack
+from DiagnosticTools import dotnet_trace
 
 
-def pre_run(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
-    """Initialization of test
+def init_test(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
+    '''Initialization of test
     
     :param test_conf: DiagToolsTestConfiguration instance
-    """
+    '''
     # step 0. create testbed and test result folder 
     os.makedirs(test_conf.test_bed, exist_ok=True)
     os.makedirs(test_conf.test_result_folder, exist_ok=True)
@@ -22,7 +29,10 @@ def pre_run(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
     log_file_path = os.path.join(test_conf.test_result_folder, 'sdk_install.log')
     app.logger = AppLogger('.NET Installation', log_file_path)
 
-    script_path = os.path.join(test_conf.test_bed, 'dotnet_install')
+    if 'win' in SysInfo.rid:
+        script_path = os.path.join(test_conf.test_bed, 'dotnet_install.ps1')
+    else:
+        script_path = os.path.join(test_conf.test_bed, 'dotnet_install.sh')
     script_path = sdk_runtime.donwload_install_script(SysInfo.rid, script_path)
     script_path = sdk_runtime.enable_runnable(SysInfo.rid, script_path)
 
@@ -69,9 +79,76 @@ def pre_run(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
             continue
 
 
-def run_test(conf_file_path: str) -> None|Exception:
-    pass
+def clean_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
+    else: home_path = os.environ['HOME']
+
+    temp_file_folder_list = [
+        os.path.join(home_path, '.aspnet'),
+        os.path.join(home_path, '.debug'),
+        os.path.join(home_path, '.dotnet'),
+        os.path.join(home_path, '.nuget'),
+        os.path.join(home_path, '.templateengine'),
+        os.path.join(home_path, '.lldb'),
+        os.path.join(home_path, '.lldbinit'),
+        os.path.join(home_path, 'lttng-traces'),
+        os.path.join(home_path, '.local')
+    ]
+    temp_files_folders_collection_path = os.path.join(test_conf.test_bed, 'temp_files_folders')
+    os.makedirs(temp_files_folders_collection_path, exist_ok=True)
+    for temp in temp_file_folder_list:
+        if not os.path.exists(temp):
+            continue
+        try:
+            shutil.move(temp, temp_files_folders_collection_path)
+        except Exception as e:
+            print(f'fail to remove {temp}: {e}')
 
 
-def post_run(conf_file_path: str) -> None|Exception:
-    pass
+def restore_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
+    else: home_path = os.environ['HOME']
+
+    temp_files_folders_collection_path = os.path.join(test_conf.test_bed, 'temp_files_folders')
+    for temp_file_folder_name in os.listdir(temp_files_folders_collection_path):
+        temp_file_folder = os.path.join(test_conf.test_bed, temp_file_folder_name)
+        try:
+            shutil.move(temp_file_folder, home_path)
+        except Exception as e:
+            print(f'fail to retore {temp_file_folder}: {e}')
+
+
+def run_test(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    tool_name_runner_map = {
+        'dotnet-counters': dotnet_counters.test_dotnet_counters,
+        'dotnet-dump': dotnet_dump.test_dotnet_dump,
+        'dotnet-gcdump': dotnet_gcdump.test_dotnet_gcdump,
+        'dotnet-sos': dotnet_sos.test_dotnet_sos,
+        'dotnet-stack': dotnet_stack.test_dotnet_stack,
+        'dotnet-trace': dotnet_trace.test_dotnet_trace
+    }
+    for tool_name in test_conf.diag_tool_to_test:
+        log_file_path = os.path.join(test_conf.test_result_folder, f'{tool_name}.log')
+        app.logger = AppLogger(f'test {tool_name}', log_file_path)
+        runner = tool_name_runner_map[tool_name]
+        runner(test_conf)
+
+
+def create_env_activation_script(test_conf: DiagToolsTestConfiguration) -> None:
+    if 'win' in SysInfo.rid:
+        env_script_path = os.path.join(test_conf.test_bed, 'env_script.ps1')
+        lines = [
+            f'$Env:DOTNET_ROOT={test_conf.dotnet_root}\n',
+            f'$Env:Path+=;{test_conf.dotnet_root}\n',
+            f'$Env:Path+=;{test_conf.diag_tool_root}\n'
+        ]
+    else:
+        env_script_path = os.path.join(test_conf.test_bed, 'env_script.sh')
+        lines = [
+            f'export DOTNET_ROOT={test_conf.dotnet_root}\n',
+            f'export PATH=$PATH:{test_conf.dotnet_root}\n',
+            f'export PATH=$PATH:{test_conf.diag_tool_root}\n'
+        ]
+    
+    with open(env_script_path, 'w+') as fp:
+        fp.writelines(lines)

@@ -1,4 +1,4 @@
-"""methods for dotnet tool installation"""
+'''methods for dotnet tool installation'''
 
 import glob
 from urllib import request
@@ -14,7 +14,7 @@ def install_tool(dotnet_bin_path: str,
                  tool_version: str, 
                  tool_feed: str,
                  env: dict) -> str|Exception:
-    """Install dotnet tool
+    '''Install dotnet tool
     
     :param dotnet_bin_path: path to dotnet executable
     :param tool: name of tool
@@ -23,7 +23,7 @@ def install_tool(dotnet_bin_path: str,
     :param tool_feed: feed of tool
     :param env: required environment variable
     :return: parent dir of the tool or exception if fail to install
-    """
+    '''
     args = [
         dotnet_bin_path, 'tool', 'install', tool,
         '--tool-path', tool_root,
@@ -41,10 +41,10 @@ def install_tool(dotnet_bin_path: str,
     pre_run_msg='start to download perfcollect script',
     post_run_msg='download perfcollect script completed')
 def download_perfcollect(perfcollect_path: str):
-    """Download perfcollect script
+    '''Download perfcollect script
 
     :param perfcollect_path: path to perfcollect script
-    """
+    '''
     try:
         req = request.urlopen(
             'https://raw.githubusercontent.com/microsoft/perfview/main/src/perfcollect/perfcollect'
@@ -57,12 +57,12 @@ def download_perfcollect(perfcollect_path: str):
     
 
 def get_tool_dll(tool_name, tool_version, tool_root: str) -> str|Exception:
-    """Get path of executable file
+    '''Get path of executable file
 
     :param tool_name: name of diag tool
     :param tool_root: root of diag tools
     :return: path of executable file or exception if fail to create
-    """
+    '''
     tool_dll_path_template = (
         f'{tool_root}/.store/{tool_name}'
         f'/{tool_version}/{tool_name}'

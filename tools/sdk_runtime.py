@@ -1,4 +1,4 @@
-"""methods for dotnet runtime, sdk installation"""
+'''methods for dotnet runtime, sdk installation'''
 
 import os
 from urllib import request
@@ -11,12 +11,12 @@ from tools.terminal import run_command_sync
     pre_run_msg='start to download dotnet-install script',
     post_run_msg='download dotnet-install script completed')
 def donwload_install_script(rid: str, script_path: str) -> str|Exception:
-    """download dotnet-install script
+    '''download dotnet-install script
     
     :param rid: .NET rid
     :param script_path: path to dotnet-install script
     :return: path to dotnet-install script or Exception if fail to download
-    """
+    '''
     if 'win' in rid:
         script_download_link = 'https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.ps1'
 
@@ -36,12 +36,12 @@ def donwload_install_script(rid: str, script_path: str) -> str|Exception:
     pre_run_msg='start to make script runnable on non-windows platforms',
     post_run_msg='making script runnable on non-windows platforms completed')
 def enable_runnable(rid: str, script_path: str) -> str|Exception:
-    """make script runnable on non-windows platforms
+    '''make script runnable on non-windows platforms
     
     :param rid: .NET rid
     :param script_path: path to script
     :return: path to script or Exception if fail
-    """
+    '''
     if 'win' in rid:
         return script_path
     
@@ -60,7 +60,7 @@ def install_sdk_from_script(rid: str,
                             sdk_version: str, 
                             dotnet_root: os.PathLike,
                             arch: str=None) -> str|Exception:
-    """install sdk with dotnet-install script
+    '''install sdk with dotnet-install script
     
     :param rid: .NET rid
     :param script_path: path to dotnet-install script
@@ -68,7 +68,7 @@ def install_sdk_from_script(rid: str,
     :param dotnet_root: root of dotnet executable
     :param arch: cpu type
     :return: DOTNET_ROOT or Exception if fail to install
-    """
+    '''
     if 'win' in rid:
         script_engine = 'powershell.exe'
     elif 'osx' in rid:
@@ -133,14 +133,14 @@ def create_env_activation_script(rid: str,
                                  output: str,
                                  dotnet_root: str,
                                  tool_root: str = None) -> str|Exception:
-    """create env activation script
+    '''create env activation script
 
     :param rid: .NET RID
     :param output: path to env activation script
     :param dotnet_root: root of dotnet executable
     :param tool_root: root of dotnet tools
     :return:
-    """
+    '''
     if 'win' in rid:
         lines = [
             f'$Env:DOTNET_ROOT={dotnet_root}\n',
