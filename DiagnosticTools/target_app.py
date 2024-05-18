@@ -160,15 +160,15 @@ def run_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Popen | Ex
     tmp_path = os.path.join(app_root, 'tmp')
     with open (tmp_path, 'w+') as tmp_write:
         command, proc = terminal.run_command_async(
-            project_bin_path,
+            [project_bin_path, '0.05'],
             stdout=tmp_write,
             env=test_conf.env
         )
         
     with open(tmp_path, 'r') as tmp_read:
         while True:
-            if 'Application started' in tmp_read.read():
-                print('webapp is running!')
+            if 'Pause for gcdumps.' in tmp_read.read():
+                print('GCDumpPlayground2 is running!')
                 tmp_read.close()
                 break
             else:

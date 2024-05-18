@@ -142,7 +142,7 @@ def attach_process(test_conf: DiagToolsTestConfiguration):
     if isinstance(webapp_process, Exception):
         return webapp_process
     
-    analyze_output = os.path.join(test_conf.test_result_folder, 'sos_dump_debug.log')
+    analyze_output = os.path.join(test_conf.test_result_folder, 'sos_process_debug.log')
     analyze_commands = __get_analyze_commands(SysInfo.rid)
 
     if 'win' in SysInfo.rid:

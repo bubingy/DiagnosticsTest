@@ -52,10 +52,11 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
         )
         time.sleep(10)
         p.terminate()
+        p.communicate()
+        time.sleep(3)
 
     webapp_process.terminate()
-    while webapp_process.poll() is None:
-        time.sleep(1)
+    webapp_process.communicate()
     
     console_app_root = os.path.join(test_conf.test_bed, 'console')
     console_app_bin = target_app.get_app_bin('console', console_app_root)
