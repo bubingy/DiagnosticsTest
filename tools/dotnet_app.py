@@ -2,6 +2,7 @@
 
 import os
 import glob
+from __future__ import annotations
 
 import app
 from tools.terminal import run_command_sync

@@ -1,6 +1,7 @@
 '''wrappers for Popen'''
 
 from subprocess import Popen, PIPE
+from __future__ import annotations
 
 import app
 
@@ -33,7 +34,7 @@ def log_terminal_command():
 
 
 @log_terminal_command()
-def run_command_sync(args: list[str] | str, stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
+def run_command_sync(args: list[str]|str, stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
     '''Run command and wait for the process to be terminated.
 
     :param command: sequence of program arguments

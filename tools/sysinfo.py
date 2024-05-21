@@ -3,6 +3,7 @@
 import re
 import glob
 import platform
+from __future__ import annotations
 
 
 def _get_os_type() -> str|Exception:
