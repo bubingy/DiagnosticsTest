@@ -23,7 +23,7 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
     )
     if isinstance(tool_dll_path, Exception):
         return tool_dll_path
-        
+    
     webapp_process = target_app.run_webapp(test_conf)
     if isinstance(webapp_process, Exception):
         return webapp_process
@@ -41,7 +41,7 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
         )
 
     async_args_list = [
-        [test_conf.dotnet_bin_path, tool_dll_path, 'collect', '-p', str(webapp_process.pid)],
+        [test_conf.dotnet_bin_path, tool_dll_path, 'collect', '-p', str(webapp_process.pid), '-o', 'webapp_counter.csv'],
         [test_conf.dotnet_bin_path, tool_dll_path, 'monitor', '-p', str(webapp_process.pid)],
     ]
     for args in async_args_list:
@@ -63,8 +63,15 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
     if isinstance(console_app_bin, Exception):
         return console_app_bin
     
-    args = [test_conf.dotnet_bin_path, tool_dll_path, 'monitor', '--', console_app_bin]
-    command, outs, errs = terminal.run_command_sync(
-        args,
-        env=test_conf.env,
-    )
+    async_args_list = [
+        [test_conf.dotnet_bin_path, tool_dll_path, 'collect', '--', console_app_bin, '-o', 'console_counter.csv'],
+        [test_conf.dotnet_bin_path, tool_dll_path, 'monitor', '--', console_app_bin],
+    ]
+    for args in async_args_list:
+        command, p = terminal.run_command_async(
+            args,
+            cwd=test_conf.test_result_folder,
+            env=test_conf.env,
+        )
+        p.communicate()
+        time.sleep(3)

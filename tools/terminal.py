@@ -1,7 +1,5 @@
 '''wrappers for Popen'''
 
-import time
-from logging import Logger
 from subprocess import Popen, PIPE
 
 import app
