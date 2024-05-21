@@ -1,8 +1,8 @@
 '''methods for dotnet runtime, sdk installation'''
 
+from __future__ import annotations
 import os
 from urllib import request
-from __future__ import annotations
 
 import app
 from tools.terminal import run_command_sync

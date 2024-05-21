@@ -1,7 +1,7 @@
 '''wrappers for Popen'''
 
-from subprocess import Popen, PIPE
 from __future__ import annotations
+from subprocess import Popen, PIPE
 
 import app
 

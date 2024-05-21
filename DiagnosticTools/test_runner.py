@@ -1,6 +1,6 @@
+from __future__ import annotations
 import os
 import shutil
-from __future__ import annotations
 
 import app
 from app import AppLogger

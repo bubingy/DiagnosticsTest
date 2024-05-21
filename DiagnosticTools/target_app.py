@@ -1,10 +1,10 @@
 '''Create, build and run app for diag tools testing'''
 
+from __future__ import annotations
 import os
 import time
 import shutil
 from subprocess import Popen
-from __future__ import annotations
 
 import app
 from tools import dotnet_app

@@ -1,9 +1,9 @@
 ''''''
 
+from __future__ import annotations
 import os
 import shutil
 from subprocess import Popen
-from __future__ import annotations
 
 import app
 from tools import dotnet_app
