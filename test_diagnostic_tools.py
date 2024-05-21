@@ -25,6 +25,9 @@ if __name__ == '__main__':
         configuration_path = args.configuration_path
         test_conf = configuration.DiagToolsTestConfiguration(configuration_path)
         test_runner.init_test(test_conf)
+        test_runner.install_DotNET_SDK(test_conf)
+        test_runner.install_diagnostic_tools(test_conf)
+        test_runner.prepare_sample_app(test_conf)
         test_runner.run_test(test_conf)
 
     if args.action == 'clean':

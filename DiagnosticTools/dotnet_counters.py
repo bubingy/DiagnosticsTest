@@ -4,6 +4,7 @@ import time
 import app
 from tools import dotnet_tool
 from tools import terminal
+from tools import dotnet_app
 from DiagnosticTools.configuration import DiagToolsTestConfiguration
 from DiagnosticTools import target_app
 
@@ -59,7 +60,7 @@ def test_dotnet_counters(test_conf: DiagToolsTestConfiguration):
     webapp_process.communicate()
     
     console_app_root = os.path.join(test_conf.test_bed, 'console')
-    console_app_bin = target_app.get_app_bin('console', console_app_root)
+    console_app_bin = dotnet_app.get_app_bin('console', console_app_root)
     if isinstance(console_app_bin, Exception):
         return console_app_bin
     

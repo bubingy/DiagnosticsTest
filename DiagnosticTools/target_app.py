@@ -1,37 +1,15 @@
 '''Create, build and run app for diag tools testing'''
 
 import os
-import glob
 import time
 import shutil
 from subprocess import Popen
 
 import app
-from tools.sysinfo import SysInfo
 from tools import dotnet_app
 from tools import terminal
 from DiagnosticTools.configuration import DiagToolsTestConfiguration
 
-
-def get_app_bin(app_name, app_root: str) -> str|Exception:
-    '''Get path of executable file
-
-    :param app_name: type of .NET app
-    :param app_root: root of .NET app
-    :return: path of executable file or exception if fail to create
-    '''
-    project_bin_path_template = os.path.join(
-        app_root,
-        'bin',
-        '*',
-        '*',
-        f'{app_name}{SysInfo.bin_ext}'
-    )
-    project_bin_path_candidates = glob.glob(project_bin_path_template)
-
-    if len(project_bin_path_candidates) < 1:
-        return Exception(f'no executable file availble for {app_root}')
-    return project_bin_path_candidates[0]
 
 
 @app.function_monitor(pre_run_msg='create and build console app for diag tool test.')
@@ -90,7 +68,7 @@ def run_webapp(test_conf: DiagToolsTestConfiguration) -> Popen | Exception:
     :return: Popen instance or exception if fail to create
     '''
     app_root = os.path.join(test_conf.test_bed, 'webapp')
-    project_bin_path = get_app_bin('webapp', app_root)
+    project_bin_path = dotnet_app.get_app_bin('webapp', app_root)
     if isinstance(project_bin_path, Exception):
         return project_bin_path
 
@@ -153,7 +131,7 @@ def run_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Popen | Ex
     :return: Popen instance or exception if fail to create
     '''
     app_root = os.path.join(test_conf.test_bed, 'GCDumpPlayground2')
-    project_bin_path = get_app_bin('GCDumpPlayground2', app_root)
+    project_bin_path = dotnet_app.get_app_bin('GCDumpPlayground2', app_root)
     if isinstance(project_bin_path, Exception):
         return project_bin_path
 

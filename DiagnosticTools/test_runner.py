@@ -16,16 +16,43 @@ from DiagnosticTools import dotnet_stack
 from DiagnosticTools import dotnet_trace
 
 
-def init_test(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
-    '''Initialization of test
+def init_test(test_conf: DiagToolsTestConfiguration) -> None:
+    '''Create testbed folder
     
     :param test_conf: DiagToolsTestConfiguration instance
     '''
-    # step 0. create testbed and test result folder 
+    # step 1. create testbed and test result folder 
     os.makedirs(test_conf.test_bed, exist_ok=True)
     os.makedirs(test_conf.test_result_folder, exist_ok=True)
 
-    # step 1. install .NET SDK
+    # step 2. copy configuration file to test result folder
+    shutil.copy(test_conf.conf_file_path, test_conf.test_result_folder)
+
+    # step 3. create env script
+    if 'win' in SysInfo.rid:
+        env_script_path = os.path.join(test_conf.test_bed, 'env_script.ps1')
+        lines = [
+            f'$Env:DOTNET_ROOT={test_conf.dotnet_root}\n',
+            f'$Env:Path+=;{test_conf.dotnet_root}\n',
+            f'$Env:Path+=;{test_conf.diag_tool_root}\n'
+        ]
+    else:
+        env_script_path = os.path.join(test_conf.test_bed, 'env_script.sh')
+        lines = [
+            f'export DOTNET_ROOT={test_conf.dotnet_root}\n',
+            f'export PATH=$PATH:{test_conf.dotnet_root}\n',
+            f'export PATH=$PATH:{test_conf.diag_tool_root}\n'
+        ]
+    
+    with open(env_script_path, 'w+') as fp:
+        fp.writelines(lines)
+
+
+def install_DotNET_SDK(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    '''Download install script and install SDK
+    
+    :param test_conf: DiagToolsTestConfiguration instance
+    '''
     log_file_path = os.path.join(test_conf.test_result_folder, 'sdk_install.log')
     app.logger = AppLogger('.NET Installation', log_file_path)
 
@@ -38,11 +65,13 @@ def init_test(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
 
     dotnet_root = sdk_runtime.install_sdk_from_script(
         SysInfo.rid, script_path, test_conf.dotnet_sdk_version, test_conf.dotnet_root)
+
+
+def install_diagnostic_tools(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    '''Install diagnostic tools
     
-    if isinstance(dotnet_root, Exception): 
-        return dotnet_root
-    
-    # step 2. install diagnostic tools
+    :param test_conf: DiagToolsTestConfiguration instance
+    '''
     log_file_path = os.path.join(test_conf.test_result_folder, 'tool_install.log')
     app.logger = AppLogger('Tools Installation', log_file_path)
 
@@ -60,7 +89,12 @@ def init_test(test_conf: DiagToolsTestConfiguration) -> dict|Exception:
             app.logger.error(f'fail to install tool {tool_name}: {ex}')
             continue
 
-    # step 3. create and build apps
+
+def prepare_sample_app(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+    '''Create and build some .NET app for testing
+    
+    :param test_conf: DiagToolsTestConfiguration instance
+    '''
     log_file_path = os.path.join(test_conf.test_result_folder, 'dotnet_app.log')
     app.logger = AppLogger('.NET app Create and Build', log_file_path)
 
@@ -132,23 +166,3 @@ def run_test(test_conf: DiagToolsTestConfiguration) -> None|Exception:
         app.logger = AppLogger(f'test {tool_name}', log_file_path)
         runner = tool_name_runner_map[tool_name]
         runner(test_conf)
-
-
-def create_env_activation_script(test_conf: DiagToolsTestConfiguration) -> None:
-    if 'win' in SysInfo.rid:
-        env_script_path = os.path.join(test_conf.test_bed, 'env_script.ps1')
-        lines = [
-            f'$Env:DOTNET_ROOT={test_conf.dotnet_root}\n',
-            f'$Env:Path+=;{test_conf.dotnet_root}\n',
-            f'$Env:Path+=;{test_conf.diag_tool_root}\n'
-        ]
-    else:
-        env_script_path = os.path.join(test_conf.test_bed, 'env_script.sh')
-        lines = [
-            f'export DOTNET_ROOT={test_conf.dotnet_root}\n',
-            f'export PATH=$PATH:{test_conf.dotnet_root}\n',
-            f'export PATH=$PATH:{test_conf.diag_tool_root}\n'
-        ]
-    
-    with open(env_script_path, 'w+') as fp:
-        fp.writelines(lines)

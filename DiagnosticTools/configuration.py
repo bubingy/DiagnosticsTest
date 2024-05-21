@@ -8,6 +8,7 @@ class DiagToolsTestConfiguration:
     def __init__(self, conf_file_path: str):
         self.__parse_conf_file(conf_file_path)
 
+        self.conf_file_path = conf_file_path
         self.test_name = f'{self.os_name}-{self.cpu_arch}-.SDK{self.dotnet_sdk_version}-Tool{self.diag_tool_version}'
         self.test_bed = os.path.join(self.testbed_root, f'DiagToolsTestbed-{self.test_name}{self.optional_feature_container_flag}')
         self.test_result_folder = os.path.join(self.test_bed, f'TestResult-{self.test_name}{self.optional_feature_container_flag}')
@@ -65,5 +66,3 @@ class DiagToolsTestConfiguration:
         except Exception as ex:
             raise Exception(f'fail to parse conf file {conf_file_path}: {ex}')    
         
-
-    # def __parse_json_file(conf_file_path: str) -> None:
