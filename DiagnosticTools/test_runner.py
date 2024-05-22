@@ -146,7 +146,7 @@ def restore_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
 
     temp_files_folders_collection_path = os.path.join(test_conf.test_bed, 'temp_files_folders')
     for temp_file_folder_name in os.listdir(temp_files_folders_collection_path):
-        temp_file_folder = os.path.join(test_conf.test_bed, temp_file_folder_name)
+        temp_file_folder = os.path.join(temp_files_folders_collection_path, temp_file_folder_name)
         try:
             shutil.move(temp_file_folder, home_path)
         except Exception as e:
