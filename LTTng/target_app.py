@@ -50,8 +50,8 @@ def run_gcperfsim(test_run_conf: RunConfiguration) -> Popen | Exception:
     :param test_run_conf: test configuration
     :return: Popen instance or exception if fail to create
     '''
-    app_root = os.path.join(test_run_conf.test_bed, 'gcperfsim')
-    project_bin_path = dotnet_app.get_app_bin('gcperfsim', app_root)
+    app_root = os.path.join(test_run_conf.test_bed, f'gcperfsim_net{test_run_conf.dotnet_sdk_version}')
+    project_bin_path = dotnet_app.get_app_bin(f'gcperfsim_net{test_run_conf.dotnet_sdk_version}', app_root)
     if isinstance(project_bin_path, Exception):
         return project_bin_path
 

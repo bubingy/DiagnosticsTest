@@ -6,7 +6,7 @@ import glob
 
 import app
 from tools.terminal import run_command_sync
-from sysinfo import SysInfo
+from tools.sysinfo import SysInfo
 
 
 def get_app_bin(app_name, app_root: str) -> str|Exception:
