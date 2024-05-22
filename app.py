@@ -26,10 +26,9 @@ def function_monitor(pre_run_msg: str=None, post_run_msg: str=None):
                 
             # print or log pre-run message
             if pre_run_msg is not None:
+                print(pre_run_msg)
                 if logger is not None:
                     logger.info(pre_run_msg)
-                else:
-                    print(pre_run_msg)
 
             # run the function
             result = func(*args, **kwargs)
@@ -41,10 +40,9 @@ def function_monitor(pre_run_msg: str=None, post_run_msg: str=None):
 
             # print or log post-run message
             if post_run_msg is not None:
+                print(post_run_msg)
                 if logger is not None:
                     logger.info(post_run_msg)
-                else:
-                    print(post_run_msg)
                     
             return result
         return wrapper
