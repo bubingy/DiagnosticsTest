@@ -107,6 +107,9 @@ def clean_temp(run_conf: RunConfiguration) -> None|Exception:
 
 
 def run_test_for_single_SDK(run_conf: RunConfiguration) -> None|Exception:
+    log_file_path = os.path.join(run_conf.test_result_folder, 'lttng.log')
+    app.logger = AppLogger('Run LTTng test', log_file_path)
+
     gcperfsim_process = target_app.run_gcperfsim(run_conf)
     if isinstance(gcperfsim_process, Exception):
         return gcperfsim_process
