@@ -58,10 +58,10 @@ class DiagToolsTestConfiguration:
 
             if config['Test']['OptionalFeatureContainer'].lower() in ['yes', 'y']:
                 self.optional_feature_container = True
-                self.optional_feature_container_flag = '-NO'
+                self.optional_feature_container_flag = ''
             else:
                 self.optional_feature_container = False
-                self.optional_feature_container_flag = ''
+                self.optional_feature_container_flag = '-NO'
                 
         except Exception as ex:
             raise Exception(f'fail to parse conf file {conf_file_path}: {ex}')    
