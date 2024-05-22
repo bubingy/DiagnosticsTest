@@ -168,3 +168,6 @@ def attach_process(test_conf: DiagToolsTestConfiguration):
                     fp.write(f'{exception}\n'.encode('utf-8'))
                     continue
             proc.communicate()
+
+    webapp_process.terminate()
+    webapp_process.communicate()
