@@ -38,7 +38,7 @@ class LTTngTestConfiguration:
         '''Parse configuration file 
         
         :param conf_file_path: path to configuration file
-        :return: DiagToolsTestConfiguration instance or Exception
+        :return: LTTngTestConfiguration instance or Exception
         '''
         try:
             config = configparser.ConfigParser()
