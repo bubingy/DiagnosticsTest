@@ -24,8 +24,8 @@ class LTTngTestConfiguration:
         self.__parse_conf_file(conf_file_path)
 
         self.conf_file_path = conf_file_path
-        self.test_name = f'{self.os_name}-{self.cpu_arch}'
-        self.test_bed = os.path.join(self.testbed_root, f'LTTngTestbed-{self.test_name}')
+        self.test_name = f'LTTng-{self.os_name}-{self.cpu_arch}'
+        self.test_bed = os.path.join(self.testbed_root, f'Testbed-{self.test_name}')
         self.test_result_folder = os.path.join(self.test_bed, f'TestResult-{self.test_name}')
 
         self.run_conf_list: list[RunConfiguration] = list()

@@ -5,13 +5,55 @@ from tools.sysinfo import SysInfo
 
 
 class AnalyzeRunConfiguration:
-    def __init__(self, testbed_root: str, dotnet_sdk_version: str, diag_tool_version: str) -> None:
-        pass
+    def __init__(self, 
+                 test_bed: str, 
+                 dotnet_sdk_version: str, 
+                 diag_tool_version: str,
+                 diag_tool_feed: str) -> None:
+        self.test_bed = test_bed
+        self.dotnet_sdk_version = dotnet_sdk_version
+        self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
+        self.dotnet_bin_path = os.path.join(self.dotnet_root, f'dotnet{SysInfo.bin_ext}')
+
+        self.diag_tool_version = diag_tool_version
+        self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-.NET{dotnet_sdk_version}')
+        self.diag_tool_feed = diag_tool_feed
+
+        self.dump_folder = os.path.join(test_bed, f'dumps-net{dotnet_sdk_version}')
+        self.analyze_folder = os.path.join(test_bed, f'analyze-net{dotnet_sdk_version}')
+        
+        env = os.environ.copy()
+        env['DOTNET_ROOT'] = self.dotnet_root
+        env['PATH'] = f'{self.dotnet_root}{SysInfo.env_connector}{self.diag_tool_root}{SysInfo.env_connector}' + env['PATH']
+
+        # environment variable
+        self.env: dict = env
 
 
 class ValidateRunConfiguration:
-    def __init__(self, testbed: str, dotnet_sdk_version: str, diag_tool_version: str) -> None:
-        pass
+    def __init__(self, 
+                 test_bed: str, 
+                 dotnet_sdk_version: str, 
+                 diag_tool_version: str,
+                 diag_tool_feed: str) -> None:
+        self.test_bed = test_bed
+        self.dotnet_sdk_version = dotnet_sdk_version
+        self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
+        self.dotnet_bin_path = os.path.join(self.dotnet_root, f'dotnet{SysInfo.bin_ext}')
+
+        self.diag_tool_version = diag_tool_version
+        self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-net{dotnet_sdk_version}')
+        self.diag_tool_feed = diag_tool_feed
+
+        self.dump_folder = os.path.join(test_bed, f'dumps-net{dotnet_sdk_version}')
+        self.analyze_folder = os.path.join(test_bed, f'analyze-net{dotnet_sdk_version}')
+        
+        env = os.environ.copy()
+        env['DOTNET_ROOT'] = self.dotnet_root
+        env['PATH'] = f'{self.dotnet_root}{SysInfo.env_connector}{self.diag_tool_root}{SysInfo.env_connector}' + env['PATH']
+
+        # environment variable
+        self.env: dict = env
 
 
 class CrossOSDACConfiguration:
@@ -19,17 +61,18 @@ class CrossOSDACConfiguration:
         self.__parse_conf_file(conf_file_path)
 
         self.conf_file_path = conf_file_path
-        self.test_name = f'{self.os_name}-{self.cpu_arch}-{self.diag_tool_version}'
+        self.test_name = f'CrossOSDAC-{self.os_name}-{self.cpu_arch}-{self.diag_tool_version}'
+        self.analyze_testbed: str = os.path.join(self.testbed_root, f'TestBed-{self.test_name}')
 
         self.analyze_run_conf_list: list[AnalyzeRunConfiguration] = list()
         self.validate_run_conf_list: list[ValidateRunConfiguration] = list()
 
         for sdk_version in self.dotnet_sdk_version_list:
             self.analyze_run_conf_list.append(
-                AnalyzeRunConfiguration(self.testbed_root, sdk_version, self.diag_tool_version)
+                AnalyzeRunConfiguration(self.analyze_testbed, sdk_version, self.diag_tool_version)
             )
             self.validate_run_conf_list.append(
-                ValidateRunConfiguration(self.testbed, sdk_version, self.diag_tool_version)
+                ValidateRunConfiguration(self.validate_testbed, sdk_version, self.diag_tool_version)
             )
 
     def __parse_conf_file(self, conf_file_path: str) -> None:
@@ -54,7 +97,8 @@ class CrossOSDACConfiguration:
             self.os_name: str = config['Test']['OSName']
             self.cpu_arch: str = config['Test']['CPUArchitecture']
             self.testbed_root: str = config['Test']['TestBedRoot']
-            self.testbed: str = config['Test']['TestBed']
+            self.validate_testbed: str = config['Test']['TestBed']
 
         except Exception as ex:
-            raise Exception(f'fail to parse conf file {conf_file_path}: {ex}')    
+            raise Exception(f'fail to parse conf file {conf_file_path}: {ex}') 
+   

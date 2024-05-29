@@ -9,8 +9,8 @@ class DiagToolsTestConfiguration:
         self.__parse_conf_file(conf_file_path)
 
         self.conf_file_path = conf_file_path
-        self.test_name = f'{self.os_name}-{self.cpu_arch}-.SDK{self.dotnet_sdk_version}-Tool{self.diag_tool_version}'
-        self.test_bed = os.path.join(self.testbed_root, f'DiagToolsTestbed-{self.test_name}{self.optional_feature_container_flag}')
+        self.test_name = f'DiagTools-{self.os_name}-{self.cpu_arch}-.SDK{self.dotnet_sdk_version}-Tool{self.diag_tool_version}'
+        self.test_bed = os.path.join(self.testbed_root, f'Testbed--{self.test_name}{self.optional_feature_container_flag}')
         self.test_result_folder = os.path.join(self.test_bed, f'TestResult-{self.test_name}{self.optional_feature_container_flag}')
 
         self.dotnet_root = os.path.join(self.test_bed, 'dotnet-sdk')
