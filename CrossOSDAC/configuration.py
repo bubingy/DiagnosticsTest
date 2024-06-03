@@ -35,7 +35,8 @@ class ValidateRunConfiguration:
                  test_bed: str, 
                  dotnet_sdk_version: str, 
                  diag_tool_version: str,
-                 diag_tool_feed: str) -> None:
+                 diag_tool_feed: str,
+                 arch: str) -> None:
         self.test_bed = test_bed
         self.dotnet_sdk_version = dotnet_sdk_version
         self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
@@ -44,6 +45,8 @@ class ValidateRunConfiguration:
         self.diag_tool_version = diag_tool_version
         self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-net{dotnet_sdk_version}')
         self.diag_tool_feed = diag_tool_feed
+
+        self.arch = arch
 
         self.dump_folder = os.path.join(test_bed, f'dumps-net{dotnet_sdk_version}')
         self.analyze_folder = os.path.join(test_bed, f'analyze-net{dotnet_sdk_version}')
@@ -69,11 +72,23 @@ class CrossOSDACConfiguration:
 
         for sdk_version in self.dotnet_sdk_version_list:
             self.analyze_run_conf_list.append(
-                AnalyzeRunConfiguration(self.analyze_testbed, sdk_version, self.diag_tool_version)
+                AnalyzeRunConfiguration(
+                    self.analyze_testbed,
+                    sdk_version,
+                    self.diag_tool_version,
+                    self.diag_tool_feed
+                )
             )
-            self.validate_run_conf_list.append(
-                ValidateRunConfiguration(self.validate_testbed, sdk_version, self.diag_tool_version)
-            )
+            for arch in ['x86', 'x64']:
+                self.validate_run_conf_list.append(
+                    ValidateRunConfiguration(
+                        self.validate_testbed,
+                        sdk_version,
+                        self.diag_tool_version,
+                        self.diag_tool_feed,
+                        arch
+                    )
+                )
 
     def __parse_conf_file(self, conf_file_path: str) -> None:
         '''Parse configuration file 
