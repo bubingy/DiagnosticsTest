@@ -20,7 +20,8 @@ def create_oom(test_run_conf: RunConfiguration) -> str | Exception:
     :return: path to the project or exception if fail to create
     '''
     # create app
-    app_root = os.path.join(test_run_conf.test_bed, f'oom_net{test_run_conf.dotnet_sdk_version}')
+    app_name = f'oom_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}'
+    app_root = os.path.join(test_run_conf.test_bed, app_name)
     app_root = dotnet_app.create_new_app(test_run_conf.dotnet_bin_path, 'console', app_root, test_run_conf.env)
     if isinstance(app_root, Exception):
         return app_root
@@ -51,8 +52,9 @@ def run_oom(test_run_conf: RunConfiguration) -> Popen | Exception:
     :param test_run_conf: test configuration
     :return: Popen instance or exception if fail to create
     '''
-    app_root = os.path.join(test_run_conf.test_bed, f'oom_net{test_run_conf.dotnet_sdk_version}')
-    project_bin_path = dotnet_app.get_app_bin(f'oom_net{test_run_conf.dotnet_sdk_version}', app_root)
+    app_name = f'oom_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}'
+    app_root = os.path.join(test_run_conf.test_bed, app_name)
+    project_bin_path = dotnet_app.get_app_bin(app_name, app_root)
     if isinstance(project_bin_path, Exception):
         return project_bin_path
 
@@ -79,7 +81,8 @@ def create_uhe(test_run_conf: RunConfiguration) -> str | Exception:
     :return: path to the project or exception if fail to create
     '''
     # create app
-    app_root = os.path.join(test_run_conf.test_bed, f'uhe_net{test_run_conf.dotnet_sdk_version}')
+    app_name = f'uhe_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}'
+    app_root = os.path.join(test_run_conf.test_bed, app_name)
     app_root = dotnet_app.create_new_app(test_run_conf.dotnet_bin_path, 'console', app_root, test_run_conf.env)
     if isinstance(app_root, Exception):
         return app_root
@@ -110,8 +113,9 @@ def run_uhe(test_run_conf: RunConfiguration) -> Popen | Exception:
     :param test_run_conf: test configuration
     :return: Popen instance or exception if fail to create
     '''
-    app_root = os.path.join(test_run_conf.test_bed, f'uhe_net{test_run_conf.dotnet_sdk_version}')
-    project_bin_path = dotnet_app.get_app_bin(f'uhe_net{test_run_conf.dotnet_sdk_version}', app_root)
+    app_name = f'uhe_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}'
+    app_root = os.path.join(test_run_conf.test_bed, app_name)
+    project_bin_path = dotnet_app.get_app_bin(app_name, app_root)
     if isinstance(project_bin_path, Exception):
         return project_bin_path
 
