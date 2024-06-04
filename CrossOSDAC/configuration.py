@@ -4,12 +4,13 @@ import configparser
 from tools.sysinfo import SysInfo
 
 
-class AnalyzeRunConfiguration:
+class RunConfiguration:
     def __init__(self, 
                  test_bed: str, 
                  dotnet_sdk_version: str, 
                  diag_tool_version: str,
-                 diag_tool_feed: str) -> None:
+                 diag_tool_feed: str,
+                 arch: str=None) -> None:
         self.test_bed = test_bed
         self.dotnet_sdk_version = dotnet_sdk_version
         self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
@@ -17,33 +18,6 @@ class AnalyzeRunConfiguration:
 
         self.diag_tool_version = diag_tool_version
         self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-.NET{dotnet_sdk_version}')
-        self.diag_tool_feed = diag_tool_feed
-
-        self.dump_folder = os.path.join(test_bed, f'dumps-net{dotnet_sdk_version}')
-        self.analyze_folder = os.path.join(test_bed, f'analyze-net{dotnet_sdk_version}')
-        
-        env = os.environ.copy()
-        env['DOTNET_ROOT'] = self.dotnet_root
-        env['PATH'] = f'{self.dotnet_root}{SysInfo.env_connector}{self.diag_tool_root}{SysInfo.env_connector}' + env['PATH']
-
-        # environment variable
-        self.env: dict = env
-
-
-class ValidateRunConfiguration:
-    def __init__(self, 
-                 test_bed: str, 
-                 dotnet_sdk_version: str, 
-                 diag_tool_version: str,
-                 diag_tool_feed: str,
-                 arch: str) -> None:
-        self.test_bed = test_bed
-        self.dotnet_sdk_version = dotnet_sdk_version
-        self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
-        self.dotnet_bin_path = os.path.join(self.dotnet_root, f'dotnet{SysInfo.bin_ext}')
-
-        self.diag_tool_version = diag_tool_version
-        self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-net{dotnet_sdk_version}')
         self.diag_tool_feed = diag_tool_feed
 
         self.arch = arch
@@ -67,21 +41,16 @@ class CrossOSDACConfiguration:
         self.test_name = f'CrossOSDAC-{self.os_name}-{self.cpu_arch}-{self.diag_tool_version}'
         self.analyze_testbed: str = os.path.join(self.testbed_root, f'TestBed-{self.test_name}')
 
-        self.analyze_run_conf_list: list[AnalyzeRunConfiguration] = list()
-        self.validate_run_conf_list: list[ValidateRunConfiguration] = list()
+        self.run_conf_list: list[RunConfiguration] = list()
 
         for sdk_version in self.dotnet_sdk_version_list:
-            self.analyze_run_conf_list.append(
-                AnalyzeRunConfiguration(
-                    self.analyze_testbed,
-                    sdk_version,
-                    self.diag_tool_version,
-                    self.diag_tool_feed
-                )
-            )
-            for arch in ['x86', 'x64']:
-                self.validate_run_conf_list.append(
-                    ValidateRunConfiguration(
+            if 'win' in SysInfo.rid:
+                arch_list = ['x86', 'x64']
+            else:
+                arch_list = [None]
+            for arch in arch_list:
+                self.run_conf_list.append(
+                    RunConfiguration(
                         self.validate_testbed,
                         sdk_version,
                         self.diag_tool_version,

@@ -6,7 +6,7 @@ from subprocess import PIPE
 import app
 from tools import dotnet_tool
 from tools import terminal
-from CrossOSDAC.configuration import AnalyzeRunConfiguration, ValidateRunConfiguration
+from CrossOSDAC.configuration import RunConfiguration
 
 
 def __filter_32bit_dump(dump_path_list: list[str]) -> list[str]:
@@ -31,7 +31,7 @@ def __filter_64bit_dump(dump_path_list: list[str]) -> list[str]:
     pre_run_msg='------ start to analyze dump ------',
     post_run_msg='------ analyze dump completed ------'
 )
-def analyze_dump(test_conf: AnalyzeRunConfiguration | ValidateRunConfiguration):
+def analyze_dump(test_conf: RunConfiguration):
     '''Run sample apps and perform tests.
 
     '''
@@ -59,14 +59,13 @@ def analyze_dump(test_conf: AnalyzeRunConfiguration | ValidateRunConfiguration):
         b'eeversion\n',
         b'exit\n'
     ]
-
-    if isinstance(test_conf, ValidateRunConfiguration):
+    if test_conf.arch is None:
+        dump_path_list = dump_path_candidates
+    else:
         if test_conf.arch == 'x86':
             dump_path_list = __filter_32bit_dump(dump_path_candidates)
         else:
             dump_path_list = __filter_64bit_dump(dump_path_candidates)
-    else:
-        dump_path_list = dump_path_candidates
 
     for dump_path in dump_path_list:
         dump_name = os.path.basename(dump_path)
@@ -74,6 +73,10 @@ def analyze_dump(test_conf: AnalyzeRunConfiguration | ValidateRunConfiguration):
             test_conf.analyze_folder,
             dump_name.replace('dump', 'analyze')
         )
+        # analyze dump on windows
+        if test_conf.arch is not None:
+            analyze_output_path = f'{analyze_output_path}_win'
+            
         async_args = [test_conf.dotnet_bin_path, tool_dll_path, 'analyze', dump_path]
         
         with open(analyze_output_path, 'wb+') as fp:

@@ -9,11 +9,11 @@ import app
 from tools.sysinfo import SysInfo
 from tools import dotnet_app
 from tools import terminal
-from CrossOSDAC.configuration import AnalyzeRunConfiguration
+from CrossOSDAC.configuration import RunConfiguration
 
 
 @app.function_monitor(pre_run_msg='create OOM for CrossOSDAC test.')
-def create_oom(test_run_conf: AnalyzeRunConfiguration) -> str | Exception:
+def create_oom(test_run_conf: RunConfiguration) -> str | Exception:
     '''create and build OOM
 
     :param test_run_conf: test configuration
@@ -45,7 +45,7 @@ def create_oom(test_run_conf: AnalyzeRunConfiguration) -> str | Exception:
 
 
 @app.function_monitor(pre_run_msg='run oom for CrossOSDAC test.')
-def run_oom(test_run_conf: AnalyzeRunConfiguration) -> Popen | Exception:
+def run_oom(test_run_conf: RunConfiguration) -> Popen | Exception:
     '''Run oom
 
     :param test_run_conf: test configuration
@@ -72,7 +72,7 @@ def run_oom(test_run_conf: AnalyzeRunConfiguration) -> Popen | Exception:
 
 
 @app.function_monitor(pre_run_msg='create UHE for CrossOSDAC test.')
-def create_uhe(test_run_conf: AnalyzeRunConfiguration) -> str | Exception:
+def create_uhe(test_run_conf: RunConfiguration) -> str | Exception:
     '''create and build UHE
 
     :param test_run_conf: test configuration
@@ -104,7 +104,7 @@ def create_uhe(test_run_conf: AnalyzeRunConfiguration) -> str | Exception:
 
 
 @app.function_monitor(pre_run_msg='run uhe for CrossOSDAC test.')
-def run_uhe(test_run_conf: AnalyzeRunConfiguration) -> Popen | Exception:
+def run_uhe(test_run_conf: RunConfiguration) -> Popen | Exception:
     '''Run oom
 
     :param test_run_conf: test configuration
