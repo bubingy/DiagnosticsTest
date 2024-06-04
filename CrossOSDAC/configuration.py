@@ -46,12 +46,14 @@ class CrossOSDACConfiguration:
         for sdk_version in self.dotnet_sdk_version_list:
             if 'win' in SysInfo.rid:
                 arch_list = ['x86', 'x64']
+                test_bed = self.validate_testbed
             else:
                 arch_list = [None]
+                test_bed = self.analyze_testbed
             for arch in arch_list:
                 self.run_conf_list.append(
                     RunConfiguration(
-                        self.validate_testbed,
+                        test_bed,
                         sdk_version,
                         self.diag_tool_version,
                         self.diag_tool_feed,

@@ -9,6 +9,20 @@ from tools import terminal
 from CrossOSDAC.configuration import RunConfiguration
 
 
+analyze_commands = [
+    b'clrstack\n',
+    b'clrstack -i\n',
+    b'clrthreads\n',
+    b'clrmodules\n',
+    b'eeheap\n',
+    b'dumpheap\n',
+    b'printexception\n'
+    b'dso\n',
+    b'eeversion\n',
+    b'exit\n'
+]
+
+
 def __filter_32bit_dump(dump_path_list: list[str]) -> list[str]:
     return list(
         filter(
@@ -44,23 +58,15 @@ def analyze_dump(test_conf: RunConfiguration):
         return tool_dll_path
     
     # analyze dump with dotnet-dump analyze
-    dump_path_template = os.path.join(test_conf.dump_folder, 'core_*')
+    dump_path_template = os.path.join(test_conf.dump_folder, 'dump_*')
     dump_path_candidates = glob.glob(dump_path_template)
     if len(dump_path_candidates) < 1:
         return Exception('no dump file is generated')
     
-    analyze_commands = [
-        b'clrstack\n',
-        b'clrthreads\n',
-        b'clrmodules\n',
-        b'eeheap\n',
-        b'dumpheap\n',
-        b'dso\n',
-        b'eeversion\n',
-        b'exit\n'
-    ]
+    # linux case
     if test_conf.arch is None:
         dump_path_list = dump_path_candidates
+    # windows case
     else:
         if test_conf.arch == 'x86':
             dump_path_list = __filter_32bit_dump(dump_path_candidates)
