@@ -4,11 +4,12 @@ from subprocess import PIPE
 
 import app
 from tools import dotnet_tool
+from tools import dotnet_app
 from tools import terminal
 from CrossOSDAC.configuration import RunConfiguration
 
 
-analyze_commands = [
+basic_analyze_commands = [
     b'clrstack\n',
     b'clrstack -i\n',
     b'clrthreads\n',
@@ -78,18 +79,27 @@ def analyze_dump(test_conf: RunConfiguration):
             test_conf.analyze_folder,
             dump_name.replace('dump', 'analyze')
         )
+
+        analyze_commands = basic_analyze_commands.copy()
+        
         # analyze dump on windows
         if test_conf.arch is not None:
             analyze_output_path = f'{analyze_output_path}_win'
+
+            app_name = dump_name.replace('dump_', '')
+            app_root = os.path.join(test_conf.test_bed, app_name)
+            project_bin_path = dotnet_app.get_app_bin(app_name, app_root)
+            project_bin_dir = os.path.dirname(project_bin_path)
+            analyze_commands.insert(
+                0,
+                f'setsymbolserver -directory {project_bin_dir}\n'.encode()
+            )
             
         async_args = [test_conf.dotnet_bin_path, tool_dll_path, 'analyze', dump_path]
         
         with open(analyze_output_path, 'wb+') as fp:
             _, proc = terminal.run_command_async(async_args, stdin=PIPE, stdout=fp, stderr=fp, env=test_conf.env)
-        analyze_commands.insert(
-            0,
-            f'setsymbolserver -directory {project_bin_dir}\n'.encode()
-        )
+
             for command in analyze_commands:
                 try:
                     proc.stdin.write(command)

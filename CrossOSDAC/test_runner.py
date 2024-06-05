@@ -30,14 +30,14 @@ def init_test(test_conf: CrossOSDACConfiguration) -> None:
     # step 3. create env script, dump folders and dump analyze folders
     for run_conf in test_conf.run_conf_list:
         if 'win' in SysInfo.rid:
-            env_script_path = os.path.join(testbed, f'env_script_net{run_conf.dotnet_sdk_version}.ps1')
+            env_script_path = os.path.join(testbed, f'env_activation_net{run_conf.dotnet_sdk_version}.ps1')
             lines = [
                 f'$Env:DOTNET_ROOT={run_conf.dotnet_root}\n',
                 f'$Env:Path+=;{run_conf.dotnet_root}\n',
                 f'$Env:Path+=;{run_conf.diag_tool_root}\n'
             ]
         else:
-            env_script_path = os.path.join(testbed, f'env_script_net{run_conf.dotnet_sdk_version}.sh')
+            env_script_path = os.path.join(testbed, f'env_activation_net{run_conf.dotnet_sdk_version}.sh')
             lines = [
                 f'export DOTNET_ROOT={run_conf.dotnet_root}\n',
                 f'export PATH=$PATH:{run_conf.dotnet_root}\n',

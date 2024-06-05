@@ -72,8 +72,6 @@ def install_sdk_from_script(rid: str,
     '''
     if 'win' in rid:
         script_engine = 'powershell.exe'
-    elif 'osx' in rid:
-        script_engine = '/bin/zsh'
     else:
         script_engine = '/bin/bash'
 

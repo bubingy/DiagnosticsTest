@@ -31,14 +31,14 @@ def init_test(test_conf: DiagToolsTestConfiguration) -> None:
 
     # step 3. create env script
     if 'win' in SysInfo.rid:
-        env_script_path = os.path.join(test_conf.test_bed, 'env_script.ps1')
+        env_script_path = os.path.join(test_conf.test_bed, 'env_activation.ps1')
         lines = [
             f'$Env:DOTNET_ROOT={test_conf.dotnet_root}\n',
             f'$Env:Path+=;{test_conf.dotnet_root}\n',
             f'$Env:Path+=;{test_conf.diag_tool_root}\n'
         ]
     else:
-        env_script_path = os.path.join(test_conf.test_bed, 'env_script.sh')
+        env_script_path = os.path.join(test_conf.test_bed, 'env_activation.sh')
         lines = [
             f'export DOTNET_ROOT={test_conf.dotnet_root}\n',
             f'export PATH=$PATH:{test_conf.dotnet_root}\n',

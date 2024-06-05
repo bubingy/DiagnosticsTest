@@ -62,7 +62,7 @@ def run_oom(test_run_conf: RunConfiguration) -> Union[Popen, Exception]:
     env['COMPlus_DbgEnableMiniDump'] = '1'
     env['COMPlus_DbgMiniDumpType'] = '4'
     env['COMPlus_DbgMiniDumpName'] = os.path.join(
-        test_run_conf.dump_folder, f'dump_oom_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}')
+        test_run_conf.dump_folder, f'dump_{app_name}')
     
     command, stdout, stderr = terminal.run_command_sync(
         [project_bin_path],
@@ -123,7 +123,7 @@ def run_uhe(test_run_conf: RunConfiguration) -> Union[Popen, Exception]:
     env['COMPlus_DbgEnableMiniDump'] = '1'
     env['COMPlus_DbgMiniDumpType'] = '4'
     env['COMPlus_DbgMiniDumpName'] = os.path.join(
-        test_run_conf.dump_folder, f'dump_uhe_net{test_run_conf.dotnet_sdk_version}_{SysInfo.rid}')
+        test_run_conf.dump_folder, f'dump_{app_name}')
     
     command, stdout, stderr = terminal.run_command_sync(
         [project_bin_path],
