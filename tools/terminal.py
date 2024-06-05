@@ -1,7 +1,7 @@
 '''wrappers for Popen'''
 
 from subprocess import Popen, PIPE
-from typing import Union, Iterable
+from typing import Union, Iterable, Tuple
 
 import app
 
@@ -34,7 +34,7 @@ def log_terminal_command():
 
 
 @log_terminal_command()
-def run_command_sync(args: Union[Iterable[str], str], stdout=PIPE, stderr=PIPE, **kwargs) -> tuple[str, str, str]:
+def run_command_sync(args: Union[Iterable[str], str], stdout=PIPE, stderr=PIPE, **kwargs) -> Tuple[str, str, str]:
     '''Run command and wait for the process to be terminated.
 
     :param command: sequence of program arguments
@@ -85,7 +85,7 @@ def run_command_sync(args: Union[Iterable[str], str], stdout=PIPE, stderr=PIPE, 
 
 
 @log_terminal_command()
-def run_command_async(args: list[str], **kwargs) -> tuple[str, Popen]:
+def run_command_async(args: Iterable[str], **kwargs) -> Tuple[str, Popen]:
     '''Run command and and return the process object without waiting for the process to be terminated.
 
     :param command: sequence of program arguments
