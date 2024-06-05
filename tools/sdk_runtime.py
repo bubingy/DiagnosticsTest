@@ -1,7 +1,7 @@
 '''methods for dotnet runtime, sdk installation'''
 
-from __future__ import annotations
 import os
+from typing import Union
 from urllib import request
 
 import app
@@ -11,7 +11,7 @@ from tools.terminal import run_command_sync
 @app.function_monitor(
     pre_run_msg='start to download dotnet-install script',
     post_run_msg='download dotnet-install script completed')
-def donwload_install_script(rid: str, script_path: str) -> str|Exception:
+def donwload_install_script(rid: str, script_path: str) -> Union[str, Exception]:
     '''download dotnet-install script
     
     :param rid: .NET rid
@@ -36,7 +36,7 @@ def donwload_install_script(rid: str, script_path: str) -> str|Exception:
 @app.function_monitor(
     pre_run_msg='start to make script runnable on non-windows platforms',
     post_run_msg='making script runnable on non-windows platforms completed')
-def enable_runnable(rid: str, script_path: str) -> str|Exception:
+def enable_runnable(rid: str, script_path: str) -> Union[str, Exception]:
     '''make script runnable on non-windows platforms
     
     :param rid: .NET rid
@@ -60,7 +60,7 @@ def install_sdk_from_script(rid: str,
                             script_path: str,
                             sdk_version: str, 
                             dotnet_root: os.PathLike,
-                            arch: str=None) -> str|Exception:
+                            arch: str=None) -> Union[str, Exception]:
     '''install sdk with dotnet-install script
     
     :param rid: .NET rid
@@ -133,7 +133,7 @@ def install_sdk_from_script(rid: str,
 def create_env_activation_script(rid: str, 
                                  output: str,
                                  dotnet_root: str,
-                                 tool_root: str = None) -> str|Exception:
+                                 tool_root: str = None) -> Union[str, Exception]:
     '''create env activation script
 
     :param rid: .NET RID

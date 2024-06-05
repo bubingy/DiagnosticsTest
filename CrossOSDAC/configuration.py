@@ -13,11 +13,16 @@ class RunConfiguration:
                  arch: str=None) -> None:
         self.test_bed = test_bed
         self.dotnet_sdk_version = dotnet_sdk_version
-        self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}')
+        if arch is None:
+            self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}-{SysInfo.rid}')
+            self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-.NET{dotnet_sdk_version}-{SysInfo.rid}')
+        else:
+            self.dotnet_root = os.path.join(test_bed, f'dotnet-sdk{dotnet_sdk_version}-{SysInfo.rid}-{arch}')
+            self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-.NET{dotnet_sdk_version}-{SysInfo.rid}-{arch}')
+
         self.dotnet_bin_path = os.path.join(self.dotnet_root, f'dotnet{SysInfo.bin_ext}')
 
         self.diag_tool_version = diag_tool_version
-        self.diag_tool_root = os.path.join(self.test_bed, f'diag-tool-.NET{dotnet_sdk_version}')
         self.diag_tool_feed = diag_tool_feed
 
         self.arch = arch

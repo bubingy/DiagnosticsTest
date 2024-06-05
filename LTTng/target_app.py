@@ -1,9 +1,9 @@
 ''''''
 
-from __future__ import annotations
 import os
 import shutil
 from subprocess import Popen
+from typing import Union
 
 import app
 from tools import dotnet_app
@@ -12,7 +12,7 @@ from LTTng.configuration import RunConfiguration
 
 
 @app.function_monitor(pre_run_msg='create GCPerfsim for lttng test.')
-def create_gcperfsim(test_run_conf: RunConfiguration) -> str | Exception:
+def create_gcperfsim(test_run_conf: RunConfiguration) -> Union[str, Exception]:
     '''create and build GCPerfsim
 
     :param test_run_conf: test configuration
@@ -44,7 +44,7 @@ def create_gcperfsim(test_run_conf: RunConfiguration) -> str | Exception:
 
 
 @app.function_monitor(pre_run_msg='run gcperfsim for diag tool test.')
-def run_gcperfsim(test_run_conf: RunConfiguration) -> Popen | Exception:
+def run_gcperfsim(test_run_conf: RunConfiguration) -> Union[Popen, Exception]:
     '''Run gcperfsim
 
     :param test_run_conf: test configuration

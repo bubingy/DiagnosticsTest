@@ -1,12 +1,12 @@
 '''Provide system information'''
 
-from __future__ import annotations
 import re
 import glob
 import platform
+from typing import Union
 
 
-def _get_os_type() -> str|Exception:
+def _get_os_type() -> Union[str, Exception]:
     '''get name of operation system
     
     :return: name of os or Exception if failed
@@ -31,7 +31,7 @@ def _get_os_type() -> str|Exception:
     return os
 
 
-def _get_cpu_type() -> str|Exception:
+def _get_cpu_type() -> Union[str, Exception]:
     '''get type of CPU
     
     :return: type of cpu or Exception if failed
@@ -48,7 +48,7 @@ def _get_cpu_type() -> str|Exception:
     return cpu_arch
 
 
-def _get_rid() -> str|Exception:
+def _get_rid() -> Union[str, Exception]:
     '''Get .Net RID of current platform
 
     :return: .Net RID of current platform or Exception if failed
@@ -63,7 +63,7 @@ def _get_rid() -> str|Exception:
         return f'{os_type}-{cpu_arch}'
 
 
-def _get_debugger(rid: str) -> str|Exception:
+def _get_debugger(rid: str) -> Union[str, Exception]:
     '''Get full name of debugger
     
     :param rid: `.Net RID` of current platform

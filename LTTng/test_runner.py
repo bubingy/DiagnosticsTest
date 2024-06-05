@@ -1,6 +1,6 @@
-from __future__ import annotations
 import os
 import shutil
+from typing import Union
 
 import app
 from app import AppLogger
@@ -47,7 +47,7 @@ def init_test(test_conf: LTTngTestConfiguration) -> None:
             fp.writelines(lines)
 
 
-def install_DotNET_SDK(run_conf: RunConfiguration) -> None|Exception:
+def install_DotNET_SDK(run_conf: RunConfiguration) -> Union[None, Exception]:
     '''Download install script and install SDK
     
     :param test_conf: RunConfiguration instance
@@ -66,7 +66,7 @@ def install_DotNET_SDK(run_conf: RunConfiguration) -> None|Exception:
         SysInfo.rid, script_path, run_conf.dotnet_sdk_version, run_conf.dotnet_root)
     
 
-def prepare_sample_app(run_conf: RunConfiguration) -> None|Exception:
+def prepare_sample_app(run_conf: RunConfiguration) -> Union[None, Exception]:
     '''Create and build some .NET app for testing
     
     :param test_conf: DiagToolsTestConfiguration instance
@@ -80,7 +80,7 @@ def prepare_sample_app(run_conf: RunConfiguration) -> None|Exception:
         app.logger.error(f'fail to create gcperfsim: {ex}')
 
 
-def clean_temp(run_conf: RunConfiguration) -> None|Exception:
+def clean_temp(run_conf: RunConfiguration) -> Union[None, Exception]:
     if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
     else: home_path = os.environ['HOME']
 
@@ -106,7 +106,7 @@ def clean_temp(run_conf: RunConfiguration) -> None|Exception:
             print(f'fail to remove {temp}: {e}')
 
 
-def run_test_for_single_SDK(run_conf: RunConfiguration) -> None|Exception:
+def run_test_for_single_SDK(run_conf: RunConfiguration) -> Union[None, Exception]:
     log_file_path = os.path.join(run_conf.test_result_folder, 'lttng.log')
     app.logger = AppLogger('Run LTTng test', log_file_path)
 

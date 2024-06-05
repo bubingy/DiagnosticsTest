@@ -1,12 +1,11 @@
-from __future__ import annotations
 import os
 import shutil
+from typing import Union
 
 import app
 from app import AppLogger
 from tools import sdk_runtime
 from tools import dotnet_tool
-from tools import terminal
 from tools.sysinfo import SysInfo
 from CrossOSDAC import target_app
 from CrossOSDAC import dump_analyzer
@@ -52,7 +51,7 @@ def init_test(test_conf: CrossOSDACConfiguration) -> None:
             fp.writelines(lines)
 
 
-def install_DotNET_SDK(run_conf: RunConfiguration) -> None|Exception:
+def install_DotNET_SDK(run_conf: RunConfiguration) -> Union[None, Exception]:
     '''Download install script and install SDK
     
     :param test_conf: RunConfiguration instance
@@ -71,7 +70,7 @@ def install_DotNET_SDK(run_conf: RunConfiguration) -> None|Exception:
         SysInfo.rid, script_path, run_conf.dotnet_sdk_version, run_conf.dotnet_root, run_conf.arch)
     
 
-def install_dotnet_dump(run_conf: RunConfiguration) -> None|Exception:
+def install_dotnet_dump(run_conf: RunConfiguration) -> Union[None, Exception]:
     dotnet_tool.install_tool(
         run_conf.dotnet_bin_path,
         'dotnet-dump',
@@ -82,7 +81,7 @@ def install_dotnet_dump(run_conf: RunConfiguration) -> None|Exception:
     )
 
 
-def prepare_sample_app(run_conf: RunConfiguration) -> None|Exception:
+def prepare_sample_app(run_conf: RunConfiguration) -> Union[None, Exception]:
     '''Create and build some .NET app for testing
     
     :param test_conf: DiagToolsTestConfiguration instance
@@ -102,7 +101,7 @@ def prepare_sample_app(run_conf: RunConfiguration) -> None|Exception:
         app.logger.error(f'fail to create uhe: {ex}')
 
 
-def clean_temp(run_conf: RunConfiguration) -> None|Exception:
+def clean_temp(run_conf: RunConfiguration) -> Union[None, Exception]:
     if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
     else: home_path = os.environ['HOME']
 
@@ -123,12 +122,15 @@ def clean_temp(run_conf: RunConfiguration) -> None|Exception:
         if not os.path.exists(temp):
             continue
         try:
-            shutil.move(temp, temp_files_folders_collection_path)
+            if 'win' in SysInfo.rid:
+                shutil.rmtree(temp)
+            else:
+                shutil.move(temp, temp_files_folders_collection_path)
         except Exception as e:
             print(f'fail to remove {temp}: {e}')
 
 
-def run_test_for_single_SDK(run_conf: RunConfiguration) -> None|Exception:
+def run_test_for_single_SDK(run_conf: RunConfiguration) -> Union[None, Exception]:
     log_file_path = os.path.join(run_conf.test_bed, f'CrossOSDAC-{run_conf.dotnet_sdk_version}.log')
     app.logger = AppLogger('Run CrossOSDAC test', log_file_path)
 

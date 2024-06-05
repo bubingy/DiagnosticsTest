@@ -1,15 +1,15 @@
 '''methods for dotnet app creation and building'''
 
-from __future__ import annotations
 import os
 import glob
+from typing import Union
 
 import app
 from tools.terminal import run_command_sync
 from tools.sysinfo import SysInfo
 
 
-def get_app_bin(app_name, app_root: str) -> str|Exception:
+def get_app_bin(app_name, app_root: str) -> Union[str, Exception]:
     '''Get path of executable file
 
     :param app_name: type of .NET app
@@ -34,7 +34,7 @@ def get_app_bin(app_name, app_root: str) -> str|Exception:
 def create_new_app(dotnet_bin_path: str, 
                    app_type: str,
                    app_root: str,
-                   env: dict) -> str|Exception:
+                   env: dict) -> Union[str, Exception]:
     '''create app with dotnet command
 
     :param dotnet_bin_path: path to dotnet executable
@@ -57,7 +57,7 @@ def create_new_app(dotnet_bin_path: str,
 @app.function_monitor()
 def build_app(dotnet_bin_path: str, 
               app_root: str,
-              env: dict) -> str|Exception:
+              env: dict) -> Union[str, Exception]:
     '''build app with dotnet command
 
     :param dotnet_bin_path: path to dotnet executable

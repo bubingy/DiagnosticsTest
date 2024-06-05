@@ -1,10 +1,10 @@
 '''Create, build and run app for diag tools testing'''
 
-from __future__ import annotations
 import os
 import time
 import shutil
 from subprocess import Popen
+from typing import Union
 
 import app
 from tools import dotnet_app
@@ -14,7 +14,7 @@ from DiagnosticTools.configuration import DiagToolsTestConfiguration
 
 
 @app.function_monitor(pre_run_msg='create and build console app for diag tool test.')
-def create_build_console_app(test_conf: DiagToolsTestConfiguration) -> str|Exception:
+def create_build_console_app(test_conf: DiagToolsTestConfiguration) -> Union[str, Exception]:
     '''create and build console app
 
     :param test_conf: test configuration
@@ -46,7 +46,7 @@ def create_build_console_app(test_conf: DiagToolsTestConfiguration) -> str|Excep
 
 
 @app.function_monitor(pre_run_msg='create and build webapp for diag tool test.')
-def create_build_webapp(test_conf: DiagToolsTestConfiguration) -> str|Exception:
+def create_build_webapp(test_conf: DiagToolsTestConfiguration) -> Union[str, Exception]:
     '''create and build webapp
 
     :param test_conf: test configuration
@@ -62,7 +62,7 @@ def create_build_webapp(test_conf: DiagToolsTestConfiguration) -> str|Exception:
 
 
 @app.function_monitor(pre_run_msg='run webapp for diag tool test.')
-def run_webapp(test_conf: DiagToolsTestConfiguration) -> Popen|Exception:
+def run_webapp(test_conf: DiagToolsTestConfiguration) -> Union[Popen, Exception]:
     '''Run webapp
 
     :param test_conf: test configuration
@@ -93,7 +93,7 @@ def run_webapp(test_conf: DiagToolsTestConfiguration) -> Popen|Exception:
 
 
 @app.function_monitor(pre_run_msg='create GCDumpPlayground2 for diag tool test.')
-def create_build_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> str|Exception:
+def create_build_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Union[str, Exception]:
     '''create and build GCDumpPlayground2
 
     :param test_conf: test configuration
@@ -125,7 +125,7 @@ def create_build_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> s
 
 
 @app.function_monitor(pre_run_msg='run GCDumpPlayground2 for diag tool test.')
-def run_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Popen|Exception:
+def run_gc_dump_playground2(test_conf: DiagToolsTestConfiguration) -> Union[Popen, Exception]:
     '''Run GCDumpPlayground2
 
     :param test_conf: test configuration

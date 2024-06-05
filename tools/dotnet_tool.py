@@ -1,7 +1,7 @@
 '''methods for dotnet tool installation'''
 
-from __future__ import annotations
 import glob
+from typing import Union
 from urllib import request
 
 import app
@@ -14,7 +14,7 @@ def install_tool(dotnet_bin_path: str,
                  tool_root: str, 
                  tool_version: str, 
                  tool_feed: str,
-                 env: dict) -> str|Exception:
+                 env: dict) -> Union[str, Exception]:
     '''Install dotnet tool
     
     :param dotnet_bin_path: path to dotnet executable
@@ -41,7 +41,7 @@ def install_tool(dotnet_bin_path: str,
 @app.function_monitor(
     pre_run_msg='start to download perfcollect script',
     post_run_msg='download perfcollect script completed')
-def download_perfcollect(perfcollect_path: str):
+def download_perfcollect(perfcollect_path: str) -> Union[str, Exception]:
     '''Download perfcollect script
 
     :param perfcollect_path: path to perfcollect script
@@ -57,7 +57,7 @@ def download_perfcollect(perfcollect_path: str):
         return Exception(f'fail to download perfcollect script: {ex}')
     
 
-def get_tool_dll(tool_name, tool_version, tool_root: str) -> str|Exception:
+def get_tool_dll(tool_name, tool_version, tool_root: str) -> Union[str, Exception]:
     '''Get path of executable file
 
     :param tool_name: name of diag tool

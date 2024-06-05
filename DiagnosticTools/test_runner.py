@@ -1,6 +1,6 @@
-from __future__ import annotations
 import os
 import shutil
+from typing import Union
 
 import app
 from app import AppLogger
@@ -49,7 +49,7 @@ def init_test(test_conf: DiagToolsTestConfiguration) -> None:
         fp.writelines(lines)
 
 
-def install_DotNET_SDK(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def install_DotNET_SDK(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     '''Download install script and install SDK
     
     :param test_conf: DiagToolsTestConfiguration instance
@@ -68,7 +68,7 @@ def install_DotNET_SDK(test_conf: DiagToolsTestConfiguration) -> None|Exception:
         SysInfo.rid, script_path, test_conf.dotnet_sdk_version, test_conf.dotnet_root)
 
 
-def install_diagnostic_tools(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def install_diagnostic_tools(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     '''Install diagnostic tools
     
     :param test_conf: DiagToolsTestConfiguration instance
@@ -91,7 +91,7 @@ def install_diagnostic_tools(test_conf: DiagToolsTestConfiguration) -> None|Exce
             continue
 
 
-def prepare_sample_app(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def prepare_sample_app(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     '''Create and build some .NET app for testing
     
     :param test_conf: DiagToolsTestConfiguration instance
@@ -114,7 +114,7 @@ def prepare_sample_app(test_conf: DiagToolsTestConfiguration) -> None|Exception:
             continue
 
 
-def clean_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def clean_temp(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
     else: home_path = os.environ['HOME']
 
@@ -140,7 +140,7 @@ def clean_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
             print(f'fail to remove {temp}: {e}')
 
 
-def restore_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def restore_temp(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     if 'win' in SysInfo.rid: home_path = os.environ['USERPROFILE']
     else: home_path = os.environ['HOME']
 
@@ -153,7 +153,7 @@ def restore_temp(test_conf: DiagToolsTestConfiguration) -> None|Exception:
             print(f'fail to retore {temp_file_folder}: {e}')
 
 
-def run_test(test_conf: DiagToolsTestConfiguration) -> None|Exception:
+def run_test(test_conf: DiagToolsTestConfiguration) -> Union[None, Exception]:
     tool_name_runner_map = {
         'dotnet-counters': dotnet_counters.test_dotnet_counters,
         'dotnet-dump': dotnet_dump.test_dotnet_dump,

@@ -1,4 +1,3 @@
-from __future__ import annotations
 import os
 import glob
 from subprocess import PIPE
@@ -87,6 +86,10 @@ def analyze_dump(test_conf: RunConfiguration):
         
         with open(analyze_output_path, 'wb+') as fp:
             _, proc = terminal.run_command_async(async_args, stdin=PIPE, stdout=fp, stderr=fp, env=test_conf.env)
+        analyze_commands.insert(
+            0,
+            f'setsymbolserver -directory {project_bin_dir}\n'.encode()
+        )
             for command in analyze_commands:
                 try:
                     proc.stdin.write(command)
