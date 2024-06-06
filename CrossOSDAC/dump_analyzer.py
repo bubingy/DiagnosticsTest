@@ -88,11 +88,10 @@ def analyze_dump(test_conf: RunConfiguration):
 
             app_name = dump_name.replace('dump_', '')
             app_root = os.path.join(test_conf.test_bed, app_name)
-            project_bin_path = dotnet_app.get_app_bin(app_name, app_root)
-            project_bin_dir = os.path.dirname(project_bin_path)
+            project_symbol_root = dotnet_app.get_app_symbol_root(app_name, app_root)
             analyze_commands.insert(
                 0,
-                f'setsymbolserver -directory {project_bin_dir}\n'.encode()
+                f'setsymbolserver -directory {project_symbol_root}\n'.encode()
             )
             
         async_args = [test_conf.dotnet_bin_path, tool_dll_path, 'analyze', dump_path]

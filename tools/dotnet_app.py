@@ -9,12 +9,34 @@ from tools.terminal import run_command_sync
 from tools.sysinfo import SysInfo
 
 
-def get_app_bin(app_name, app_root: str) -> Union[str, Exception]:
+def get_app_dll(app_name: str, app_root: str) -> Union[str, Exception]:
+    '''Get path of dll file
+
+    :param app_name: type of .NET app
+    :param app_root: root of .NET app
+    :return: path of dll file or exception if can't find
+    '''
+    project_dll_path_template = os.path.join(
+        app_root,
+        'bin',
+        '*',
+        '*',
+        f'{app_name}.dll'
+    )
+    project_dll_path_candidates = glob.glob(project_dll_path_template)
+
+    if len(project_dll_path_candidates) < 1:
+        return Exception(f'no executable file availble for {app_root}')
+    
+    return project_dll_path_candidates[0]
+    
+
+def get_app_bin(app_name: str, app_root: str) -> Union[str, Exception]:
     '''Get path of executable file
 
     :param app_name: type of .NET app
     :param app_root: root of .NET app
-    :return: path of executable file or exception if fail to create
+    :return: path of executable file or exception if can't find
     '''
     project_bin_path_template = os.path.join(
         app_root,
@@ -28,6 +50,19 @@ def get_app_bin(app_name, app_root: str) -> Union[str, Exception]:
     if len(project_bin_path_candidates) < 1:
         return Exception(f'no executable file availble for {app_root}')
     return project_bin_path_candidates[0]
+
+
+def get_app_symbol_root(app_name: str, app_root: str) -> Union[str, Exception]:
+    '''Get folder of executable file
+
+    :param app_name: type of .NET app
+    :param app_root: root of .NET app
+    :return: path of executable file or exception if fail to create
+    '''
+    dll_path = get_app_dll(app_name, app_root)
+    if isinstance(dll_path, Exception):
+        return dll_path
+    return os.path.dirname(dll_path)
 
 
 @app.function_monitor()
