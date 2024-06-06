@@ -1,5 +1,6 @@
 import os
 import glob
+import time
 from subprocess import PIPE
 
 import app
@@ -170,4 +171,5 @@ def attach_process(test_conf: DiagToolsTestConfiguration):
             proc.communicate()
 
     webapp_process.terminate()
-    webapp_process.communicate()
+    while webapp_process.poll() is None:
+        time.sleep(1)

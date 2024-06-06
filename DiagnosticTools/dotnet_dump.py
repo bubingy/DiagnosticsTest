@@ -1,4 +1,5 @@
 import os
+import time
 import glob
 from subprocess import PIPE
 
@@ -43,7 +44,8 @@ def test_dotnet_dump(test_conf: DiagToolsTestConfiguration):
         )
 
     webapp_process.terminate()
-    webapp_process.communicate()
+    while webapp_process.poll() is None:
+        time.sleep(1)
     
     # analyze dump with dotnet-dump analyze
     if 'win' in SysInfo.rid:
